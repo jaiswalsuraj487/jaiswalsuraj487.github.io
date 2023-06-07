@@ -1,0 +1,15 @@
+---
+title: Blogs
+listing:
+    sort: 'date desc'
+    contents: 'blogsData'
+    sort-ui: false
+    filter-ui: false
+    categories: true
+    feed: true
+    type: table
+page-layout: full
+---
+
+
+

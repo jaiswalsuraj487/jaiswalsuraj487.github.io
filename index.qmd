@@ -1,0 +1,25 @@
+---
+title: "Suraj Jaiswal"
+image: images/profile_photo.jpg
+about: 
+  template: trestles
+  image-width: 15em
+  image-shape: round
+  links:
+    - icon: envelope-at-fill
+      text: Email
+      href: mailto:jaiswalsuraj@iitgn.ac.in
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/suraj-jaiswal-3494261b6/
+    - icon: github
+      text: Github
+      href: https://github.com/jaiswalsuraj487
+
+---
+
+Welcome to my blog! I'm Suraj Jaiswal, an M.Tech student at IIT Gandhinagar, pursuing Computer Science and Engineering under the mentorship of [Dr. Nipun Batra](https://nipunbatra.github.io/).
+<br> 
+Here, I'll share my experiences, research projects, and insights as we delve into the exciting world of technology. IIT Gandhinagar, known for its excellence in education and research, provides the ideal environment for me to explore the limitless possibilities of computer science. 
+
+
