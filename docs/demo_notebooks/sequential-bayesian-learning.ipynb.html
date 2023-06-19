@@ -333,40 +333,6 @@ w \sim \mathcal{N}\left(0, \alpha^{-1}\text{I}\right)
     \frac{1}{2}\sum_{n=1}^N\left(t_n - {\bf w}^T {\bf\phi}({\bf x}_n)\right)^2 + \frac{\lambda}{2}\sum_{j=1}^{M}|w_j|^q
 \]</span></p>
 <p>The maximum posterior weight vector <span class="math inline">\({\bf w}_{\text{MAP}}\)</span> considering a generalized Gaussian will not be (in every case) the mean, since the mean will not coincide with the mode.</p>
-<div class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>SN <span class="op">=</span> np.eye(<span class="dv">2</span>) <span class="op">/</span> alpha</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>mN <span class="op">=</span> np.zeros((<span class="dv">2</span>, <span class="dv">1</span>))</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>seed(<span class="dv">1643</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">20</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>nobs <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">20</span>]</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>ix_fig <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="bu">len</span>(nobs) <span class="op">+</span> <span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">12</span>))</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>plot_prior(mN, SN, ax<span class="op">=</span>ax[<span class="dv">0</span>,<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="17">
-<pre><code>&lt;matplotlib.contour.QuadContourSet at 0x299e2dc2910&gt;</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<p><img src="sequential-bayesian-learning.ipynb_files/figure-html/cell-11-output-2.png" class="img-fluid"></p>
-</div>
-</div>
-<div class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>SN <span class="op">=</span> np.eye(<span class="dv">2</span>) <span class="op">/</span> alpha</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>mN <span class="op">=</span> np.zeros((<span class="dv">2</span>, <span class="dv">1</span>))</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>seed(<span class="dv">1643</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">20</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>nobs <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">20</span>]</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>ix_fig <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="bu">len</span>(nobs) <span class="op">+</span> <span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">12</span>))</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>plot_prior(mN, SN, ax<span class="op">=</span>ax[<span class="dv">0</span>,<span class="dv">1</span>])</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>, <span class="dv">1</span>].scatter(<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">0.5</span>, c<span class="op">=</span><span class="st">"white"</span>, marker<span class="op">=</span><span class="st">"+"</span>)</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>, <span class="dv">0</span>].axis(<span class="st">"off"</span>)</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>plot_sample_w(mN, SN, ax<span class="op">=</span>ax[<span class="dv">0</span>, <span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<p><img src="sequential-bayesian-learning.ipynb_files/figure-html/cell-12-output-1.png" class="img-fluid"></p>
-</div>
-</div>
 
 
 

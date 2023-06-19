@@ -187,7 +187,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<div class="cell" data-execution_count="39">
+<div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -199,9 +199,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 y = \boldsymbol x^T\boldsymbol\theta + \epsilon\,,\quad \epsilon \sim \mathcal N(0, \sigma^2)
 \]</span> Where $ &nbsp;$ is the noise from normal distribution with variance <span class="math inline">\(\sigma^2\)</span>. Training inputs in <span class="math inline">\(\mathcal X = \{\boldsymbol x_1, \ldots, \boldsymbol x_N\}\)</span> and corresponding training targets <span class="math inline">\(\mathcal Y = \{y_1, \ldots, y_N\}\)</span>, respectively.</p>
 <p>Function</p>
-<div class="cell" data-execution_count="40">
+<div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> g(x, sigma):   </span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.cos(x) <span class="op">+</span> sigma<span class="op">*</span>np.random.normal(size<span class="op">=</span>(x.shape))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    epsilon <span class="op">=</span> np.random.normal(mu, sigma, size<span class="op">=</span>(x.shape))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.cos(x) <span class="op">+</span> epsilon</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We apply non linear feature transformation on feature matrix with polynomial of degree <span class="math inline">\(P\)</span> <span class="math display">\[
 \sum_{k=0}^K \theta_k x^k = \boldsymbol \phi(x)^T\boldsymbol\theta\,,\quad
@@ -218,19 +221,19 @@ x^K
 \boldsymbol\phi(x_1) &amp; \boldsymbol\phi(x_2) &amp; \cdots &amp; \boldsymbol\phi(x_n)
 \end{bmatrix}^T \in\mathbb{R}^{N\times K+1}
 \]</span></p>
-<div class="cell" data-execution_count="41">
+<div class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poly_features(X, p):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns a matrix with p columns containing the polynomial features of the input vector X."""</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> X.flatten()</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([<span class="fl">1.0</span><span class="op">*</span>X<span class="op">**</span>i <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(p<span class="op">+</span><span class="dv">1</span>)]).T</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Sample to see nonlinear transformation</p>
-<div class="cell" data-execution_count="42">
+<div class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.array([<span class="op">-</span><span class="dv">3</span>, <span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">3</span>]).reshape(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="co"># 5x1 vector, N=5, D=1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="43">
+<div class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>poly_features(X, <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="43">
+<div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>array([[  1.,  -3.,   9., -27.],
        [  1.,  -1.,   1.,  -1.],
        [  1.,   0.,   0.,   0.],
@@ -240,13 +243,13 @@ x^K
 </div>
 <section id="known-entities" class="level2">
 <h2 class="anchored" data-anchor-id="known-entities">Known entities</h2>
-<div class="cell" data-execution_count="44">
+<div class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">1.0</span> <span class="co"># standard deviation of the noise</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>m0 <span class="op">=</span> <span class="fl">0.0</span> <span class="co"># mean of the prior</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>S0 <span class="op">=</span> <span class="fl">1.0</span> <span class="co"># covariance of the prior  </span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="dv">6</span> <span class="co"># order of the polynomial </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="45">
+<div class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100</span> <span class="co"># number of data points</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.random.uniform(high<span class="op">=</span><span class="dv">5</span>, low<span class="op">=-</span><span class="dv">5</span>, size<span class="op">=</span>(N,<span class="dv">1</span>)) <span class="co"># training inputs, size Nx1</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> g(X, sigma) <span class="co"># training targets, size Nx1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -254,10 +257,11 @@ x^K
 </section>
 <section id="posterior" class="level2">
 <h2 class="anchored" data-anchor-id="posterior">Posterior</h2>
-<p>Calculating: <span class="math display">\[\begin{align}
+<p>Calculating</p>
+<p><span class="math display">\[\begin{align}
 &amp;\text{Parameter posterior: } p(\boldsymbol\theta|\mathcal X, \mathcal Y) = \mathcal N(\boldsymbol \theta \,|\, Mn,\, Sn)
 \end{align}\]</span></p>
-<div class="cell" data-execution_count="46">
+<div class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> posterior(X, y, p, m0, S0, sigma):</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the posterior mean and covariance matrix of the weights given the training data."""</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    poly_X <span class="op">=</span> poly_features(X, p)</span>
@@ -267,10 +271,10 @@ x^K
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mN, SN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="47">
+<div class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mN , SN <span class="op">=</span> posterior(X, y, p ,m0, S0, sigma)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="48">
+<div class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>Ntest <span class="op">=</span> <span class="dv">200</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>Xtest <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">5</span>, <span class="dv">5</span>, Ntest).reshape(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="co"># test inputs</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -279,18 +283,18 @@ x^K
 <p>Now, let’s make predictions (ignoring the measurement noise). We obtain three predictors: <span class="math display">\[\begin{align}
 &amp;\text{Bayesian: } p(f(\boldsymbol X_{\text{test}})) = \mathcal N(f(\boldsymbol X_{\text{test}}) \,|\, \boldsymbol \phi(X_{\text{test}}) \boldsymbol\theta_{\text{mean}},\, \boldsymbol\phi(X_{\text{test}}) \boldsymbol\theta_{\text{var}}  \boldsymbol\phi(X_{\text{test}})^\top)
 \end{align}\]</span> We already computed all quantities. Write some code that implements all three predictors.</p>
-<div class="cell" data-execution_count="49">
+<div class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>posterior_pred_mean <span class="op">=</span> poly_X_test <span class="op">@</span> mN</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>posterior_pred_uncertainty_para <span class="op">=</span> poly_X_test <span class="op">@</span> SN <span class="op">@</span> poly_X_test.T</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>posterior_pred_var <span class="op">=</span> sigma<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> posterior_pred_uncertainty_para</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="50">
+<div class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># print(posterior_pred_mean.shape)</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># print(posterior_pred_var.shape)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="51">
+<div class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the posterior</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>plt.plot(X, y, <span class="st">"+"</span>)</span>
