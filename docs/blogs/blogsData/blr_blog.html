@@ -147,19 +147,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#linear-regression" id="toc-linear-regression" class="nav-link active" data-scroll-target="#linear-regression">Linear Regression</a>
+  <li><a href="#what-is-uncertainity" id="toc-what-is-uncertainity" class="nav-link active" data-scroll-target="#what-is-uncertainity">What is Uncertainity?</a></li>
+  <li><a href="#linear-regression" id="toc-linear-regression" class="nav-link" data-scroll-target="#linear-regression">Linear Regression</a>
   <ul class="collapse">
-  <li><a href="#maximum-likelihood" id="toc-maximum-likelihood" class="nav-link" data-scroll-target="#maximum-likelihood">Maximum Likelihood</a>
+  <li><a href="#maximum-likelihood" id="toc-maximum-likelihood" class="nav-link" data-scroll-target="#maximum-likelihood">Maximum Likelihood</a></li>
+  <li><a href="#polynomial-regression" id="toc-polynomial-regression" class="nav-link" data-scroll-target="#polynomial-regression">Polynomial Regression</a>
   <ul class="collapse">
-  <li><a href="#polynomial-regression" id="toc-polynomial-regression" class="nav-link" data-scroll-target="#polynomial-regression">Polynomial Regression</a></li>
+  <li><a href="#nonlinear-features" id="toc-nonlinear-features" class="nav-link" data-scroll-target="#nonlinear-features">Nonlinear Features</a></li>
   </ul></li>
   </ul></li>
   <li><a href="#bayesian-linear-regression" id="toc-bayesian-linear-regression" class="nav-link" data-scroll-target="#bayesian-linear-regression">Bayesian Linear Regression</a>
   <ul class="collapse">
   <li><a href="#bayes-theroem" id="toc-bayes-theroem" class="nav-link" data-scroll-target="#bayes-theroem">Bayes theroem</a></li>
+  <li><a href="#bayesian-inference" id="toc-bayesian-inference" class="nav-link" data-scroll-target="#bayesian-inference">Bayesian inference</a></li>
   <li><a href="#bayeisan-approch" id="toc-bayeisan-approch" class="nav-link" data-scroll-target="#bayeisan-approch">Bayeisan approch</a></li>
   <li><a href="#known-entities" id="toc-known-entities" class="nav-link" data-scroll-target="#known-entities">Known entities</a></li>
-  <li><a href="#posterior" id="toc-posterior" class="nav-link" data-scroll-target="#posterior">Posterior</a></li>
+  <li><a href="#posterior" id="toc-posterior" class="nav-link" data-scroll-target="#posterior">Posterior</a>
+  <ul class="collapse">
+  <li><a href="#parameter-posteriori-in-closed-form" id="toc-parameter-posteriori-in-closed-form" class="nav-link" data-scroll-target="#parameter-posteriori-in-closed-form">Parameter posteriori in closed form</a></li>
+  <li><a href="#posterior-predictive-distribution" id="toc-posterior-predictive-distribution" class="nav-link" data-scroll-target="#posterior-predictive-distribution">Posterior Predictive distribution</a></li>
+  <li><a href="#visulizing-the-parameter-posterior" id="toc-visulizing-the-parameter-posterior" class="nav-link" data-scroll-target="#visulizing-the-parameter-posterior">Visulizing the parameter Posterior</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -196,19 +204,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<p>Welcome to my blog on Bayesian linear regression, where we explore the power of this technique. While traditional linear regression provides point estimates, Bayesian linear regression incorporates prior knowledge and quantifies uncertainty. By combining observed data with prior beliefs, we make more informed decisions. Throughout this blog, we’ll delve into key components like prior distributions, likelihood functions, and posterior inference. Join us as we unravel the flexibility and potential applications of Bayesian linear regression, empowering you to enhance predictions, understand uncertainty, and make robust decisions. Let’s embark on this enlightening journey together.</p>
+<p>Welcome to my blog on Bayesian linear regression, where we explore the power of this technique. While traditional linear regression provides point estimates, Bayesian linear regression incorporates prior knowledge and quantifies uncertainty. By combining observed data with prior beliefs, we make more informed decisions. Throughout this blog, we’ll delve into key components like probalistic approch to linear regression, basics of types of uncertainity, prior distributions, likelihood functions, and posterior inference. Let’s embark on this enlightening journey together.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="blr_blog_files/figure-html/83fffa4e-1-stocksimg.jpg" class="img-fluid figure-img"></p>
+<p><img src="blr_blog_files/figure-html/815967ef-1-stocksimg.jpg" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">stocksimg.jpg</figcaption>
 </figure>
 </div>
-<p>Lets first discuss implementing linear regression before Bayesian linear regression.</p>
+<section id="what-is-uncertainity" class="level1">
+<h1>What is Uncertainity?</h1>
+<p>In nearly all real-world situations, our data and knowledge about the world is incomplete, indirect and noisy. Hence, uncertainty must be a fundamental part of our decision-making process. It provides us valuable information about trustworthiness and reliability of model predictions. - There are two types of uncertainty :</p>
+<ol type="1">
+<li>Aleatoric uncertainty, which is the uncertainty that arises from the data. It is inherited in data and can’t be reduced as it is caused by data generation process.</li>
+<li>Epistemic uncertainty, which is the uncertainty that arises from the model(here regression model). We usually predict the uncertainty in data (aleatoric) still be uncertain about the uncertainity based on model parameters(epistemic).</li>
+</ol>
+<ul>
+<li>This is exaclty why we need to learn bayesian approch. It provides a way to learn uncertainty. We will see basic bayeian approch in linear regression called bayesian linear regression. -But lets first discuss implementing linear regression before diving into the Bayesian linear regression.</li>
+</ul>
+</section>
 <section id="linear-regression" class="level1">
 <h1>Linear Regression</h1>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="blr_blog_files/figure-html/90777929-1-LR.png" class="img-fluid figure-img"></p>
+<p><img src="blr_blog_files/figure-html/ea813c97-1-LR.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">IMG src medium article</figcaption>
 </figure>
 </div>
@@ -223,6 +241,15 @@ y = \boldsymbol x^T\boldsymbol\theta + \epsilon\, ,\quad \boldsymbol\theta = \be
 </ol>
 <p>We assume we have a training set <span class="math inline">\((\boldsymbol x_n, y_n)\)</span>, <span class="math inline">\(n=1,\ldots, N\)</span>. We summarize the sets of training inputs in <span class="math inline">\(\mathcal X = \{\boldsymbol x_1, \ldots, \boldsymbol x_N\}\)</span> and corresponding training targets <span class="math inline">\(\mathcal Y = \{y_1, \ldots, y_N\}\)</span>, respectively.</p>
 <p>Here, we are interested in finding good parameters <span class="math inline">\(\boldsymbol\theta\)</span>.</p>
+<p><span class="math display">\[
+\begin{array}{l}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \theta \ \ \ \ \ \ \ \ \ \sigma \\
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \downarrow \ \ \ \swarrow \\
+x_{n} \ \ \ \rightarrow \ \ y_{n} \ \ \\
+n\ =\ 1,......,N\ \\
+\\
+\end{array}
+\]</span> <span class="math display">\[ Probabilistic \ graphical \ model \ for \ linear \ regression \]</span></p>
 <p>Let’s first see the demo dataset</p>
 <div class="cell" data-execution_count="100">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -365,10 +392,11 @@ p(\mathcal Y | \mathcal X, \boldsymbol\theta) = \prod_{n=1}^N p(y_n | \boldsymbo
 <p><img src="blr_blog_files/figure-html/cell-14-output-2.png" class="img-fluid"></p>
 </div>
 </div>
-<section id="polynomial-regression" class="level3">
-<h3 class="anchored" data-anchor-id="polynomial-regression">Polynomial Regression</h3>
-<section id="nonlinear-features" class="level4">
-<h4 class="anchored" data-anchor-id="nonlinear-features">Nonlinear Features</h4>
+</section>
+<section id="polynomial-regression" class="level2">
+<h2 class="anchored" data-anchor-id="polynomial-regression">Polynomial Regression</h2>
+<section id="nonlinear-features" class="level3">
+<h3 class="anchored" data-anchor-id="nonlinear-features">Nonlinear Features</h3>
 <p>So far, we have looked at linear regression with linear features. This allowed us to fit straight lines. However, linear regression also allows us to fit functions that are nonlinear in the inputs <span class="math inline">\(\boldsymbol x\)</span>, as long as the parameters <span class="math inline">\(\boldsymbol\theta\)</span> appear linearly. This means, we can learn functions of the form <span class="math display">\[
 f(\boldsymbol x, \boldsymbol\theta) = \sum_{k = 1}^K \theta_k \phi_k(\boldsymbol x)\,,
 \]</span> where the features <span class="math inline">\(\phi_k(\boldsymbol x)\)</span> are (possibly nonlinear) transformations of the inputs <span class="math inline">\(\boldsymbol x\)</span>.</p>
@@ -446,6 +474,7 @@ x^K
 <p><img src="blr_blog_files/figure-html/cell-18-output-2.png" class="img-fluid"></p>
 </div>
 </div>
+<p>Now lets try different polynomial fits.</p>
 <div class="cell" data-execution_count="117">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Values of p to consider</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>p_values <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">9</span>]</span>
@@ -479,7 +508,7 @@ x^K
 <p><img src="blr_blog_files/figure-html/cell-19-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-</section>
+<p>You can refer 9.1 and 9.2 section of <a href="https://mml-book.github.io/book/mml-book.pdf">Mathematics for Machine Learning</a> to understand in depth about probalistic approch to linear regression.</p>
 </section>
 </section>
 </section>
@@ -489,24 +518,27 @@ x^K
 <p>So far we computed point estimates of our parameters. For example, in linear regression we chose values for the weights and bias that minimized our mean squared error cost function.</p>
 <p>In the Bayesian approach we don’t work with exact values but with probabilities. This allows us to model the uncertainty in our parameter estimates.</p>
 <p>In nearly all real-world situations, our data and knowledge about the world is incomplete, indirect and noisy. Hence, uncertainty must be a fundamental part of our decision-making process. This is exactly what the Bayesian approach is about. It provides a formal and consistent way to reason in the presence of uncertainty.</p>
-<section id="bayes-theroem" class="level3">
-<h3 class="anchored" data-anchor-id="bayes-theroem">Bayes theroem</h3>
+<section id="bayes-theroem" class="level2">
+<h2 class="anchored" data-anchor-id="bayes-theroem">Bayes theroem</h2>
 <p>The basis of bayesian linear regression is bayes theroem. - Bayes’ theorem looks as follows: <span class="math display">\[
 \begin{equation}
 p(\boldsymbol{\theta} | \mathbf{x}, y) = \frac{p(y | \boldsymbol{x}, \boldsymbol{\theta})p(\boldsymbol{\theta})}{p(\boldsymbol{x}, y)}
 \end{equation}
 \]</span> - <span class="math inline">\(p(y | \boldsymbol{x}, \boldsymbol{\theta})\)</span> is the <em>likelihood</em>. It describes the probability of the target values given the data and parameters. - <span class="math inline">\(p(\boldsymbol{\theta})\)</span> is the <em>prior</em>. It describes our initial knowledge about which parameter values are likely and unlikely. - <span class="math inline">\(p(\boldsymbol{x}, y)\)</span> is the <em>evidence</em>. It describes the joint probability of the data and targets.</p>
+</section>
+<section id="bayesian-inference" class="level2">
+<h2 class="anchored" data-anchor-id="bayesian-inference">Bayesian inference</h2>
 <p>In general, Bayesian inference works as follows: 1. We start with some prior belief about a hypothesis <span class="math inline">\(p(h)\)</span> 2. We observe some data, representating new evidence <span class="math inline">\(e\)</span> 3. We use Bayes’ theorem to update our belief given the new evidence: <span class="math inline">\(p(h|e) = \frac{p(e |h)p(h)}{p(e)}\)</span></p>
 <p>Have a look at <a href="https://en.wikipedia.org/wiki/Bayesian_inference">Wiki</a></p>
 </section>
-<section id="bayeisan-approch" class="level3">
-<h3 class="anchored" data-anchor-id="bayeisan-approch">Bayeisan approch</h3>
+<section id="bayeisan-approch" class="level2">
+<h2 class="anchored" data-anchor-id="bayeisan-approch">Bayeisan approch</h2>
 <p>Unlike linear regression where we computed point estimates of our parameters using maximum likelihood approach and make predictions, here in Bayesian linear regression we estimate</p>
 <p>Following are the steps: 1. We assume a that we know standard deviation of the noise, mean and covariance of the prior. 2. We than calculate parameter posteriori 3. Based on that we make posteriori predictions on unseen data ie. test data.</p>
 <p>Now lets see along with code</p>
 <p>Here we have same assumptions that we took in linear regression <span class="math display">\[
 y = \boldsymbol x^T\boldsymbol\theta + \epsilon\,,\quad \epsilon \sim \mathcal N(0, \sigma^2)
-\]</span> Where $ &nbsp;$ is the noise from normal distribution with variance <span class="math inline">\(\sigma^2\)</span>. Training inputs in <span class="math inline">\(\mathcal X = \{\boldsymbol x_1, \ldots, \boldsymbol x_N\}\)</span> and corresponding training targets <span class="math inline">\(\mathcal Y = \{y_1, \ldots, y_N\}\)</span>, respectively.</p>
+\]</span> Where epsilon is the noise from normal distribution with variance <span class="math inline">\(\sigma^2\)</span>. Training inputs in <span class="math inline">\(\mathcal X = \{\boldsymbol x_1, \ldots, \boldsymbol x_N\}\)</span> and corresponding training targets <span class="math inline">\(\mathcal Y = \{y_1, \ldots, y_N\}\)</span>, respectively.</p>
 <p>Function</p>
 <div class="cell" data-execution_count="118">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> g(x, mu, sigma):   </span>
@@ -544,26 +576,41 @@ x^K
 </div>
 </div>
 </section>
-<section id="known-entities" class="level3">
-<h3 class="anchored" data-anchor-id="known-entities">Known entities</h3>
+<section id="known-entities" class="level2">
+<h2 class="anchored" data-anchor-id="known-entities">Known entities</h2>
 <div class="cell" data-execution_count="121">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">1.0</span> <span class="co"># standard deviation of the noise</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>m0 <span class="op">=</span> <span class="fl">0.0</span> <span class="co"># mean of the prior</span></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>S0 <span class="op">=</span> <span class="fl">1.0</span> <span class="co"># covariance of the prior  </span></span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="dv">6</span> <span class="co"># order of the polynomial </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p><span class="math display">\[
+\begin{array}{l}
+\ \ \ \ \ \ \ \ \ m_{0} \ \ \ \ \ \ \ \ \ \ \ \ S_{0}\\
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \searrow \ \ \ \swarrow \\
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \theta \ \ \ \ \ \ \ \ \ \ \ \sigma \\
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \downarrow \ \ \ \swarrow \\
+x_{n} \ \ \rightarrow \ \ \ \ \ \ y_{n} \ \ \\
+n\ =\ 1,......,N\ \\
+\end{array}
+\]</span> <span class="math display">\[ Graphical \ model \ for \ Bayeisan \ linear \ regression \]</span></p>
 <div class="cell" data-execution_count="122">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100</span> <span class="co"># number of data points</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.random.uniform(high<span class="op">=</span><span class="dv">5</span>, low<span class="op">=-</span><span class="dv">5</span>, size<span class="op">=</span>(N,<span class="dv">1</span>)) <span class="co"># training inputs, size Nx1</span></span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> g(X, m0, sigma) <span class="co"># training targets, size Nx1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="posterior" class="level3">
-<h3 class="anchored" data-anchor-id="posterior">Posterior</h3>
-<p>Calculating</p>
-<p><span class="math display">\[\begin{align}
-&amp;\text{Parameter posterior: } p(\boldsymbol\theta|\mathcal X, \mathcal Y) = \mathcal N(\boldsymbol \theta \,|\, Mn,\, Sn)
-\end{align}\]</span></p>
+<section id="posterior" class="level2">
+<h2 class="anchored" data-anchor-id="posterior">Posterior</h2>
+<section id="parameter-posteriori-in-closed-form" class="level3">
+<h3 class="anchored" data-anchor-id="parameter-posteriori-in-closed-form">Parameter posteriori in closed form</h3>
+<p>Calculating Parameter posterior: <span class="math display">\[
+\begin{aligned}
+p(\boldsymbol{\theta} \mid \mathcal{X}, \mathcal{Y}) &amp;=\mathcal{N}\left(\boldsymbol{\theta} \mid \boldsymbol{m}_{N}, \boldsymbol{S}_{N}\right) \\
+\boldsymbol{S}_{N} &amp;=\left(\boldsymbol{S}_{0}^{-1}+\sigma^{-2} \boldsymbol{\Phi}^{\top} \boldsymbol{\Phi}\right)^{-1} \\
+\boldsymbol{m}_{N} &amp;=\boldsymbol{S}_{N}\left(\boldsymbol{S}_{0}^{-1} \boldsymbol{m}_{0}+\sigma^{-2} \boldsymbol{\Phi}^{\top} \boldsymbol{y}\right)
+\end{aligned}
+\]</span></p>
 <div class="cell" data-execution_count="123">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> posterior(X, y, p, m0, S0, sigma):</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the posterior mean and covariance matrix of the weights given the training data."""</span></span>
@@ -583,9 +630,13 @@ x^K
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>poly_X_test <span class="op">=</span> poly_features(Xtest, p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now, let’s make predictions (ignoring the measurement noise). We obtain three predictors: <span class="math display">\[\begin{align}
-&amp;\text{Bayesian: } p(f(\boldsymbol X_{\text{test}})) = \mathcal N(f(\boldsymbol X_{\text{test}}) \,|\, \boldsymbol \phi(X_{\text{test}}) \boldsymbol\theta_{\text{mean}},\, \boldsymbol\phi(X_{\text{test}}) \boldsymbol\theta_{\text{var}}  \boldsymbol\phi(X_{\text{test}})^\top)
-\end{align}\]</span> We already computed all quantities. Write some code that implements all three predictors.</p>
+</section>
+<section id="posterior-predictive-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="posterior-predictive-distribution">Posterior Predictive distribution</h3>
+<p>Now, let’s make predictions (ignoring the measurement noise). We obtain three predictors: <span class="math display">\[
+\begin{align}
+&amp;\text{Bayesian: } p(f(\boldsymbol X_{\text{test}}) \, |\ X, Y, \boldsymbol X_{\text{test}}) = \mathcal N(f(\boldsymbol X_{\text{test}}) \,|\, \boldsymbol \phi(X_{\text{test}}) \boldsymbol M_{\text{n}},\, \boldsymbol\phi(X_{\text{test}}) \boldsymbol S_{\text{N}}  \boldsymbol\phi(X_{\text{test}})^\top + \sigma ^ 2)
+\end{align} \]</span> We already computed all quantities. Write some code that implements all three predictors.</p>
 <div class="cell" data-execution_count="126">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>posterior_pred_mean <span class="op">=</span> poly_X_test <span class="op">@</span> mN</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -617,91 +668,95 @@ x^K
 <span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'$x$'</span>)<span class="op">;</span></span>
 <span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'$y$'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="blr_blog_files/figure-html/cell-30-output-1.png" class="img-fluid"></p>
+<p><img src="blr_blog_files/figure-html/cell-29-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell" data-execution_count="94">
+<p>You can refer 9.3 section of <a href="https://mml-book.github.io/book/mml-book.pdf">Mathematics for Machine Learning</a> to understand in depth about bayesian linear regression.</p>
+</section>
+<section id="visulizing-the-parameter-posterior" class="level3">
+<h3 class="anchored" data-anchor-id="visulizing-the-parameter-posterior">Visulizing the parameter Posterior</h3>
+<p>In this section we will visualize the posterior and will see how it changes as it sees more data.</p>
+<div class="cell" data-execution_count="136">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> f(x, a): <span class="cf">return</span> a[<span class="dv">0</span>] <span class="op">+</span> a[<span class="dv">1</span>] <span class="op">*</span> x</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_prior(m, S, liminf<span class="op">=-</span><span class="dv">1</span>, limsup<span class="op">=</span><span class="dv">1</span>, step<span class="op">=</span><span class="fl">0.05</span>, ax<span class="op">=</span>plt, <span class="op">**</span>kwargs):</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    grid <span class="op">=</span> np.mgrid[liminf:limsup <span class="op">+</span> step:step, liminf:limsup <span class="op">+</span> step:step]</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    nx <span class="op">=</span> grid.shape[<span class="op">-</span><span class="dv">1</span>]</span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> multivariate_normal.pdf(grid.T.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>), mean<span class="op">=</span>m.ravel(), cov<span class="op">=</span>S).reshape(nx, nx).T</span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ax.contourf(<span class="op">*</span>grid, z, <span class="op">**</span>kwargs)</span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_sample_w(mean, cov, size<span class="op">=</span><span class="dv">10</span>, ax<span class="op">=</span>plt):</span>
-<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>    w <span class="op">=</span> np.random.multivariate_normal(mean<span class="op">=</span>mean.ravel(), cov<span class="op">=</span>cov, size<span class="op">=</span>size)</span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
-<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> wi <span class="kw">in</span> w:</span>
-<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>        ax.plot(x, f(x, wi), c<span class="op">=</span><span class="st">"tab:blue"</span>, alpha<span class="op">=</span><span class="fl">0.4</span>)</span>
-<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_likelihood_obs(X, T, ix, ax<span class="op">=</span>plt):</span>
-<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a><span class="co">    Plot the likelihood function of a single observation</span></span>
-<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>    W <span class="op">=</span> np.mgrid[<span class="op">-</span><span class="dv">1</span>:<span class="dv">1</span>:<span class="fl">0.1</span>, <span class="op">-</span><span class="dv">1</span>:<span class="dv">1</span>:<span class="fl">0.1</span>]</span>
-<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>    x, t <span class="op">=</span> sample_vals(X, T, ix) <span class="co"># ith row</span></span>
-<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>    mean <span class="op">=</span> W.T.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>) <span class="op">@</span> x.T</span>
-<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>    likelihood <span class="op">=</span> norm.pdf(t, loc<span class="op">=</span>mean, scale<span class="op">=</span> np.sqrt(<span class="dv">1</span> <span class="op">/</span> beta)).reshape(<span class="dv">20</span>, <span class="dv">20</span>).T</span>
-<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>    ax.contourf(<span class="op">*</span>W, likelihood)</span>
-<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>    ax.scatter(<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">0.5</span>, c<span class="op">=</span><span class="st">"white"</span>, marker<span class="op">=</span><span class="st">"+"</span>)</span>
-<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_vals(X, T, ix):</span>
-<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
-<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns</span></span>
-<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a><span class="co">    -------</span></span>
-<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a><span class="co">    Phi: The linear model transormation</span></span>
-<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a><span class="co">    t: the target datapoint</span></span>
-<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a><span class="co">    return ith data</span></span>
-<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>    x_in <span class="op">=</span> X[ix]</span>
-<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>    Phi <span class="op">=</span> np.c_[np.ones_like(x_in), x_in]</span>
-<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> T[[ix]]</span>
-<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Phi, t</span>
-<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> posterior_w(phi, t, S0, m0):</span>
-<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a><span class="co">    Compute the posterior distribution of </span></span>
-<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a><span class="co">    a Gaussian with known precision and conjugate</span></span>
-<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a><span class="co">    prior a gaussian</span></span>
-<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
-<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a><span class="co">    Parameters</span></span>
-<span id="cb36-51"><a href="#cb36-51" aria-hidden="true" tabindex="-1"></a><span class="co">    ----------</span></span>
-<span id="cb36-52"><a href="#cb36-52" aria-hidden="true" tabindex="-1"></a><span class="co">    phi: np.array(N, M)</span></span>
-<span id="cb36-53"><a href="#cb36-53" aria-hidden="true" tabindex="-1"></a><span class="co">    t: np.array(N, 1)</span></span>
-<span id="cb36-54"><a href="#cb36-54" aria-hidden="true" tabindex="-1"></a><span class="co">    S0: np.array(M, M)</span></span>
-<span id="cb36-55"><a href="#cb36-55" aria-hidden="true" tabindex="-1"></a><span class="co">        The prior covariance matrix</span></span>
-<span id="cb36-56"><a href="#cb36-56" aria-hidden="true" tabindex="-1"></a><span class="co">    m0: np.array(M, 1)</span></span>
-<span id="cb36-57"><a href="#cb36-57" aria-hidden="true" tabindex="-1"></a><span class="co">        The prior mean vector</span></span>
-<span id="cb36-58"><a href="#cb36-58" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb36-59"><a href="#cb36-59" aria-hidden="true" tabindex="-1"></a>    SN <span class="op">=</span> inv(inv(S0) <span class="op">+</span> beta <span class="op">*</span> phi.T <span class="op">@</span> phi)</span>
-<span id="cb36-60"><a href="#cb36-60" aria-hidden="true" tabindex="-1"></a>    mN <span class="op">=</span> SN <span class="op">@</span> (inv(S0) <span class="op">@</span> m0 <span class="op">+</span> beta <span class="op">*</span> phi.T <span class="op">@</span> t)</span>
-<span id="cb36-61"><a href="#cb36-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> SN, mN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_prior(m, S, liminf<span class="op">=-</span><span class="dv">1</span>, limsup<span class="op">=</span><span class="dv">1</span>, step<span class="op">=</span><span class="fl">0.05</span>, ax<span class="op">=</span>plt, <span class="op">**</span>kwargs):</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    grid <span class="op">=</span> np.mgrid[liminf:limsup <span class="op">+</span> step:step, liminf:limsup <span class="op">+</span> step:step]</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    nx <span class="op">=</span> grid.shape[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> multivariate_normal.pdf(grid.T.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>), mean<span class="op">=</span>m.ravel(), cov<span class="op">=</span>S).reshape(nx, nx).T</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ax.contourf(<span class="op">*</span>grid, z, <span class="op">**</span>kwargs)</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_sample_w(mean, cov, size<span class="op">=</span><span class="dv">10</span>, ax<span class="op">=</span>plt):</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>    w <span class="op">=</span> np.random.multivariate_normal(mean<span class="op">=</span>mean.ravel(), cov<span class="op">=</span>cov, size<span class="op">=</span>size)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> wi <span class="kw">in</span> w:</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>        ax.plot(x, f(x, wi), c<span class="op">=</span><span class="st">"tab:blue"</span>, alpha<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_likelihood_obs(X, T, ix, ax<span class="op">=</span>plt):</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a><span class="co">    Plot the likelihood function of a single observation</span></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>    W <span class="op">=</span> np.mgrid[<span class="op">-</span><span class="dv">1</span>:<span class="dv">1</span>:<span class="fl">0.1</span>, <span class="op">-</span><span class="dv">1</span>:<span class="dv">1</span>:<span class="fl">0.1</span>]</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>    x, t <span class="op">=</span> sample_vals(X, T, ix) <span class="co"># ith row</span></span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>    mean <span class="op">=</span> W.T.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>) <span class="op">@</span> x.T</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>    likelihood <span class="op">=</span> norm.pdf(t, loc<span class="op">=</span>mean, scale<span class="op">=</span> np.sqrt(sigma <span class="op">**</span><span class="dv">2</span>)).reshape(<span class="dv">20</span>, <span class="dv">20</span>).T</span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>    ax.contourf(<span class="op">*</span>W, likelihood)</span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>    ax.scatter(<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">0.5</span>, c<span class="op">=</span><span class="st">"white"</span>, marker<span class="op">=</span><span class="st">"+"</span>)</span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_vals(X, T, ix):</span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns</span></span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a><span class="co">    -------</span></span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a><span class="co">    Phi: The linear model transormation</span></span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a><span class="co">    t: the target datapoint</span></span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a><span class="co">    return ith data</span></span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a>    x_in <span class="op">=</span> X[ix]</span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>    Phi <span class="op">=</span> np.c_[np.ones_like(x_in), x_in]</span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> T[[ix]]</span>
+<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Phi, t</span>
+<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> posterior_w(phi, t, S0, m0):</span>
+<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a><span class="co">    Compute the posterior distribution of </span></span>
+<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a><span class="co">    a Gaussian with known precision and conjugate</span></span>
+<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a><span class="co">    prior a gaussian</span></span>
+<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a><span class="co">    Parameters</span></span>
+<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a><span class="co">    ----------</span></span>
+<span id="cb36-51"><a href="#cb36-51" aria-hidden="true" tabindex="-1"></a><span class="co">    phi: np.array(N, M)</span></span>
+<span id="cb36-52"><a href="#cb36-52" aria-hidden="true" tabindex="-1"></a><span class="co">    t: np.array(N, 1)</span></span>
+<span id="cb36-53"><a href="#cb36-53" aria-hidden="true" tabindex="-1"></a><span class="co">    S0: np.array(M, M)</span></span>
+<span id="cb36-54"><a href="#cb36-54" aria-hidden="true" tabindex="-1"></a><span class="co">        The prior covariance matrix</span></span>
+<span id="cb36-55"><a href="#cb36-55" aria-hidden="true" tabindex="-1"></a><span class="co">    m0: np.array(M, 1)</span></span>
+<span id="cb36-56"><a href="#cb36-56" aria-hidden="true" tabindex="-1"></a><span class="co">        The prior mean vector</span></span>
+<span id="cb36-57"><a href="#cb36-57" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb36-58"><a href="#cb36-58" aria-hidden="true" tabindex="-1"></a>    SN <span class="op">=</span> inv(inv(S0) <span class="op">+</span> ((<span class="dv">1</span> <span class="op">/</span> sigma) <span class="op">**</span> <span class="dv">2</span>) <span class="op">*</span> phi.T <span class="op">@</span> phi)</span>
+<span id="cb36-59"><a href="#cb36-59" aria-hidden="true" tabindex="-1"></a>    mN <span class="op">=</span> SN <span class="op">@</span> (inv(S0) <span class="op">@</span> m0 <span class="op">+</span> ((<span class="dv">1</span> <span class="op">/</span> sigma) <span class="op">**</span> <span class="dv">2</span>) <span class="op">*</span> phi.T <span class="op">@</span> t)</span>
+<span id="cb36-60"><a href="#cb36-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> SN, mN</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="95">
+<div class="cell" data-execution_count="141">
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>seed(<span class="dv">314</span>)</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> np.array([<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">0.5</span>])</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> np.array([<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">0.5</span>]) <span class="co"># true parameter values</span></span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">30</span></span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">0.2</span></span>
 <span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> uniform(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, (N, <span class="dv">1</span>))</span>
 <span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> f(X, a) <span class="op">+</span> randn(N, <span class="dv">1</span>) <span class="op">*</span> sigma</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="96">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> (<span class="dv">1</span> <span class="op">/</span> sigma) <span class="op">**</span> <span class="dv">2</span> <span class="co"># precision</span></span>
+<div class="cell" data-execution_count="142">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># beta = (1 / sigma) ** 2 # precision</span></span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>alpha <span class="op">=</span> <span class="fl">2.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="97">
+<div class="cell" data-execution_count="143">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>SN <span class="op">=</span> np.eye(<span class="dv">2</span>) <span class="op">/</span> alpha</span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>mN <span class="op">=</span> np.zeros((<span class="dv">2</span>, <span class="dv">1</span>))</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>seed(<span class="dv">1643</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="98">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>nobs <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">5</span>,<span class="dv">30</span>]</span>
+<div class="cell" data-execution_count="144">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>nobs <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">15</span>, <span class="dv">30</span>]</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>ix_fig <span class="op">=</span> <span class="dv">1</span></span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="bu">len</span>(nobs) <span class="op">+</span> <span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">12</span>))</span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>plot_prior(mN, SN, ax<span class="op">=</span>ax[<span class="dv">0</span>,<span class="dv">1</span>])</span>
@@ -729,11 +784,13 @@ x^K
 <span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>    axi.set_title(title, size<span class="op">=</span><span class="dv">15</span>)</span>
 <span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="blr_blog_files/figure-html/cell-36-output-1.png" class="img-fluid"></p>
+<p><img src="blr_blog_files/figure-html/cell-34-output-1.png" class="img-fluid"></p>
 </div>
 </div>
+<p>We can see above as the model see more data, the posterior converges close the the true values at end. Refer to <a href="https://www.microsoft.com/en-us/research/uploads/prod/2006/01/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf">Bishop - Pattern Recognition and Machine Learning fig 3.7</a> to understand above fig in detail.</p>
 
 
+</section>
 </section>
 </section>
 
