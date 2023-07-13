@@ -205,12 +205,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 <p>Welcome to my blog on Bayesian linear regression, where we explore the power of this technique. While traditional linear regression provides point estimates, Bayesian linear regression incorporates prior knowledge and quantifies uncertainty. By combining observed data with prior beliefs, we make more informed decisions. Throughout this blog, we’ll delve into key components like probalistic approch to linear regression, basics of types of uncertainity, prior distributions, likelihood functions, and posterior inference. Let’s embark on this enlightening journey together.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="blr_blog_files/figure-html/815967ef-1-stocksimg.jpg" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">stocksimg.jpg</figcaption>
-</figure>
-</div>
 <section id="what-is-uncertainity" class="level1">
 <h1>What is Uncertainity?</h1>
 <p>In nearly all real-world situations, our data and knowledge about the world is incomplete, indirect and noisy. Hence, uncertainty must be a fundamental part of our decision-making process. It provides us valuable information about trustworthiness and reliability of model predictions. - There are two types of uncertainty :</p>
@@ -226,7 +220,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>Linear Regression</h1>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="blr_blog_files/figure-html/ea813c97-1-LR.png" class="img-fluid figure-img"></p>
+<p><img src="blr_blog_files/figure-html/93c80050-1-LR.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">IMG src medium article</figcaption>
 </figure>
 </div>
@@ -242,16 +236,16 @@ y = \boldsymbol x^T\boldsymbol\theta + \epsilon\, ,\quad \boldsymbol\theta = \be
 <p>We assume we have a training set <span class="math inline">\((\boldsymbol x_n, y_n)\)</span>, <span class="math inline">\(n=1,\ldots, N\)</span>. We summarize the sets of training inputs in <span class="math inline">\(\mathcal X = \{\boldsymbol x_1, \ldots, \boldsymbol x_N\}\)</span> and corresponding training targets <span class="math inline">\(\mathcal Y = \{y_1, \ldots, y_N\}\)</span>, respectively.</p>
 <p>Here, we are interested in finding good parameters <span class="math inline">\(\boldsymbol\theta\)</span>.</p>
 <p><span class="math display">\[
-\begin{array}{l}
+\boxed{ \begin{array}{l}
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \theta \ \ \ \ \ \ \ \ \ \sigma \\
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \downarrow \ \ \ \swarrow \\
-x_{n} \ \ \ \rightarrow \ \ y_{n} \ \ \\
-n\ =\ 1,......,N\ \\
+\ \ \ x_{n} \ \ \rightarrow \ y_{n} \ \ \\
+\ \ n\ =\ 1,......,N\ \\
 \\
-\end{array}
+\end{array} }
 \]</span> <span class="math display">\[ Probabilistic \ graphical \ model \ for \ linear \ regression \]</span></p>
 <p>Let’s first see the demo dataset</p>
-<div class="cell" data-execution_count="100">
+<div class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.linalg</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -260,7 +254,7 @@ n\ =\ 1,......,N\ \\
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> numpy.random <span class="im">import</span> seed, uniform, randn</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> numpy.linalg <span class="im">import</span> inv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="101">
+<div class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define training set</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.array([<span class="op">-</span><span class="dv">3</span>, <span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">3</span>]).reshape(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="co"># 5x1 vector, N=5, D=1</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.array([<span class="op">-</span><span class="fl">1.2</span>, <span class="op">-</span><span class="fl">0.7</span>, <span class="fl">0.14</span>, <span class="fl">0.67</span>, <span class="fl">1.67</span>]).reshape(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>) <span class="co"># 5x1 vector</span></span>
@@ -276,18 +270,18 @@ n\ =\ 1,......,N\ \\
 </div>
 <section id="maximum-likelihood" class="level2">
 <h2 class="anchored" data-anchor-id="maximum-likelihood">Maximum Likelihood</h2>
-<p>We will start with maximum likelihood estimation of the parameters <span class="math inline">\(\boldsymbol\theta\)</span>. In maximum likelihood estimation, we find the parameters <span class="math inline">\(\boldsymbol\theta^{\mathrm{ML}}\)</span> that maximize the likelihood <span class="math display">\[
+<p>We will start with maximum likelihood estimation of the parameters <span class="math inline">\(\boldsymbol\theta\)</span>. In maximum likelihood estimation, we find the parameters <span class="math inline">\(\boldsymbol\theta_{\mathrm{ML}}\)</span> that maximize the likelihood <span class="math display">\[
 p(\mathcal Y | \mathcal X, \boldsymbol\theta) = \prod_{n=1}^N p(y_n | \boldsymbol x_n, \boldsymbol\theta)\,.
 \]</span> From the lecture we know that the maximum likelihood estimator is given by <span class="math display">\[
-\boldsymbol\theta^{\text{ML}} = (\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T\boldsymbol y\in\mathbb{R}^D\,,
+\boldsymbol\theta_{\text{ML}} = (\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T\boldsymbol y\in\mathbb{R}^D\,,
 \]</span> where <span class="math display">\[
 \boldsymbol X = [\boldsymbol x_1, \ldots, \boldsymbol x_N]^T\in\mathbb{R}^{N\times D}\,,\quad \boldsymbol y = [y_1, \ldots, y_N]^T \in\mathbb{R}^N\,.
 \]</span></p>
-<div class="cell" data-execution_count="102">
+<div class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>N, D <span class="op">=</span> X.shape</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>X_aug <span class="op">=</span> np.hstack([np.ones((N,<span class="dv">1</span>)), X])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="103">
+<div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> max_lik_estimate(X, y):</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># X: N x D matrix of training inputs</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># y: N x 1 vector of training targets/observations</span></span>
@@ -305,7 +299,7 @@ p(\mathcal Y | \mathcal X, \boldsymbol\theta) = \prod_{n=1}^N p(y_n | \boldsymbo
 </div>
 </div>
 <p>Now we will make predictions at test inputs <span class="math inline">\(\boldsymbol X_{\text{test}}\in\mathbb{R}\)</span>, <span class="math display">\[
-\ \boldsymbol y_{\text{pred}} = \boldsymbol \Phi_{\text{test}}\boldsymbol\theta^{\text{ML}}
+\ \boldsymbol y_{\text{pred}} = \boldsymbol \Phi_{\text{test}}\boldsymbol\theta_{\text{ML}}
 \]</span></p>
 <div class="cell" data-execution_count="105">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define a test set</span></span>
@@ -585,14 +579,14 @@ x^K
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="dv">6</span> <span class="co"># order of the polynomial </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><span class="math display">\[
-\begin{array}{l}
+\boxed{\begin{array}{l}
 \ \ \ \ \ \ \ \ \ m_{0} \ \ \ \ \ \ \ \ \ \ \ \ S_{0}\\
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \searrow \ \ \ \swarrow \\
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \theta \ \ \ \ \ \ \ \ \ \ \ \sigma \\
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \downarrow \ \ \ \swarrow \\
-x_{n} \ \ \rightarrow \ \ \ \ \ \ y_{n} \ \ \\
-n\ =\ 1,......,N\ \\
-\end{array}
+\ \ \ \ x_{n} \ \ \rightarrow \ \ y_{n} \ \ \\
+\ \ \ \ n\ =\ 1,......,N\ \\
+\end{array}}
 \]</span> <span class="math display">\[ Graphical \ model \ for \ Bayeisan \ linear \ regression \]</span></p>
 <div class="cell" data-execution_count="122">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100</span> <span class="co"># number of data points</span></span>
@@ -774,8 +768,8 @@ p(\boldsymbol{\theta} \mid \mathcal{X}, \mathcal{Y}) &amp;=\mathcal{N}\left(\bol
 <span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>        ax[ix_fig, <span class="dv">2</span>].set_xlim(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
 <span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>        ax[ix_fig, <span class="dv">2</span>].set_ylim(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
 <span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> l <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
-<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>            ax[ix_fig, l].set_xlabel(<span class="st">"$w_0$"</span>)</span>
-<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>            ax[ix_fig, l].set_ylabel(<span class="st">"$w_1$"</span>)</span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>            ax[ix_fig, l].set_xlabel(<span class="st">"$$</span><span class="ch">\t</span><span class="st">heta_0$$"</span>)</span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>            ax[ix_fig, l].set_ylabel(<span class="st">"$$</span><span class="ch">\t</span><span class="st">heta_1$$"</span>)</span>
 <span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>        plot_sample_w(mN, SN, ax<span class="op">=</span>ax[ix_fig, <span class="dv">2</span>])</span>
 <span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>        ix_fig <span class="op">+=</span> <span class="dv">1</span></span>
 <span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a></span>

@@ -2,6 +2,7 @@
   {
     "listing": "/blogs/index.html",
     "items": [
+      "/blogs/blogsData/Image_super_resolution.html",
       "/blogs/blogsData/blr_blog.html",
       "/blogs/blogsData/demo.html",
       "/blogs/blogsData/Bayesian_Lineara_Regressiondemo.html"
