@@ -152,10 +152,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#main-task" id="toc-main-task" class="nav-link" data-scroll-target="#main-task">Main task</a>
   <ul class="collapse">
-  <li><a href="#but-why-cnn-why-not-mlp" id="toc-but-why-cnn-why-not-mlp" class="nav-link" data-scroll-target="#but-why-cnn-why-not-mlp">But why CNN? Why not MLP?</a>
-  <ul class="collapse">
-  <li><a href="#basic-implementation-of-cnn-and-mlp-on-mnist-dataset-for-classification.you-can-skip-if-you-know-basics-about-cnn-and-mlp" id="toc-basic-implementation-of-cnn-and-mlp-on-mnist-dataset-for-classification.you-can-skip-if-you-know-basics-about-cnn-and-mlp" class="nav-link" data-scroll-target="#basic-implementation-of-cnn-and-mlp-on-mnist-dataset-for-classification.you-can-skip-if-you-know-basics-about-cnn-and-mlp">Basic implementation of CNN and MLP on Mnist dataset for classification.(you can skip if you know basics about CNN and MLP)</a></li>
+  <li><a href="#but-why-cnn-why-not-mlp" id="toc-but-why-cnn-why-not-mlp" class="nav-link" data-scroll-target="#but-why-cnn-why-not-mlp">But why CNN? Why not MLP?</a></li>
   </ul></li>
+  <li><a href="#cnn-for-super-resolution" id="toc-cnn-for-super-resolution" class="nav-link" data-scroll-target="#cnn-for-super-resolution">CNN for Super Resolution</a>
+  <ul class="collapse">
+  <li><a href="#unet-architecture-for-super-resolution" id="toc-unet-architecture-for-super-resolution" class="nav-link" data-scroll-target="#unet-architecture-for-super-resolution">UNET architecture for super resolution:</a></li>
   </ul></li>
   <li><a href="#gans-generative-adversarial-networks" id="toc-gans-generative-adversarial-networks" class="nav-link" data-scroll-target="#gans-generative-adversarial-networks">GANS Generative Adversarial Networks</a>
   <ul class="collapse">
@@ -164,7 +165,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#training-process" id="toc-training-process" class="nav-link" data-scroll-target="#training-process">Training process</a></li>
   </ul></li>
-  <li><a href="#application-of-gans" id="toc-application-of-gans" class="nav-link" data-scroll-target="#application-of-gans">Application of GANS:</a></li>
   <li><a href="#gans-for-super-resolution" id="toc-gans-for-super-resolution" class="nav-link" data-scroll-target="#gans-for-super-resolution">GANS for Super Resolution</a>
   <ul class="collapse">
   <li><a href="#code-for-generator-block" id="toc-code-for-generator-block" class="nav-link" data-scroll-target="#code-for-generator-block">Code for Generator Block</a></li>
@@ -218,21 +218,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Camera image:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="Image_super_resolution_files/figure-html/ebb5abbc-1-flower_blur_unblur.jpg" class="img-fluid figure-img"></p>
+<p><img src="Image_super_resolution_files/figure-html/0dc46562-1-flower_blur_unblur.jpg" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">flower_blur_unblur.jpg</figcaption>
 </figure>
 </div>
 <p>Security camera image:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="Image_super_resolution_files/figure-html/ebb5abbc-3-numberplate_blur_unblur.jpg" class="img-fluid figure-img"></p>
+<p><img src="Image_super_resolution_files/figure-html/0dc46562-3-numberplate_blur_unblur.jpg" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">numberplate_blur_unblur.jpg</figcaption>
 </figure>
 </div>
 <p>Geological image:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="Image_super_resolution_files/figure-html/ebb5abbc-2-geo_lr_hr.png" class="img-fluid figure-img"></p>
+<p><img src="Image_super_resolution_files/figure-html/0dc46562-2-geo_lr_hr.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">geo_lr_hr.png</figcaption>
 </figure>
 </div>
@@ -241,6 +241,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="how-we-create-our-dataset">How we create our dataset?</h2>
 <p>We always do not have low and high resolution images of the same scene. So we create our own dataset. We take high resolution images (from net) and from that we create low resolution images by downscaling the high resolution images. We have used two methods for downscaling the images: 1. Bicubic Interpolation 2. Gaussian Blur</p>
 <p>We won’t discussing in detail about these methods. We will be using the Gaussian Blur method for downscaling the images.</p>
+<div class="cell" data-execution_count="39">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> keras</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cv2</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Load MNIST dataset</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>(x_train, _), (_, _) <span class="op">=</span> keras.datasets.mnist.load_data()</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Select a random image from the dataset</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> x_train[np.random.randint(<span class="dv">0</span>, x_train.shape[<span class="dv">0</span>])]</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize the pixel values</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> image.astype(<span class="st">'float32'</span>) <span class="op">/</span> <span class="fl">255.0</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Blur the image using Gaussian filter</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>blurred_image <span class="op">=</span> cv2.GaussianBlur(image, (<span class="dv">3</span>, <span class="dv">3</span>), <span class="dv">0</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the original and blurred images</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>plt.imshow(image, cmap<span class="op">=</span><span class="st">'gray'</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Original Image'</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'off'</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>plt.imshow(blurred_image, cmap<span class="op">=</span><span class="st">'gray'</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Blurred Image'</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'off'</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Image_super_resolution_files/figure-html/cell-2-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>One other quick way is to size down image then resize it to original size. This way we can get low resolution image.</p>
 </section>
 </section>
 <section id="main-task" class="level1">
@@ -254,53 +289,52 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Another common problem is that MLPs react differently to an input (images) and its shifted version — they are not translation invariant.</li>
 <li>The main problems is that spatial information is lost when the image is flattened(matrix to vector) into an MLP.</li>
 </ol>
-<section id="basic-implementation-of-cnn-and-mlp-on-mnist-dataset-for-classification.you-can-skip-if-you-know-basics-about-cnn-and-mlp" class="level3">
-<h3 class="anchored" data-anchor-id="basic-implementation-of-cnn-and-mlp-on-mnist-dataset-for-classification.you-can-skip-if-you-know-basics-about-cnn-and-mlp">Basic implementation of CNN and MLP on Mnist dataset for classification.(you can skip if you know basics about CNN and MLP)</h3>
+<p>Basic implementation of CNN and MLP on Mnist dataset for classification.(you can skip if you know basics about CNN and MLP)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.datasets <span class="im">import</span> mnist</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.models <span class="im">import</span> Sequential</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.layers <span class="im">import</span> Dense, Flatten, Conv2D, MaxPooling2D</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.datasets <span class="im">import</span> mnist</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.models <span class="im">import</span> Sequential</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.layers <span class="im">import</span> Dense, Flatten, Conv2D, MaxPooling2D</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load MNIST dataset</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>(x_train, y_train), (x_test, y_test) <span class="op">=</span> mnist.load_data()</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Preprocess the data</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>x_train <span class="op">=</span> x_train <span class="op">/</span> <span class="fl">255.0</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>x_test <span class="op">=</span> x_test <span class="op">/</span> <span class="fl">255.0</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape the data for MLP</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>x_train_mlp <span class="op">=</span> x_train.reshape((<span class="op">-</span><span class="dv">1</span>, <span class="dv">28</span><span class="op">*</span><span class="dv">28</span>))</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>x_test_mlp <span class="op">=</span> x_test.reshape((<span class="op">-</span><span class="dv">1</span>, <span class="dv">28</span><span class="op">*</span><span class="dv">28</span>))</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape the data for CNN</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>x_train_cnn <span class="op">=</span> x_train.reshape((<span class="op">-</span><span class="dv">1</span>, <span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>))</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>x_test_cnn <span class="op">=</span> x_test.reshape((<span class="op">-</span><span class="dv">1</span>, <span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load MNIST dataset</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>(x_train, y_train), (x_test, y_test) <span class="op">=</span> mnist.load_data()</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Preprocess the data</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>x_train <span class="op">=</span> x_train <span class="op">/</span> <span class="fl">255.0</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>x_test <span class="op">=</span> x_test <span class="op">/</span> <span class="fl">255.0</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape the data for MLP</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>x_train_mlp <span class="op">=</span> x_train.reshape((<span class="op">-</span><span class="dv">1</span>, <span class="dv">28</span><span class="op">*</span><span class="dv">28</span>))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>x_test_mlp <span class="op">=</span> x_test.reshape((<span class="op">-</span><span class="dv">1</span>, <span class="dv">28</span><span class="op">*</span><span class="dv">28</span>))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape the data for CNN</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>x_train_cnn <span class="op">=</span> x_train.reshape((<span class="op">-</span><span class="dv">1</span>, <span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>))</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>x_test_cnn <span class="op">=</span> x_test.reshape((<span class="op">-</span><span class="dv">1</span>, <span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="Image_super_resolution_files/figure-html/74198dc0-1-MLP_fig_imageclassification.jpg" class="img-fluid figure-img"></p>
+<p><img src="Image_super_resolution_files/figure-html/c9ea7219-1-MLP_fig_imageclassification.jpg" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">MLP_fig_imageclassification.jpg</figcaption>
 </figure>
 </div>
 <div class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># MLP model</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>mlp_model <span class="op">=</span> Sequential()</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>mlp_model.add(Dense(<span class="dv">256</span>, activation<span class="op">=</span><span class="st">'relu'</span>, input_shape<span class="op">=</span>(<span class="dv">28</span><span class="op">*</span><span class="dv">28</span>,)))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>mlp_model.add(Dense(<span class="dv">128</span>, activation<span class="op">=</span><span class="st">'relu'</span>))</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>mlp_model.add(Dense(<span class="dv">10</span>, activation<span class="op">=</span><span class="st">'softmax'</span>))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>mlp_model.summary()</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>mlp_model.<span class="bu">compile</span>(optimizer<span class="op">=</span><span class="st">'adam'</span>, loss<span class="op">=</span><span class="st">'sparse_categorical_crossentropy'</span>, metrics<span class="op">=</span>[<span class="st">'accuracy'</span>])</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Train MLP model</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>mlp_model.fit(x_train_mlp, y_train, epochs<span class="op">=</span><span class="dv">10</span>, batch_size<span class="op">=</span><span class="dv">32</span>, validation_data<span class="op">=</span>(x_test_mlp, y_test))</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate MLP model</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>mlp_loss, mlp_accuracy <span class="op">=</span> mlp_model.evaluate(x_test_mlp, y_test)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MLP Accuracy:"</span>, mlp_accuracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># MLP model</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>mlp_model <span class="op">=</span> Sequential()</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>mlp_model.add(Dense(<span class="dv">256</span>, activation<span class="op">=</span><span class="st">'relu'</span>, input_shape<span class="op">=</span>(<span class="dv">28</span><span class="op">*</span><span class="dv">28</span>,)))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>mlp_model.add(Dense(<span class="dv">128</span>, activation<span class="op">=</span><span class="st">'relu'</span>))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>mlp_model.add(Dense(<span class="dv">10</span>, activation<span class="op">=</span><span class="st">'softmax'</span>))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>mlp_model.summary()</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>mlp_model.<span class="bu">compile</span>(optimizer<span class="op">=</span><span class="st">'adam'</span>, loss<span class="op">=</span><span class="st">'sparse_categorical_crossentropy'</span>, metrics<span class="op">=</span>[<span class="st">'accuracy'</span>])</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Train MLP model</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>mlp_model.fit(x_train_mlp, y_train, epochs<span class="op">=</span><span class="dv">10</span>, batch_size<span class="op">=</span><span class="dv">32</span>, validation_data<span class="op">=</span>(x_test_mlp, y_test))</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate MLP model</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>mlp_loss, mlp_accuracy <span class="op">=</span> mlp_model.evaluate(x_test_mlp, y_test)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MLP Accuracy:"</span>, mlp_accuracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Model: "sequential_2"
 _________________________________________________________________
@@ -343,27 +377,27 @@ MLP Accuracy: 0.9790999889373779</code></pre>
 </div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="Image_super_resolution_files/figure-html/77a44ec3-1-CNN_fig_imageclassification.jpg" class="img-fluid figure-img"></p>
+<p><img src="Image_super_resolution_files/figure-html/9b5c802a-1-CNN_fig_imageclassification.jpg" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">CNN_fig_imageclassification.jpg</figcaption>
 </figure>
 </div>
 <div class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CNN model</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>cnn_model <span class="op">=</span> Sequential()</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>cnn_model.add(Conv2D(<span class="dv">32</span>, (<span class="dv">3</span>, <span class="dv">3</span>), activation<span class="op">=</span><span class="st">'relu'</span>, input_shape<span class="op">=</span>(<span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>)))</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>cnn_model.add(MaxPooling2D((<span class="dv">2</span>, <span class="dv">2</span>)))</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>cnn_model.add(Flatten())</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>cnn_model.add(Dense(<span class="dv">128</span>, activation<span class="op">=</span><span class="st">'relu'</span>))</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>cnn_model.add(Dense(<span class="dv">10</span>, activation<span class="op">=</span><span class="st">'softmax'</span>))</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>cnn_model.summary()</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>cnn_model.<span class="bu">compile</span>(optimizer<span class="op">=</span><span class="st">'adam'</span>, loss<span class="op">=</span><span class="st">'sparse_categorical_crossentropy'</span>, metrics<span class="op">=</span>[<span class="st">'accuracy'</span>])</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Train CNN model</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>cnn_model.fit(x_train_cnn, y_train, epochs<span class="op">=</span><span class="dv">10</span>, batch_size<span class="op">=</span><span class="dv">32</span>, validation_data<span class="op">=</span>(x_test_cnn, y_test))</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate CNN model</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>cnn_loss, cnn_accuracy <span class="op">=</span> cnn_model.evaluate(x_test_cnn, y_test)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"CNN Accuracy:"</span>, cnn_accuracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CNN model</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>cnn_model <span class="op">=</span> Sequential()</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>cnn_model.add(Conv2D(<span class="dv">32</span>, (<span class="dv">3</span>, <span class="dv">3</span>), activation<span class="op">=</span><span class="st">'relu'</span>, input_shape<span class="op">=</span>(<span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>)))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>cnn_model.add(MaxPooling2D((<span class="dv">2</span>, <span class="dv">2</span>)))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>cnn_model.add(Flatten())</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>cnn_model.add(Dense(<span class="dv">128</span>, activation<span class="op">=</span><span class="st">'relu'</span>))</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>cnn_model.add(Dense(<span class="dv">10</span>, activation<span class="op">=</span><span class="st">'softmax'</span>))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>cnn_model.summary()</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>cnn_model.<span class="bu">compile</span>(optimizer<span class="op">=</span><span class="st">'adam'</span>, loss<span class="op">=</span><span class="st">'sparse_categorical_crossentropy'</span>, metrics<span class="op">=</span>[<span class="st">'accuracy'</span>])</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Train CNN model</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>cnn_model.fit(x_train_cnn, y_train, epochs<span class="op">=</span><span class="dv">10</span>, batch_size<span class="op">=</span><span class="dv">32</span>, validation_data<span class="op">=</span>(x_test_cnn, y_test))</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate CNN model</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>cnn_loss, cnn_accuracy <span class="op">=</span> cnn_model.evaluate(x_test_cnn, y_test)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"CNN Accuracy:"</span>, cnn_accuracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Model: "sequential_3"
 _________________________________________________________________
@@ -410,55 +444,61 @@ CNN Accuracy: 0.9861000180244446</code></pre>
 </div>
 </div>
 <div class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Select a random image from the test set</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>index <span class="op">=</span> np.random.randint(<span class="dv">0</span>, x_test.shape[<span class="dv">0</span>])</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the image and its label</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> x_test[index]</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>label <span class="op">=</span> y_test[index]</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape the image for MLP model prediction</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>image_mlp <span class="op">=</span> image.reshape((<span class="dv">1</span>, <span class="dv">28</span><span class="op">*</span><span class="dv">28</span>))</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape the image for CNN model prediction</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>image_cnn <span class="op">=</span> image.reshape((<span class="dv">1</span>, <span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>))</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict using MLP model</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>mlp_prediction <span class="op">=</span> np.argmax(mlp_model.predict(image_mlp))</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict using CNN model</span></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>cnn_prediction <span class="op">=</span> np.argmax(cnn_model.predict(image_cnn))</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the image and predictions</span></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co"># MLP plot</span></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>plt.imshow(image, cmap<span class="op">=</span><span class="st">'gray'</span>)</span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"MLP Prediction: </span><span class="sc">{</span>mlp_prediction<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'off'</span>)</span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="co"># CNN plot</span></span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>plt.imshow(image, cmap<span class="op">=</span><span class="st">'gray'</span>)</span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"CNN Prediction: </span><span class="sc">{</span>cnn_prediction<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'off'</span>)</span>
-<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Select a random image from the test set</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>index <span class="op">=</span> np.random.randint(<span class="dv">0</span>, x_test.shape[<span class="dv">0</span>])</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the image and its label</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> x_test[index]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>label <span class="op">=</span> y_test[index]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape the image for MLP model prediction</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>image_mlp <span class="op">=</span> image.reshape((<span class="dv">1</span>, <span class="dv">28</span><span class="op">*</span><span class="dv">28</span>))</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape the image for CNN model prediction</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>image_cnn <span class="op">=</span> image.reshape((<span class="dv">1</span>, <span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict using MLP model</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>mlp_prediction <span class="op">=</span> np.argmax(mlp_model.predict(image_mlp))</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict using CNN model</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>cnn_prediction <span class="op">=</span> np.argmax(cnn_model.predict(image_cnn))</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the image and predictions</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co"># MLP plot</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>plt.imshow(image, cmap<span class="op">=</span><span class="st">'gray'</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"MLP Prediction: </span><span class="sc">{</span>mlp_prediction<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'off'</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co"># CNN plot</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>plt.imshow(image, cmap<span class="op">=</span><span class="st">'gray'</span>)</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"CNN Prediction: </span><span class="sc">{</span>cnn_prediction<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'off'</span>)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>1/1 [==============================] - 0s 156ms/step
 1/1 [==============================] - 0s 82ms/step</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="Image_super_resolution_files/figure-html/cell-6-output-2.png" class="img-fluid"></p>
+<p><img src="Image_super_resolution_files/figure-html/cell-7-output-2.png" class="img-fluid"></p>
 </div>
 </div>
 <p>CNN does perform well on image classification task than MLP but above for toy dataset MNIST the difference is not that much. But for real world dataset the difference is huge.</p>
 <p>Show the difference between MLP and CNN for real world dataset.(open MLP vs CNN using transfer learning VGG16 on Snake vs Antelope dataset.ipynb)</p>
 <p>Here we can see that CNN is better than MLP for image classification. So we will be using CNN for our task.</p>
 </section>
+</section>
+<section id="cnn-for-super-resolution" class="level1">
+<h1>CNN for Super Resolution</h1>
+<p>Usually we see in cnn we have convolutional layers and max-pooling layers. Due to which the end is image is shrinked. So how can we use CNN for super resolution? We use architecture called as UNET.</p>
+<section id="unet-architecture-for-super-resolution" class="level2">
+<h2 class="anchored" data-anchor-id="unet-architecture-for-super-resolution">UNET architecture for super resolution:</h2>
+<p>Here we are just understand the high level view of unet architecture. We will be discussing in detail about unet in next blog. Unet has two parts: 1. Encoder 2. Decoder</p>
+<p>Encoder is same as CNN where we have convolutional layers and max-pooling layers. But in decoder we have upsampling layers instead of max-pooling layers. So the image is not shrinked and we get the high resolution image.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Image_super_resolution_files/figure-html/2f722ab1-1-u-net-architecture.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">u-net-architecture.png</figcaption>
+</figure>
+</div>
 </section>
 </section>
 <section id="gans-generative-adversarial-networks" class="level1">
@@ -478,7 +518,7 @@ CNN Accuracy: 0.9861000180244446</code></pre>
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="Image_super_resolution_files/figure-html/4ac4dae5-1-gan_architecture.png" class="img-fluid figure-img"></p>
+<p><img src="Image_super_resolution_files/figure-html/5ff72c8a-1-gan_architecture.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">gan_architecture.png</figcaption>
 </figure>
 </div>
@@ -502,192 +542,182 @@ CNN Accuracy: 0.9861000180244446</code></pre>
 <p>This is how both Generator(to make better fake images) and Discriminator(to identify fake images) are getting better.</p>
 </section>
 </section>
-<section id="application-of-gans" class="level2">
-<h2 class="anchored" data-anchor-id="application-of-gans">Application of GANS:</h2>
-<ol type="1">
-<li>Realistic photo generation</li>
-<li>Image super-resolution</li>
-<li>Imaage to image translation</li>
-<li>Text to image translation</li>
-<li>Semantic image to photo translation</li>
-</ol>
-</section>
 <section id="gans-for-super-resolution" class="level2">
 <h2 class="anchored" data-anchor-id="gans-for-super-resolution">GANS for Super Resolution</h2>
 <p>Importing necessary libraries</p>
 <div class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> keras.datasets <span class="im">import</span> mnist</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cv2</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> glob</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.layers <span class="im">import</span> Input, Add, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, AveragePooling2D, MaxPooling2D, UpSampling2D</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.layers <span class="im">import</span> LeakyReLU, Dropout</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.models <span class="im">import</span> Sequential, Model, load_model</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> keras.datasets <span class="im">import</span> mnist</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cv2</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> glob</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.layers <span class="im">import</span> Input, Add, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, AveragePooling2D, MaxPooling2D, UpSampling2D</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.layers <span class="im">import</span> LeakyReLU, Dropout</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.models <span class="im">import</span> Sequential, Model, load_model</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># a function to format display the losses</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hmsString(sec_elapsed):</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> <span class="bu">int</span>(sec_elapsed <span class="op">/</span> (<span class="dv">60</span> <span class="op">*</span> <span class="dv">60</span>))</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> <span class="bu">int</span>((sec_elapsed <span class="op">%</span> (<span class="dv">60</span> <span class="op">*</span> <span class="dv">60</span>)) <span class="op">/</span> <span class="dv">60</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> sec_elapsed <span class="op">%</span> <span class="dv">60</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"</span><span class="sc">{}</span><span class="st">:</span><span class="sc">{:&gt;02}</span><span class="st">:</span><span class="sc">{:&gt;05.2f}</span><span class="st">"</span>.<span class="bu">format</span>(h, m, s)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co"># downsample and introduce noise in the images</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> downSampleAndNoisyfi(X):</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    shape <span class="op">=</span> X[<span class="dv">0</span>].shape</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    X_down <span class="op">=</span> []</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x_i <span class="kw">in</span> X:</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>       x_c <span class="op">=</span> cv2.resize(x_i, (shape[<span class="dv">0</span>]<span class="op">//</span><span class="dv">4</span>, shape[<span class="dv">1</span>]<span class="op">//</span><span class="dv">4</span>), interpolation <span class="op">=</span> cv2.INTER_AREA)</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>       x_c <span class="op">=</span> np.clip(x_c<span class="op">+</span> np.random.normal(<span class="dv">0</span>, <span class="dv">5</span>, x_c.shape) , <span class="dv">0</span>, <span class="dv">255</span>).astype(<span class="st">'uint8'</span>)</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>       X_down.append(x_c)</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    X_down <span class="op">=</span> np.array(X_down, dtype <span class="op">=</span> <span class="st">'uint8'</span>)</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X_down</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># a function to format display the losses</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hmsString(sec_elapsed):</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> <span class="bu">int</span>(sec_elapsed <span class="op">/</span> (<span class="dv">60</span> <span class="op">*</span> <span class="dv">60</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> <span class="bu">int</span>((sec_elapsed <span class="op">%</span> (<span class="dv">60</span> <span class="op">*</span> <span class="dv">60</span>)) <span class="op">/</span> <span class="dv">60</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> sec_elapsed <span class="op">%</span> <span class="dv">60</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"</span><span class="sc">{}</span><span class="st">:</span><span class="sc">{:&gt;02}</span><span class="st">:</span><span class="sc">{:&gt;05.2f}</span><span class="st">"</span>.<span class="bu">format</span>(h, m, s)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># downsample and introduce noise in the images</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> downSampleAndNoisyfi(X):</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    shape <span class="op">=</span> X[<span class="dv">0</span>].shape</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    X_down <span class="op">=</span> []</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x_i <span class="kw">in</span> X:</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>       x_c <span class="op">=</span> cv2.resize(x_i, (shape[<span class="dv">0</span>]<span class="op">//</span><span class="dv">4</span>, shape[<span class="dv">1</span>]<span class="op">//</span><span class="dv">4</span>), interpolation <span class="op">=</span> cv2.INTER_AREA)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>       x_c <span class="op">=</span> np.clip(x_c<span class="op">+</span> np.random.normal(<span class="dv">0</span>, <span class="dv">5</span>, x_c.shape) , <span class="dv">0</span>, <span class="dv">255</span>).astype(<span class="st">'uint8'</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>       X_down.append(x_c)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    X_down <span class="op">=</span> np.array(X_down, dtype <span class="op">=</span> <span class="st">'uint8'</span>)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X_down</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="code-for-generator-block" class="level3">
 <h3 class="anchored" data-anchor-id="code-for-generator-block">Code for Generator Block</h3>
 <div class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Generator(input_shape):</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    X_input <span class="op">=</span> Input(input_shape)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X_input)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    X_shortcut <span class="op">=</span> X</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)  </span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Add()([X_shortcut, X])  </span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    X_shortcut <span class="op">=</span> X</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)  </span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Add()([X_shortcut, X])</span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> UpSampling2D(size<span class="op">=</span><span class="dv">2</span>)(X)</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    X_shortcut <span class="op">=</span> X</span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Add()([X_shortcut, X])</span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    X_shortcut <span class="op">=</span> X</span>
-<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
-<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
-<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)   </span>
-<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Add()([X_shortcut, X])</span>
-<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
-<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> UpSampling2D(size<span class="op">=</span><span class="dv">2</span>)(X)</span>
-<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>    X_shortcut <span class="op">=</span> X</span>
-<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
-<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
-<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
-<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">1</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
-<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
-<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
-<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    generator_model <span class="op">=</span> Model(inputs<span class="op">=</span>X_input, outputs<span class="op">=</span>X)</span>
-<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> generator_model</span>
-<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Generator(input_shape):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    X_input <span class="op">=</span> Input(input_shape)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X_input)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    X_shortcut <span class="op">=</span> X</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)  </span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Add()([X_shortcut, X])  </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    X_shortcut <span class="op">=</span> X</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)  </span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Add()([X_shortcut, X])</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> UpSampling2D(size<span class="op">=</span><span class="dv">2</span>)(X)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    X_shortcut <span class="op">=</span> X</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Add()([X_shortcut, X])</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    X_shortcut <span class="op">=</span> X</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)   </span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Add()([X_shortcut, X])</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> UpSampling2D(size<span class="op">=</span><span class="dv">2</span>)(X)</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    X_shortcut <span class="op">=</span> X</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">1</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.5</span>)(X)</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>    generator_model <span class="op">=</span> Model(inputs<span class="op">=</span>X_input, outputs<span class="op">=</span>X)</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> generator_model</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="code-for-discriminator-block" class="level3">
 <h3 class="anchored" data-anchor-id="code-for-discriminator-block">Code for Discriminator Block</h3>
 <div class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Discriminator(input_shape):</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    X_input <span class="op">=</span> Input(input_shape)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X_input)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">64</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.8</span>)(X)</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    discriminator_model <span class="op">=</span> Model(inputs<span class="op">=</span>X_input, outputs<span class="op">=</span>X)</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> discriminator_model</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Discriminator(input_shape):</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    X_input <span class="op">=</span> Input(input_shape)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">32</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X_input)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Conv2D(filters <span class="op">=</span> <span class="dv">64</span>, kernel_size <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>), strides <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>), padding <span class="op">=</span> <span class="st">'same'</span>)(X)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> BatchNormalization(momentum<span class="op">=</span><span class="fl">0.8</span>)(X)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> Activation(<span class="st">'relu'</span>)(X)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    discriminator_model <span class="op">=</span> Model(inputs<span class="op">=</span>X_input, outputs<span class="op">=</span>X)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> discriminator_model</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="traing-gans" class="level3">
 <h3 class="anchored" data-anchor-id="traing-gans">Traing GANS</h3>
 <div class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One step of the test step</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="at">@tf.function</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_step(X, Y, generator, discriminator, generator_optimizer, discriminator_optimizer):</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">with</span> tf.GradientTape() <span class="im">as</span> gen_tape, tf.GradientTape() <span class="im">as</span> disc_tape:</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    generated_images <span class="op">=</span> generator(X, training<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    real_output <span class="op">=</span> discriminator(Y, training<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    fake_output <span class="op">=</span> discriminator(generated_images, training<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    gen_loss <span class="op">=</span> tf.keras.losses.MSE(Y, generated_images)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    disc_loss <span class="op">=</span> tf.keras.losses.MSE(real_output, fake_output)</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    gradients_of_generator <span class="op">=</span> gen_tape.gradient(<span class="op">\</span></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        gen_loss, generator.trainable_variables)</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    gradients_of_discriminator <span class="op">=</span> disc_tape.gradient(<span class="op">\</span></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        disc_loss, discriminator.trainable_variables)</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    generator_optimizer.apply_gradients(<span class="bu">zip</span>(</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        gradients_of_generator, generator.trainable_variables))</span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    discriminator_optimizer.apply_gradients(<span class="bu">zip</span>(</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        gradients_of_discriminator, </span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        discriminator.trainable_variables))</span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> gen_loss,disc_loss</span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="co"># The main function to train the GAN</span></span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(X_train, Y_train, generator, discriminator, batch_size<span class="op">=</span><span class="dv">100</span>, epochs<span class="op">=</span><span class="dv">50</span>):</span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    generator_optimizer <span class="op">=</span> tf.keras.optimizers.Adam(<span class="fl">1.5e-4</span>,<span class="fl">0.5</span>)</span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    discriminator_optimizer <span class="op">=</span> tf.keras.optimizers.Adam(<span class="fl">1.5e-4</span>,<span class="fl">0.5</span>)</span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    start <span class="op">=</span> time.time()</span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
-<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>        epoch_start <span class="op">=</span> time.time()</span>
-<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>        gen_loss_list <span class="op">=</span> []</span>
-<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>        disc_loss_list <span class="op">=</span> []</span>
-<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>        prev_i <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(X_train.shape[<span class="dv">0</span>]):</span>
-<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span>((i<span class="op">+</span><span class="dv">1</span>)<span class="op">%</span>batch_size <span class="op">==</span> <span class="dv">0</span>):</span>
-<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>                t <span class="op">=</span> train_step(X_train[prev_i:i<span class="op">+</span><span class="dv">1</span>], Y_train[prev_i:i<span class="op">+</span><span class="dv">1</span>], generator, discriminator, generator_optimizer, discriminator_optimizer)</span>
-<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>                gen_loss_list.append(t[<span class="dv">0</span>])</span>
-<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>                disc_loss_list.append(t[<span class="dv">1</span>])</span>
-<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>                prev_i <span class="op">=</span> i<span class="op">+</span><span class="dv">1</span></span>
-<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>        g_loss <span class="op">=</span> np.<span class="bu">sum</span>(np.array(gen_loss_list)) <span class="op">/</span> np.<span class="bu">sum</span>(np.array(gen_loss_list).shape)</span>
-<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>        d_loss <span class="op">=</span> np.<span class="bu">sum</span>(np.array(disc_loss_list)) <span class="op">/</span> np.<span class="bu">sum</span>(np.array(disc_loss_list).shape)</span>
-<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>        epoch_elapsed <span class="op">=</span> time.time()<span class="op">-</span>epoch_start</span>
-<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span> (<span class="ss">f'Epoch </span><span class="sc">{</span>epoch<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">, gen loss=</span><span class="sc">{</span>g_loss<span class="sc">}</span><span class="ss">,disc loss=</span><span class="sc">{</span>d_loss<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>hmsString(epoch_elapsed)<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>    elapsed <span class="op">=</span> time.time()<span class="op">-</span>start</span>
-<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span> (<span class="ss">f'Training time: </span><span class="sc">{</span>hmsString(elapsed)<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>    </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One step of the test step</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="at">@tf.function</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_step(X, Y, generator, discriminator, generator_optimizer, discriminator_optimizer):</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">with</span> tf.GradientTape() <span class="im">as</span> gen_tape, tf.GradientTape() <span class="im">as</span> disc_tape:</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    generated_images <span class="op">=</span> generator(X, training<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    real_output <span class="op">=</span> discriminator(Y, training<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    fake_output <span class="op">=</span> discriminator(generated_images, training<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    gen_loss <span class="op">=</span> tf.keras.losses.MSE(Y, generated_images)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    disc_loss <span class="op">=</span> tf.keras.losses.MSE(real_output, fake_output)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    gradients_of_generator <span class="op">=</span> gen_tape.gradient(<span class="op">\</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        gen_loss, generator.trainable_variables)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    gradients_of_discriminator <span class="op">=</span> disc_tape.gradient(<span class="op">\</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        disc_loss, discriminator.trainable_variables)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    generator_optimizer.apply_gradients(<span class="bu">zip</span>(</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>        gradients_of_generator, generator.trainable_variables))</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    discriminator_optimizer.apply_gradients(<span class="bu">zip</span>(</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        gradients_of_discriminator, </span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>        discriminator.trainable_variables))</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> gen_loss,disc_loss</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="co"># The main function to train the GAN</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(X_train, Y_train, generator, discriminator, batch_size<span class="op">=</span><span class="dv">100</span>, epochs<span class="op">=</span><span class="dv">50</span>):</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>    generator_optimizer <span class="op">=</span> tf.keras.optimizers.Adam(<span class="fl">1.5e-4</span>,<span class="fl">0.5</span>)</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>    discriminator_optimizer <span class="op">=</span> tf.keras.optimizers.Adam(<span class="fl">1.5e-4</span>,<span class="fl">0.5</span>)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    start <span class="op">=</span> time.time()</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>        epoch_start <span class="op">=</span> time.time()</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>        gen_loss_list <span class="op">=</span> []</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>        disc_loss_list <span class="op">=</span> []</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>        prev_i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(X_train.shape[<span class="dv">0</span>]):</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span>((i<span class="op">+</span><span class="dv">1</span>)<span class="op">%</span>batch_size <span class="op">==</span> <span class="dv">0</span>):</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>                t <span class="op">=</span> train_step(X_train[prev_i:i<span class="op">+</span><span class="dv">1</span>], Y_train[prev_i:i<span class="op">+</span><span class="dv">1</span>], generator, discriminator, generator_optimizer, discriminator_optimizer)</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>                gen_loss_list.append(t[<span class="dv">0</span>])</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>                disc_loss_list.append(t[<span class="dv">1</span>])</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>                prev_i <span class="op">=</span> i<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>        g_loss <span class="op">=</span> np.<span class="bu">sum</span>(np.array(gen_loss_list)) <span class="op">/</span> np.<span class="bu">sum</span>(np.array(gen_loss_list).shape)</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>        d_loss <span class="op">=</span> np.<span class="bu">sum</span>(np.array(disc_loss_list)) <span class="op">/</span> np.<span class="bu">sum</span>(np.array(disc_loss_list).shape)</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>        epoch_elapsed <span class="op">=</span> time.time()<span class="op">-</span>epoch_start</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span> (<span class="ss">f'Epoch </span><span class="sc">{</span>epoch<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">, gen loss=</span><span class="sc">{</span>g_loss<span class="sc">}</span><span class="ss">,disc loss=</span><span class="sc">{</span>d_loss<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>hmsString(epoch_elapsed)<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>    elapsed <span class="op">=</span> time.time()<span class="op">-</span>start</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span> (<span class="ss">f'Training time: </span><span class="sc">{</span>hmsString(elapsed)<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>    </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># loading the dataset(the original image are the HR 28*28 images)</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>(Y_train, _), (Y_test, _) <span class="op">=</span> mnist.load_data()</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># downsampling and introducing gaussian noise</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># this downsampled and noised dataset is out X or inputs</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> downSampleAndNoisyfi(Y_train)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> downSampleAndNoisyfi(Y_test)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co"># introduce a new dimension to the data (None, 28, 28, 1)</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> X_test[..., np.newaxis]</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> X_train[..., np.newaxis]</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>Y_train <span class="op">=</span> Y_train[..., np.newaxis]</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>Y_test <span class="op">=</span> Y_test[..., np.newaxis]</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating a generator model</span></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Showing the summary of generator </span></span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>generator <span class="op">=</span> Generator((<span class="dv">7</span>,<span class="dv">7</span>,<span class="dv">1</span>))</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>generator.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># loading the dataset(the original image are the HR 28*28 images)</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>(Y_train, _), (Y_test, _) <span class="op">=</span> mnist.load_data()</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># downsampling and introducing gaussian noise</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># this downsampled and noised dataset is out X or inputs</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> downSampleAndNoisyfi(Y_train)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> downSampleAndNoisyfi(Y_test)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># introduce a new dimension to the data (None, 28, 28, 1)</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> X_test[..., np.newaxis]</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> X_train[..., np.newaxis]</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>Y_train <span class="op">=</span> Y_train[..., np.newaxis]</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>Y_test <span class="op">=</span> Y_test[..., np.newaxis]</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating a generator model</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Showing the summary of generator </span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>generator <span class="op">=</span> Generator((<span class="dv">7</span>,<span class="dv">7</span>,<span class="dv">1</span>))</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>generator.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Model: "model"
 __________________________________________________________________________________________________
@@ -788,10 +818,10 @@ ________________________________________________________________________________
 </div>
 </div>
 <div class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating a discriminator model</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Showing the summary of discriminator</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>discriminator <span class="op">=</span> Discriminator((<span class="dv">28</span>,<span class="dv">28</span>,<span class="dv">1</span>))</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>discriminator.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating a discriminator model</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Showing the summary of discriminator</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>discriminator <span class="op">=</span> Discriminator((<span class="dv">28</span>,<span class="dv">28</span>,<span class="dv">1</span>))</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>discriminator.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Model: "model_1"
 _________________________________________________________________
@@ -818,67 +848,66 @@ _________________________________________________________________</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># training with batch size of 100 and for 50 epochs</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>train(X_train, Y_train, generator, discriminator, <span class="dv">100</span>, <span class="dv">5</span>) <span class="co">#50)</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># save the generator model for future use</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>generator.save(<span class="st">"mnist_generator_model"</span>)</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>generator.save(<span class="st">"mnist_generator_model.h5"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># training with batch size of 100 and for 50 epochs</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>train(X_train, Y_train, generator, discriminator, <span class="dv">100</span>, <span class="dv">5</span>) <span class="co">#50)</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># save the generator model for future use</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>generator.save(<span class="st">"mnist_generator_model"</span>)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>generator.save(<span class="st">"mnist_generator_model.h5"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here we have run only for 5 epochs but you can run for more epochs to get better results.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># testing the model</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>Y_pred <span class="op">=</span> generator.predict(X_test)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># showing the first 5 results</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>fig,a <span class="op">=</span>  plt.subplots(<span class="dv">3</span>,<span class="dv">5</span>)</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>fig.subplots_adjust(hspace<span class="op">=</span><span class="fl">0.5</span>, wspace<span class="op">=</span><span class="fl">0.1</span>)</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">0</span>][i].imshow(X_test[i])</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">0</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">0</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">0</span>][i].title.set_text(<span class="st">"LR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>))</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">1</span>][i].imshow(Y_pred[i])</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">1</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">1</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">1</span>][i].title.set_text(<span class="st">"SR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>)) </span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">2</span>][i].imshow(Y_test[i])</span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">2</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">2</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">2</span>][i].title.set_text(<span class="st">"HR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>)) </span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># testing the model</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>Y_pred <span class="op">=</span> generator.predict(X_test)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># showing the first 5 results</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>fig,a <span class="op">=</span>  plt.subplots(<span class="dv">3</span>,<span class="dv">5</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>fig.subplots_adjust(hspace<span class="op">=</span><span class="fl">0.5</span>, wspace<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">0</span>][i].imshow(X_test[i])</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">0</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">0</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">0</span>][i].title.set_text(<span class="st">"LR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>))</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">1</span>][i].imshow(Y_pred[i])</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">1</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">1</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">1</span>][i].title.set_text(<span class="st">"SR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>)) </span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">2</span>][i].imshow(Y_test[i])</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">2</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">2</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    a[<span class="dv">2</span>][i].title.set_text(<span class="st">"HR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>313/313 [==============================] - 9s 27ms/step</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="Image_super_resolution_files/figure-html/cell-15-output-2.png" class="img-fluid"></p>
+<p><img src="Image_super_resolution_files/figure-html/cell-16-output-2.png" class="img-fluid"></p>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># showing the first 5 random results</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>figb,ab <span class="op">=</span>  plt.subplots(<span class="dv">3</span>,<span class="dv">5</span>)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>figb.subplots_adjust(hspace<span class="op">=</span><span class="fl">0.5</span>, wspace<span class="op">=</span><span class="fl">0.1</span>)</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    ii <span class="op">=</span> random.randint(<span class="dv">0</span>, <span class="dv">10000</span>) </span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">0</span>][i].imshow(X_test[ii])</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">0</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">0</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">0</span>][i].title.set_text(<span class="st">"LR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>))</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">1</span>][i].imshow(Y_pred[ii])</span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">1</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">1</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">1</span>][i].title.set_text(<span class="st">"SR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>)) </span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">2</span>][i].imshow(Y_test[ii])</span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">2</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">2</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">2</span>][i].title.set_text(<span class="st">"HR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># showing the first 5 random results</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>figb,ab <span class="op">=</span>  plt.subplots(<span class="dv">3</span>,<span class="dv">5</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>figb.subplots_adjust(hspace<span class="op">=</span><span class="fl">0.5</span>, wspace<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    ii <span class="op">=</span> random.randint(<span class="dv">0</span>, <span class="dv">10000</span>) </span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">0</span>][i].imshow(X_test[ii])</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">0</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">0</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">0</span>][i].title.set_text(<span class="st">"LR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>))</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">1</span>][i].imshow(Y_pred[ii])</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">1</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">1</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">1</span>][i].title.set_text(<span class="st">"SR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>)) </span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">2</span>][i].imshow(Y_test[ii])</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">2</span>][i].axes.get_xaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">2</span>][i].axes.get_yaxis().set_visible(<span class="va">False</span>)</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    ab[<span class="dv">2</span>][i].title.set_text(<span class="st">"HR: "</span><span class="op">+</span><span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="Image_super_resolution_files/figure-html/cell-16-output-1.png" class="img-fluid"></p>
+<p><img src="Image_super_resolution_files/figure-html/cell-17-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 <p>Well GAN does perform good but it has some problems.</p>
