@@ -71,9 +71,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-author',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
+      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author"],
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -119,15 +119,17 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../about.html" rel="" target="">
- <span class="menu-text">About</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link active" href="../blogs/index.html" rel="" target="" aria-current="page">
  <span class="menu-text">Blogs</span></a>
   </li>  
 </ul>
-            <div class="quarto-navbar-tools ms-auto">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../resume/Suraj_JAISWAL.pdf" rel="" target="">
+ <span class="menu-text">Resume</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
 </div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
@@ -139,7 +141,7 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(4)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(4)</span></div><div class="category" data-category="Bayesian">Bayesian <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Deep Learning">Deep Learning <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Regression">Regression <span class="quarto-category-count">(1)</span></div></div></div>
 <!-- main -->
 <main class="content column-page-left" id="quarto-document-content">
 
@@ -164,70 +166,140 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<div class="quarto-listing quarto-listing-container-table" id="listing-listing">
+<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
+<div class="list quarto-listing-default">
+<div class="quarto-post image-right" data-index="0" data-categories="Deep Learning" data-listing-date-sort="1689100200000" data-listing-file-modified-sort="1698276945954" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7">
+<div class="thumbnail">
+<p><a href="../blogs/blogsData/Image_super_resolution.html"> <p class="card-img-top"><img src="blogsData\Image_super_resolution_files\figure-html\4691ed4a-1-flower_blur_unblur.jpg"  class="thumbnail-image card-img"/></p> </a></p>
+</div>
+<div class="body">
+<a href="../blogs/blogsData/Image_super_resolution.html">
+<h3 class="no-anchor listing-title">
+Image Super Resolution
+</h3>
+<div class="listing-subtitle">
 
-<table class="quarto-listing-table table">
-<thead>
-<tr>
-<th>
-Date
-</th>
-<th>
-Title
-</th>
-<th>
-Author
-</th>
-</tr>
-</thead>
-<tbody class="list">
-<tr data-index="0" data-listing-date-sort="1689100200000" data-listing-file-modified-sort="1689236002431" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-title-sort="Image Super Resolution" data-listing-filename-sort="Image_super_resolution.ipynb">
-<td>
-<span class="listing-date">Jul 12, 2023</span>
-</td>
-<td>
-<a href="../blogs/blogsData/Image_super_resolution.html" class="title listing-title">Image Super Resolution</a>
-</td>
-<td>
-<span class="listing-author">Suraj Jaiswal</span>
-</td>
-</tr>
-<tr data-index="1" data-listing-date-sort="1687026600000" data-listing-file-modified-sort="1687586378465" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-title-sort="Baysian Linear Regression blog" data-listing-filename-sort="blr_blog.ipynb">
-<td>
-<span class="listing-date">Jun 18, 2023</span>
-</td>
-<td>
-<a href="../blogs/blogsData/blr_blog.html" class="title listing-title">Baysian Linear Regression blog</a>
-</td>
-<td>
-<span class="listing-author">Suraj Jaiswal</span>
-</td>
-</tr>
-<tr data-index="2" data-listing-date-sort="1686508200000" data-listing-file-modified-sort="1687030935868" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Plots for bayesian LR" data-listing-filename-sort="demo.ipynb">
-<td>
-<span class="listing-date">Jun 12, 2023</span>
-</td>
-<td>
-<a href="../blogs/blogsData/demo.html" class="title listing-title">Plots for bayesian LR</a>
-</td>
-<td>
-<span class="listing-author">Suraj Jaiswal</span>
-</td>
-</tr>
-<tr data-index="3" data-listing-date-sort="1685903400000" data-listing-file-modified-sort="1687094625715" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Baysian Linear Regression" data-listing-filename-sort="Bayesian_Lineara_Regressiondemo.ipynb">
-<td>
-<span class="listing-date">Jun 5, 2023</span>
-</td>
-<td>
-<a href="../blogs/blogsData/Bayesian_Lineara_Regressiondemo.html" class="title listing-title">Baysian Linear Regression</a>
-</td>
-<td>
-<span class="listing-author">Suraj Jaiswal</span>
-</td>
-</tr>
-</tbody>
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('Deep Learning'); return false;">
+Deep Learning
+</div>
+</div>
+<a href="../blogs/blogsData/Image_super_resolution.html">
+<div class="listing-description">
+The central aim of Super-Resolution (SR) is…
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="../blogs/blogsData/Image_super_resolution.html">
+<div class="listing-date">
+Jul 12, 2023
+</div>
+<div class="listing-author">
+Suraj Jaiswal
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="Regression,Bayesian" data-listing-date-sort="1687026600000" data-listing-file-modified-sort="1698276565135" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8">
+<div class="thumbnail">
+<p><a href="../blogs/blogsData/blr_blog.html"> <p class="card-img-top"><img src="blogsData\blr_blog_files\figure-html\c639e809-1-LR.png"  class="thumbnail-image card-img"/></p> </a></p>
+</div>
+<div class="body">
+<a href="../blogs/blogsData/blr_blog.html">
+<h3 class="no-anchor listing-title">
+Baysian Linear Regression blog
+</h3>
+<div class="listing-subtitle">
 
-</table>
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('Regression'); return false;">
+Regression
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('Bayesian'); return false;">
+Bayesian
+</div>
+</div>
+<a href="../blogs/blogsData/blr_blog.html">
+<div class="listing-description">
+Welcome to my blog on Bayesian linear regression, where we explore the power of this technique. While traditional linear regression provides point estimates, Bayesian linear…
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="../blogs/blogsData/blr_blog.html">
+<div class="listing-date">
+Jun 18, 2023
+</div>
+<div class="listing-author">
+Suraj Jaiswal
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-listing-date-sort="1686508200000" data-listing-file-modified-sort="1687030935868" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1">
+<div class="thumbnail">
+<p><a href="../blogs/blogsData/demo.html"> <p class="card-img-top"><img src="blogsData\demo_files\figure-html\cell-4-output-2.png"  class="thumbnail-image card-img"/></p> </a></p>
+</div>
+<div class="body">
+<a href="../blogs/blogsData/demo.html">
+<h3 class="no-anchor listing-title">
+Plots for bayesian LR
+</h3>
+<div class="listing-subtitle">
+
+</div>
+<div class="listing-description">
+9.3
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="../blogs/blogsData/demo.html">
+<div class="listing-date">
+Jun 12, 2023
+</div>
+<div class="listing-author">
+Suraj Jaiswal
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="3" data-listing-date-sort="1685903400000" data-listing-file-modified-sort="1698276559646" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1">
+<div class="thumbnail">
+<p><a href="../blogs/blogsData/Bayesian_Lineara_Regressiondemo.html"> <p class="card-img-top"><img src="blogsData\Bayesian_Lineara_Regressiondemo_files\figure-html\cell-14-output-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+</div>
+<div class="body">
+<a href="../blogs/blogsData/Bayesian_Lineara_Regressiondemo.html">
+<h3 class="no-anchor listing-title">
+Baysian Linear Regression
+</h3>
+<div class="listing-subtitle">
+
+</div>
+<div class="listing-description">
+<span class="math display">\[
+y = \boldsymbol x^T\boldsymbol\theta + \epsilon\,,\quad \epsilon \sim \mathcal N(0, \sigma^2)
+\]</span> Where $ &nbsp;$ is the noise from normal distribution with variance <span class="math inline">\(\sigma^2\)</span>. Training inputs…<span class="math inline"></span><span class="math inline"></span>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="../blogs/blogsData/Bayesian_Lineara_Regressiondemo.html">
+<div class="listing-date">
+Jun 5, 2023
+</div>
+<div class="listing-author">
+Suraj Jaiswal
+</div>
+</a>
+</div>
+</div>
+</div>
 <div class="listing-no-matching d-none">
 No matching items
 </div>

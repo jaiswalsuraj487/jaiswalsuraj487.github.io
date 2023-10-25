@@ -7,9 +7,12 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - about.qmd
+      # - about.qmd
       - href: blogs/index.qmd
         text: Blogs
+    right: 
+      - href: resume/Suraj_JAISWAL.pdf
+        text: Resume
 format:
   html:
     theme: cosmo
