@@ -1,0 +1,15 @@
+---
+title: Publications and Projects
+listing:
+    sort: 'date desc'
+    contents: 'data_folder'
+    sort-ui: false
+    filter-ui: false
+    categories: true
+    feed: true
+    type: default
+page-layout: full
+---
+
+
+

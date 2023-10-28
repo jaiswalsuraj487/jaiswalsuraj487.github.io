@@ -10,6 +10,8 @@ website:
       # - about.qmd
       - href: blogs/index.qmd
         text: Blogs
+      # - href: publications_and_projects/index.qmd
+      #   text: Publications and Projects
     right: 
       - href: resume/Suraj_JAISWAL.pdf
         text: Resume
