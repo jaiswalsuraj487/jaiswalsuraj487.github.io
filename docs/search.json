@@ -725,14 +725,14 @@
     "href": "blogs/blogsData/process_and_screen.html",
     "title": "Process and Screen",
     "section": "",
-    "text": "Please visit : Siddhesh Dosi for more intersting content\nTo know the owner of the process\nKill a process\nscreen: &lt;sid.sname&gt;"
+    "text": "To know the owner of the process\nKill a process\nscreen: &lt;sid.sname&gt;"
   },
   {
     "objectID": "blogs/blogsData/process_and_screen.html#step-by-step-example",
     "href": "blogs/blogsData/process_and_screen.html#step-by-step-example",
     "title": "Process and Screen",
     "section": "Step  by step example:",
-    "text": "Step  by step example:\n\nscreen -S sample\nrun some process with stdout output\nctrl + A, Esc (scroll using up and down key)\nctrl + A + D (Detach)\nscreen -ls\n\n(base) dosisiddhesh@lingolexico:/home/dosisiddhesh$ screen -ls\nThere is a screen on:\n220829.sample   (11/17/2023 11:55:27 AM)        (Detached)\n\nscreen -r sample (resume)\nctrl + A + D (Detach)\nscreen -XS sample quit (Screen terminated)\nscreen -ls\n\nNo Sockets found in /run/screen/S-dosisiddhesh."
+    "text": "Step  by step example:\n\nscreen -S sample\nrun some process with stdout output\nctrl + A, Esc (scroll using up and down key)\nctrl + A + D (Detach)\nscreen -ls\n\n(base) dosisiddhesh@lingolexico:/home/dosisiddhesh$ screen -ls\nThere is a screen on:\n220829.sample   (11/17/2023 11:55:27 AM)        (Detached)\n\nscreen -r sample (resume)\nctrl + A + D (Detach)\nscreen -XS sample quit (Screen terminated)\nscreen -ls\n\nNo Sockets found in /run/screen/S-dosisiddhesh.\nPlease visit : Siddhesh Dosi for more intersting content"
   },
   {
     "objectID": "blogs/blogsData/Logistic_regression_pyro.html",
