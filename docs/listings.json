@@ -7,5 +7,12 @@
       "/blogs/blogsData/demo.html",
       "/blogs/blogsData/Bayesian_Lineara_Regressiondemo.html"
     ]
+  },
+  {
+    "listing": "/publications_and_projects/index.html",
+    "items": [
+      "/publications_and_projects/data_folder/Autoencoder.html",
+      "/publications_and_projects/data_folder/research.html"
+    ]
   }
 ]
