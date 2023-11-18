@@ -227,8 +227,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<p>Our main goal is to predict the whole image given a few context points of image for each image.</p>
-<p><strong>Motivation</strong>: Why are we doing this? Say, for example, you have less bandwidth, but you want to send an image to your friend. What you can do is to compress the image to few context points using NN model and give this compressed image and the model to your friend. Your friend can use this model and these few context points of the original image to reconstruct the whole image.</p>
+<p>Our main goal is constructing the whole image from its few context points.</p>
+<p><strong>Motivation</strong>: Why are we doing this? Say, for example, you have less bandwidth, but you want to send an image to your friend. What you can do is to compress the image to few context points using NN model and give this compressed image and the model to your friend. Your friend can use this model and these few context points of the original image to reconstruct the whole image. We can also use this for image inpainting, super-resolution, etc.</p>
 <p>Simple ways can be as follows, but we have some issues with these approaches: - For this, if we learn a single neural network for all images, then this will be a general model, but at testing time, we don’t have the whole image, so we won’t be able to use the same model. - And if we learn a neural network for each image, then this will be a task-specific model, but at testing time, we don’t know which image model to pick for a new image.</p>
 <p>So, we use a Meta learning setup using hypernet and neural processes to learn a task-specific neural network that predicts the whole image given a few context points of an image.</p>
 <p><strong>Why meta?</strong> Because we are learning a model that learns the parameters of another model.</p>
