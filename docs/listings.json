@@ -2,6 +2,7 @@
   {
     "listing": "/blogs/index.html",
     "items": [
+      "/blogs/blogsData/process_and_screen.html",
       "/blogs/blogsData/Image_super_resolution.html",
       "/blogs/blogsData/blr_blog.html",
       "/blogs/blogsData/demo.html",
@@ -11,8 +12,8 @@
   {
     "listing": "/publications_and_projects/index.html",
     "items": [
-      "/publications_and_projects/data_folder/Autoencoder.html",
-      "/publications_and_projects/data_folder/research.html"
+      "/publications_and_projects/data/Autoencoder.html",
+      "/publications_and_projects/data/research.html"
     ]
   }
 ]

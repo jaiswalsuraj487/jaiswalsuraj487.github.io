@@ -2,7 +2,7 @@
 title: Publications and Projects
 listing:
     sort: 'date desc'
-    contents: 'data_folder'
+    contents: 'data'
     sort-ui: false
     filter-ui: false
     categories: true
