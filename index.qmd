@@ -20,6 +20,6 @@ about:
 
 Welcome to my blog! I'm Suraj Jaiswal, an M.Tech student at IIT Gandhinagar, pursuing Computer Science and Engineering under the mentorship of [Dr. Nipun Batra](https://nipunbatra.github.io/).
 <br> 
+Currently working as a Machine learning intern in [Neuroreef Lab](https://www.linkedin.com/company/neuroreef-labs/) where we broadly focus on using LLMs in the healthcare sector. We're pioneering [BooksClinical](https://booksclinical.com/), a groundbreaking AI framework inspired by human cognition for expert medical Q&A to deliver evidence-based answers through the GRADE framework. 
+<br>  
 Here, I'll share my experiences, research projects, and insights as we delve into the exciting world of technology. IIT Gandhinagar, known for its excellence in education and research, provides the ideal environment for me to explore the limitless possibilities of computer science. 
-
-
