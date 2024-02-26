@@ -151,7 +151,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#retrieval-augmented-generationrag-for-large-language-models" id="toc-retrieval-augmented-generationrag-for-large-language-models" class="nav-link active" data-scroll-target="#retrieval-augmented-generationrag-for-large-language-models">Retrieval-Augmented Generation(RAG) for Large Language Models</a></li>
+  <li><a href="#retrieval-augmented-generationrag-for-large-language-models" id="toc-retrieval-augmented-generationrag-for-large-language-models" class="nav-link active" data-scroll-target="#retrieval-augmented-generationrag-for-large-language-models">Retrieval-Augmented Generation(RAG) for Large Language Models</a>
+  <ul class="collapse">
+  <li><a href="#without-rag.-direct-query-to-llm" id="toc-without-rag.-direct-query-to-llm" class="nav-link" data-scroll-target="#without-rag.-direct-query-to-llm">Without RAG. Direct query to LLM</a></li>
+  <li><a href="#with-rag.-query-to-llm-with-retrieval" id="toc-with-rag.-query-to-llm-with-retrieval" class="nav-link" data-scroll-target="#with-rag.-query-to-llm-with-retrieval">With RAG. Query to LLM with retrieval</a></li>
+  </ul></li>
   <li><a href="#hypothetical-document-embeddingshyde" id="toc-hypothetical-document-embeddingshyde" class="nav-link" data-scroll-target="#hypothetical-document-embeddingshyde">Hypothetical Document Embeddings~(HyDE)</a></li>
   <li><a href="#comparison-of-without-rag-rag-and-hyde" id="toc-comparison-of-without-rag-rag-and-hyde" class="nav-link" data-scroll-target="#comparison-of-without-rag-rag-and-hyde">Comparison of without RAG, RAG and HyDE</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
@@ -266,6 +270,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   warn_deprecated(</code></pre>
 </div>
 </div>
+<section id="without-rag.-direct-query-to-llm" class="level2">
+<h2 class="anchored" data-anchor-id="without-rag.-direct-query-to-llm">Without RAG. Direct query to LLM</h2>
 <div class="cell" data-outputid="3c3cdb06-c930-4169-b36d-de119c64c8b3" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"What is performance of model on detecting brick kilns"</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>chain <span class="op">=</span> load_qa_chain(llm_mistral, chain_type<span class="op">=</span><span class="st">"stuff"</span>)</span>
@@ -295,6 +301,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 Helpful Answer: The performance of the model on detecting brick kilns can be evaluated by calculating the accuracy, precision, recall, and F1 score. These metrics can be calculated by comparing the predicted results of the model with the actual results. The accuracy measures the percentage of correct predictions, while the precision measures the percentage of true positive predictions among all positive predictions. The recall measures the percentage of true positive predictions among all actual positive cases. The F1 score is the harmonic mean of precision and recall,</code></pre>
 </div>
 </div>
+</section>
+<section id="with-rag.-query-to-llm-with-retrieval" class="level2">
+<h2 class="anchored" data-anchor-id="with-rag.-query-to-llm-with-retrieval">With RAG. Query to LLM with retrieval</h2>
 <div class="cell" data-outputid="e6c6b36d-3614-4f98-9206-197dc9c01016" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> google.colab <span class="im">import</span> drive</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>drive.mount(<span class="st">'/content/drive'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -354,7 +363,7 @@ Helpful Answer: The performance of the model on detecting brick kilns can be eva
 <pre><code>37</code></pre>
 </div>
 </div>
-<p>Loading the embeddings from the model</p>
+<p>Creating the embeddings for the database</p>
 <div class="cell" data-outputid="3d64cf7b-ef9e-4281-8c27-41461a7e5d2c" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> HuggingFaceEmbeddings()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -380,6 +389,7 @@ Please note that authentication is recommended but still optional to access publ
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> HuggingFaceEmbeddings()</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>db_hf <span class="op">=</span> FAISS.load_local(<span class="st">'/content/drive/MyDrive/Colab Notebooks/langchain/faiss_index_docstore_mapping_hf'</span>, embeddings)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Performing the retrieval via semantic search in the vector database</p>
 <div class="cell" data-outputid="0b74b87c-4e2c-4146-b8fc-d615d7b6146c" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>top_docs <span class="op">=</span> db_hf.similarity_search(query, k<span class="op">=</span><span class="dv">5</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> top_docs:</span>
@@ -426,6 +436,7 @@ page_content='NeurIPS 2023 Workshop on Adaptive Experimental Design and Active L
 Helpful Answer: The model was able to reduce the annotation of 281 images to 282.</code></pre>
 </div>
 </div>
+</section>
 </section>
 <section id="hypothetical-document-embeddingshyde" class="level1">
 <h1>Hypothetical Document Embeddings~(HyDE)</h1>
