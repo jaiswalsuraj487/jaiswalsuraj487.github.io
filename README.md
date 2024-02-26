@@ -7,4 +7,3 @@ Install the extension
 quarto add quarto-ext/lightbox
 
 quarto preview file_name.qmd
-```

@@ -13,6 +13,7 @@
   {
     "listing": "/publications_and_projects/index.html",
     "items": [
+      "/publications_and_projects/data/rag_hyde_huggingface.html",
       "/publications_and_projects/data/Autoencoder.html",
       "/publications_and_projects/data/Hypernet_neural_process.html",
       "/publications_and_projects/data/diversity_acq_AL.html",
