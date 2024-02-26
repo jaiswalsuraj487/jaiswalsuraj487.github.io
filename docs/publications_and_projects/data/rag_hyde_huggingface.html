@@ -151,10 +151,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#retrieval-augmented-generationrag-for-large-language-models" id="toc-retrieval-augmented-generationrag-for-large-language-models" class="nav-link active" data-scroll-target="#retrieval-augmented-generationrag-for-large-language-models">Retrieval-Augmented Generation(RAG) for Large Language Models</a>
-  <ul class="collapse">
-  <li><a href="#hypothetical-document-embeddingshyde-paper-link" id="toc-hypothetical-document-embeddingshyde-paper-link" class="nav-link" data-scroll-target="#hypothetical-document-embeddingshyde-paper-link">Hypothetical Document Embeddings~(HyDE) Paper link</a></li>
-  </ul></li>
+  <li><a href="#retrieval-augmented-generationrag-for-large-language-models" id="toc-retrieval-augmented-generationrag-for-large-language-models" class="nav-link active" data-scroll-target="#retrieval-augmented-generationrag-for-large-language-models">Retrieval-Augmented Generation(RAG) for Large Language Models</a></li>
+  <li><a href="#hypothetical-document-embeddingshyde" id="toc-hypothetical-document-embeddingshyde" class="nav-link" data-scroll-target="#hypothetical-document-embeddingshyde">Hypothetical Document Embeddings~(HyDE)</a></li>
+  <li><a href="#comparison-of-without-rag-rag-and-hyde" id="toc-comparison-of-without-rag-rag-and-hyde" class="nav-link" data-scroll-target="#comparison-of-without-rag-rag-and-hyde">Comparison of without RAG, RAG and HyDE</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -166,8 +166,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1 class="title">Retrieval-Augmented Generation(RAG) and Hypothetical Document Embeddings~(HyDE)</h1>
   <div class="quarto-categories">
     <div class="quarto-category">NLP</div>
-    <div class="quarto-category">RAG</div>
-    <div class="quarto-category">HyDE</div>
   </div>
   </div>
 
@@ -195,6 +193,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
+<section id="retrieval-augmented-generationrag-for-large-language-models" class="level1">
+<h1>Retrieval-Augmented Generation(RAG) for Large Language Models</h1>
+<p>Large Language Models (LLMs), such as those driving today’s most advanced AI chatbots and information retrieval systems, are incredibly powerful. However, they’re not without their issues. Here’s a brief overview of what RAG is, the problems it addresses, and how it enhances LLMs:</p>
+<p><strong>Current Problems with LLMs</strong>:</p>
+<ul>
+<li>Inconsistency: LLMs can sometimes provide accurate answers, but other times they might produce irrelevant or incorrect information.</li>
+<li>Outdated Knowledge: Since LLMs are trained on datasets that may not include the most recent information, their responses can be outdated.</li>
+<li>Lack of Understanding: LLMs process information based on statistical relationships between words, not actual comprehension of content.</li>
+</ul>
+<p><b>What is RAG?</b></p>
+<ul>
+<li>Augmented Learning: RAG stands for Retrieval-Augmented Generation, an AI framework designed to supplement the internal knowledge of LLMs with external, up-to-date information from various sources.</li>
+<li>Enhanced Accuracy: By grounding LLM responses in external data, RAG improves the relevance, timeliness, and accuracy of the information provided.</li>
+</ul>
+<p><b>How RAG Helps</b>:</p>
+<ul>
+<li>Current, Reliable Facts: RAG ensures LLMs have access to the latest information, making responses more accurate and reliable.</li>
+<li>Transparency: Users can access the sources of information, enabling verification of the LLM’s responses for accuracy and trustworthiness.</li>
+<li>Continuous Updates: The RAG framework allows for the integration of new, relevant data, ensuring LLMs remain up-to-date with the latest knowledge.</li>
+</ul>
+<p>By addressing the inherent limitations of LLMs through the integration of external data, RAG significantly enhances the quality and reliability of LLM-generated responses, making this technology a game-changer in the field of AI and machine learning.</p>
+<p><a href="https://arxiv.org/abs/2312.10997">Paper link</a></p>
+<p><img src="../images/rag_hyde_hugginface/rag_archi.jpeg" width="700"></p>
+<p><img src="../images/rag_hyde_hugginface/rag_archi_2.png" width="700"></p>
+<p><a href="https://colab.research.google.com/github/jaiswalsuraj487/jaiswalsuraj487.github.io/blob/main/publications_and_projects/data/rag_hyde_huggingface.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a></p>
 <div class="cell" data-outputid="56b2fb37-1e3c-4be2-e8b3-31ea3c985400">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install required libraries</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install PyPDF2</span>
@@ -218,13 +241,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.embeddings <span class="im">import</span> HuggingFaceEmbeddings</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.chains.question_answering <span class="im">import</span> load_qa_chain</span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"HUGGINGFACEHUB_API_TOKEN"</span>] <span class="op">=</span> <span class="st">"YOUR_API_TOKEN"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"HUGGINGFACEHUB_API_TOKEN"</span>] <span class="op">=</span> <span class="st">"YOUR_API_TOKEN"</span> <span class="co"># Login to https://huggingface.co/ go to settings &gt; Access Tokens &gt; create a new token</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="retrieval-augmented-generationrag-for-large-language-models" class="level1">
-<h1>Retrieval-Augmented Generation(RAG) for Large Language Models</h1>
-<p><a href="https://arxiv.org/abs/2312.10997">Paper link</a></p>
-<p><img src="../images/rag_hyde_hugginface/rag_archi.jpeg" width="700"></p>
-<p><img src="../images/rag_hyde_hugginface/rag_archi_2.png" width="700"></p>
 <p>Taking open source models from hugging face <a href="https://huggingface.co/models">link</a></p>
 <div class="cell" data-outputid="a63568fe-d549-490a-80b2-658d5e02aefc" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>llm_small<span class="op">=</span>HuggingFaceHub(</span>
@@ -408,8 +426,27 @@ page_content='NeurIPS 2023 Workshop on Adaptive Experimental Design and Active L
 Helpful Answer: The model was able to reduce the annotation of 281 images to 282.</code></pre>
 </div>
 </div>
-<section id="hypothetical-document-embeddingshyde-paper-link" class="level2">
-<h2 class="anchored" data-anchor-id="hypothetical-document-embeddingshyde-paper-link">Hypothetical Document Embeddings~(HyDE) <a href="https://arxiv.org/abs/2212.10496">Paper link</a></h2>
+</section>
+<section id="hypothetical-document-embeddingshyde" class="level1">
+<h1>Hypothetical Document Embeddings~(HyDE)</h1>
+<p>While the Retrieval-Augmented Generation (RAG) framework significantly enhances the capabilities of Large Language Models (LLMs) by integrating external knowledge sources, it has certain limitations that the Hypothetical Document Embeddings (HyDE) approach aims to address. Here are the key shortcomings of RAG that HyDE seeks to overcome:</p>
+<p><strong>Dependence on Existing Knowledge Repositories</strong>:</p>
+<ul>
+<li>RAG relies on external databases or knowledge sources to augment its responses. This dependency means RAG’s effectiveness is limited by the availability, quality, and currency of these external sources. HyDE, on the other hand, generates hypothetical documents based on the query itself, allowing for more flexible and creative retrieval that doesn’t directly rely on pre-existing databases.</li>
+</ul>
+<p><strong>Challenges with Zero-Shot Learning</strong>:</p>
+<ul>
+<li>RAG’s performance can be hindered in zero-shot scenarios where it has to deal with queries or subjects not well-represented in its training data or external databases. HyDE addresses this by generating relevant content on-the-fly, which is then used to retrieve real documents, effectively bypassing the need for direct relevance labels or prior examples.</li>
+</ul>
+<p><strong>Updating and Maintenance of Knowledge Sources</strong>:</p>
+<ul>
+<li>For RAG to remain effective, the external databases it relies on must be continually updated and maintained. This can be resource-intensive and may still result in gaps in knowledge. HyDE’s approach of generating hypothetical documents sidesteps the need for maintaining vast, up-to-date knowledge repositories, as it dynamically creates the content needed for effective retrieval.</li>
+</ul>
+<p><strong>Handling of Novel and Niche Queries</strong>:</p>
+<ul>
+<li>RAG might struggle with highly novel or niche queries that require specialized knowledge not widely available in external sources. HyDE’s methodology of creating hypothetical documents tailored to each query allows for better handling of such cases, as it constructs a contextually relevant document that can then be used to identify similar real-world documents.</li>
+</ul>
+<p><a href="https://arxiv.org/abs/2212.10496">Paper link</a></p>
 <p><img src="../images/rag_hyde_hugginface/hyde_architecture.png" width="900"></p>
 <div class="cell" data-outputid="53f68d8d-2bea-4bcc-cac0-e417efc6016f" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>query, base_answer</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -464,9 +501,31 @@ page_content='•In our current work, we only looked at the binary classificatio
 Helpful Answer: The model was able to reduce the annotation of brick kilns from 189 to 704 through active learning, achieving a similar F1 score with 70% fewer samples. The model was able to reach 97% of optimal F1 score with active learning, whereas random could reach only 90% with the same number of samples labeled. The model was also able to detect brick kilns in a new region with only a small number of annotated</code></pre>
 </div>
 </div>
-
-
 </section>
+<section id="comparison-of-without-rag-rag-and-hyde" class="level1">
+<h1>Comparison of without RAG, RAG and HyDE</h1>
+<p><em>Question</em>: What is performance of modele on detecting brick kilns</p>
+<p><strong>Without RAG</strong>:</p>
+<ul>
+<li><em>Helpful Answer</em>: The performance of the model on detecting brick kilns can be evaluated by calculating the accuracy, precision, recall, and F1 score. These metrics can be calculated by comparing the predicted results of the model with the actual results. The accuracy measures the percentage of correct predictions, while the precision measures the percentage of true positive predictions among all positive predictions. The recall measures the percentage of true positive predictions among all actual positive cases. The F1 score is the harmonic mean of precision and recall,</li>
+<li><em>Observation</em>: The response offers a general explanation of performance metrics (accuracy, precision, recall, F1 score) without directly addressing the specific query</li>
+</ul>
+<p><strong>With RAG</strong>:</p>
+<ul>
+<li><em>Helpful Answer</em>: The model was able to reduce the annotation of 281 images to 282.</li>
+<li><em>Observation</em>: This approach yields a more specific answer by touching on the reduction of annotation effort, indicating an improvement. However, the response lacks comprehensive details</li>
+</ul>
+<p><strong>With HyDE</strong>:</p>
+<ul>
+<li><em>Helpful Answer</em>: The model was able to reduce the annotation of brick kilns from 189 to 704 through active learning, achieving a similar F1 score with 70% fewer samples. The model was able to reach 97% of optimal F1 score with active learning, whereas random could reach only 90% with the same number of samples labeled. The model was also able to detect brick kilns in a new region with only a small number of annotated</li>
+<li><em>Observation</em>: The response from the HyDE-enhanced model is notably more detailed, providing concrete numbers, percentages, and a comparison of effectiveness through active learning.</li>
+</ul>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>The development and integration of Retrieval-Augmented Generation (RAG) and Hypothetical Document Embeddings (HyDE) represent pivotal advancements in enhancing Large Language Models (LLMs). RAG addresses the challenges of accuracy and currency in LLM responses by grounding them in external knowledge, making it invaluable for tasks requiring up-to-date and verifiable information. Conversely, HyDE offers an ingenious solution to zero-shot learning challenges by generating hypothetical documents to facilitate the retrieval of relevant real-world documents, ideal for novel or niche queries.</p>
+
+
 </section>
 
 </main> <!-- /main -->
