@@ -718,6 +718,13 @@
     "href": "blogs/blogsData/conda_setup.html#installing-pytorch",
     "title": "Setting up Conda Environment for ML Projects",
     "section": "Installing Pytorch",
-    "text": "Installing Pytorch\nVisit the Pytorch website to find the latest version of Pytorch. You can choose your system configuration and get the command to install Pytorch.\n\nconda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia\ncheck if everything is installed correctly by running the below command:\npython -c \"import torch; print(torch.__version__)\"\nInstalling other libraries and packages.\nFor more visit Ayush Shrivastava"
+    "text": "Installing Pytorch\nVisit the Pytorch website to find the latest version of Pytorch. You can choose your system configuration and get the command to install Pytorch.\n\nconda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia\ncheck if everything is installed correctly by running the below command:\npython -c \"import torch; print(torch.__version__)\"\nInstalling other libraries and packages."
+  },
+  {
+    "objectID": "blogs/blogsData/conda_setup.html#to-check-occupied-space-in-folder",
+    "href": "blogs/blogsData/conda_setup.html#to-check-occupied-space-in-folder",
+    "title": "Setting up Conda Environment for ML Projects",
+    "section": "To check occupied space in folder",
+    "text": "To check occupied space in folder\n$ du -hs\nFor more visit Ayush Shrivastava"
   }
 ]

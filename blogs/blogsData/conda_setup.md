@@ -67,4 +67,11 @@ python -c "import torch; print(torch.__version__)"
 
 Installing other libraries and packages.
 
+To check occupied space in folder
+---------------------------------
+
+```bash
+$ du -hs
+```
+
 For more visit [Ayush Shrivastava](https://ayushshrivstava.github.io/)
