@@ -2,6 +2,7 @@
   {
     "listing": "/blogs/index.html",
     "items": [
+      "/blogs/blogsData/conda_setup.html",
       "/blogs/blogsData/process_and_screen.html",
       "/blogs/blogsData/Logistic_regression_pyro.html",
       "/blogs/blogsData/Image_super_resolution.html",
