@@ -1,7 +1,7 @@
 ---
 title: "CI/CD Pipeline Documentation"
 author: "Suraj Jaiswal"
-date: "July 30, 2024"
+date: "July 2, 2024"
 format: html
 categories: ['System']
 ---

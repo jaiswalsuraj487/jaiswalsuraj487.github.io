@@ -2,7 +2,8 @@
   {
     "listing": "/blogs/index.html",
     "items": [
-      "/blogs/blogsData/CI/CD Pipeline Documentation.html",
+      "/blogs/blogsData/graphrag.html",
+      "/blogs/blogsData/CICD Pipeline Documentation.html",
       "/blogs/blogsData/conda_setup.html",
       "/blogs/blogsData/process_and_screen.html",
       "/blogs/blogsData/Logistic_regression_pyro.html",
