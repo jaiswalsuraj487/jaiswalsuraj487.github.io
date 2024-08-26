@@ -725,7 +725,7 @@
     "href": "blogs/blogsData/conda_setup.html#to-check-occupied-space-in-folder",
     "title": "Setting up Conda Environment for ML Projects",
     "section": "To check occupied space in folder",
-    "text": "To check occupied space in folder\n$ du -hs\nFor more visit Ayush Shrivastava"
+    "text": "To check occupied space in folder\n$ du -hs"
   },
   {
     "objectID": "publications_and_projects/data/research2.html",
@@ -845,5 +845,12 @@
     "title": "Graph RAG",
     "section": "",
     "text": "We will create and use use graphrag environment.\nconda create -n graphrag python=3.11\n# To activate this environment, use\nconda activate graphrag\nTo install the required packages, run the following command:\npip install graphrag rich\nAdd openai key value in variable GRAPHRAG_API_KEY in .env file\nconfigure settings.yaml file\nchange tokens_per_minute in setting.yaml file as per below https://platform.openai.com/docs/guides/rate-limits/usage-tiers"
+  },
+  {
+    "objectID": "blogs/blogsData/conda_setup.html#some-useful-shortcuts",
+    "href": "blogs/blogsData/conda_setup.html#some-useful-shortcuts",
+    "title": "Setting up Conda Environment for ML Projects",
+    "section": "Some useful shortcuts:",
+    "text": "Some useful shortcuts:\n\nTo wrap words in VS code, use Alt + Z\nTo traverse between in mouse focus between files in VS code, use Alt + Left/Right Arrow\n\nFor more visit Ayush Shrivastava"
   }
 ]

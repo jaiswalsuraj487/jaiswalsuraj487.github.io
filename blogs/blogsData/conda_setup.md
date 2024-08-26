@@ -74,4 +74,10 @@ To check occupied space in folder
 $ du -hs
 ```
 
+Some useful shortcuts:
+---------------------------------
+- To wrap words in VS code, use `Alt + Z`
+- To traverse between in mouse focus between files in VS code, use `Alt + Left/Right Arrow`
+
+
 For more visit [Ayush Shrivastava](https://ayushshrivstava.github.io/)
