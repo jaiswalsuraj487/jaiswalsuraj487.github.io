@@ -3,6 +3,7 @@ project:
   output-dir: docs
 website:
   title: "Suraj Jaiswal"
+  site-url: https://jaiswalsuraj487.github.io/
   navbar:
     left:
       - href: index.qmd
@@ -14,7 +15,7 @@ website:
       - href: publications_and_projects/index.qmd 
         text: Publications and Projects
     right: 
-      - href: resume/Suraj_JAISWAL.pdf
+      - href: resume/Suraj_Jaiswal_Resume.pdf
         text: Resume
 format:
   html:

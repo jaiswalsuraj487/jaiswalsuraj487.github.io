@@ -18,8 +18,15 @@ about:
 
 ---
 
-Welcome to my blog! pre, an M.Tech student at IIT Gandhinagar, pursuing Computer Science and Engineering under the mentorship of [Dr. Nipun Batra](https://nipunbatra.github.io/).
-<br> 
-Currently working as a Machine learning intern in [Neuroreef Lab](https://www.linkedin.com/company/neuroreef-labs/) where we broadly focus on using LLMs in the healthcare sector. We're pioneering [BooksClinical](https://booksclinical.com/), a groundbreaking AI framework inspired by human cognition for expert medical Q&A to deliver evidence-based answers through the GRADE framework. 
-<br>  
-Here, I'll share my experiences, research projects, and insights as we delve into the exciting world of technology. IIT Gandhinagar, known for its excellence in education and research, provides the ideal environment for me to explore the limitless possibilities of computer science. 
+Welcome to My Portfolio!
+
+Check out my [Resume](https://jaiswalsuraj487.github.io/resume/Suraj_Jaiswal_Resume.pdf) to know more about me.
+
+I'm a Machine Learning Engineer working at [Neuroreef Lab](https://www.linkedin.com/company/neuroreef-labs/) dedicated to advancing AI applications in healthcare. Here, I drive the development of [CareCortex](https://carecortex.ai/), an innovative AI copilot that assists doctors in real-time, capturing detailed medical notes aligned with clinical standards. My expertise spans large language models (LLMs), retrieval-augmented generation (RAG), and automated coding for Medical codes.
+
+In previous roles, including my internship, I developed robust machine learning pipelines for [Medaura](https://medaura.ai/), an interactive medical Q&A product that draws insights from the extensive PubMed database.
+
+My academic journey at IIT Gandhinagar, guided by [Dr. Nipun Batra](https://nipunbatra.github.io/), sharpened my skills in scalable Machine learning. My research on satellite-based detection and compliance monitoring of brick kilns has been published in ACM Compass and NeurIPS 2023, focusing on using deep and active learning for environmental compliance, achieving high accuracy with reduced annotation.
+
+Here, I share technical insights, project highlights, and my exploration of AI's potential to create meaningful, real-world impact. Dive in to discover more about my work and innovations at the intersection of machine learning, healthcare, and environmental sustainability.
+
