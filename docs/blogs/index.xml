@@ -19,6 +19,7 @@
 
 
 
+
 <section id="from-local-to-global-a-graph-rag-approach-to-query-focused-summarization" class="level1">
 <h1>From Local to Global: A Graph RAG Approach to Query-Focused Summarization</h1>
 <p>Approach uses an LLM to build a graph-based text index in two stages: first to derive an entity knowledge graph from the source documents, then to pregenerate community summaries for all groups of closely-related entities. Given a question, each community summary is used to generate a partial response, before all partial responses are again summarized in a final response to the user. Blog: https://www.microsoft.com/en-us/research/publication/from-local-to-global-a-graph-rag-approach-to-query-focused-summarization/</p>
