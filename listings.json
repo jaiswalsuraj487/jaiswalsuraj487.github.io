@@ -1,0 +1,28 @@
+[
+  {
+    "listing": "/publications_and_projects/index.html",
+    "items": [
+      "/publications_and_projects/data/research_acm.html",
+      "/publications_and_projects/data/rag_hyde_huggingface.html",
+      "/publications_and_projects/data/Autoencoder.html",
+      "/publications_and_projects/data/Hypernet_neural_process.html",
+      "/publications_and_projects/data/diversity_acq_AL.html",
+      "/publications_and_projects/data/research_neurips.html",
+      "/publications_and_projects/data/diveristy_acquisition_demo.html"
+    ]
+  },
+  {
+    "listing": "/blogs/index.html",
+    "items": [
+      "/blogs/blogsData/graphrag.html",
+      "/blogs/blogsData/CICD Pipeline Documentation.html",
+      "/blogs/blogsData/conda_setup.html",
+      "/blogs/blogsData/process_and_screen.html",
+      "/blogs/blogsData/Logistic_regression_pyro.html",
+      "/blogs/blogsData/Image_super_resolution.html",
+      "/blogs/blogsData/blr_blog.html",
+      "/blogs/blogsData/demo.html",
+      "/blogs/blogsData/Bayesian_Lineara_Regressiondemo.html"
+    ]
+  }
+]
