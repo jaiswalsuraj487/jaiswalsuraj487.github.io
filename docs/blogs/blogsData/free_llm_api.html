@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Suraj Jaiswal</title>
+<title>Using FREE Gemini API with Fallback – Suraj Jaiswal</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,25 +20,61 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-6ec84bd1cbca259591e26654c72239a2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-6ec84bd1cbca259591e26654c72239a2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -68,17 +104,17 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent quarto-light">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Suraj Jaiswal</span>
     </a>
   </div>
@@ -89,21 +125,21 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./blogs/index.html"> 
+    <a class="nav-link" href="../../blogs/index.html"> 
 <span class="menu-text">Blogs</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./publications_and_projects/index.html"> 
+    <a class="nav-link" href="../../publications_and_projects/index.html"> 
 <span class="menu-text">Publications and Projects</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./resume/Suraj_Jaiswal_Resume.pdf"> 
+    <a class="nav-link" href="../../resume/Suraj_Jaiswal_Resume.pdf"> 
 <span class="menu-text">Resume</span></a>
   </li>  
 </ul>
@@ -117,49 +153,217 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#gemini-model-rate-limits" id="toc-gemini-model-rate-limits" class="nav-link active" data-scroll-target="#gemini-model-rate-limits">1. Gemini Model Rate Limits</a></li>
+  <li><a href="#install-dependencies" id="toc-install-dependencies" class="nav-link" data-scroll-target="#install-dependencies">2. Install Dependencies:</a></li>
+  <li><a href="#set-up-the-api-key" id="toc-set-up-the-api-key" class="nav-link" data-scroll-target="#set-up-the-api-key">3. Set Up the API Key</a></li>
+  <li><a href="#first-api-call" id="toc-first-api-call" class="nav-link" data-scroll-target="#first-api-call">4. First API Call</a></li>
+  <li><a href="#fallback-mechanism-with-multiple-models" id="toc-fallback-mechanism-with-multiple-models" class="nav-link" data-scroll-target="#fallback-mechanism-with-multiple-models">5. Fallback Mechanism with Multiple Models</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
-<div class="quarto-about-trestles">
-  <div class="about-entity">
-    <img src="images/profile_photo.jpg" class="about-image
-  round " style="height: 15em; width: 15em;">
+<main class="content" id="quarto-document-content">
+
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Suraj Jaiswal</h1>
+<h1 class="title">Using FREE Gemini API with Fallback</h1>
 </div>
+
+
+
 <div class="quarto-title-meta">
+
+    
+  
+    
   </div>
+  
+
+
 </header>
-    <div class="about-links">
-  <a href="mailto:jaiswalsuraj@iitgn.ac.in" class="about-link" rel="" target="">
-    <i class="bi bi-envelope-at-fill"></i>
-     <span class="about-link-text">Email</span>
-  </a>
-  <a href="https://www.linkedin.com/in/suraj-jaiswal-3494261b6/" class="about-link" rel="" target="">
-    <i class="bi bi-linkedin"></i>
-     <span class="about-link-text">LinkedIn</span>
-  </a>
-  <a href="https://github.com/jaiswalsuraj487" class="about-link" rel="" target="">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">Github</span>
-  </a>
-</div>
-  </div>
-  <div class="about-contents"><main class="content" id="quarto-document-content">
-<p>Welcome to My Portfolio!</p>
-<p>Check out my <a href="https://jaiswalsuraj487.github.io/resume/Suraj_Jaiswal_Resume.pdf">Resume</a> to know more about me.</p>
-<p>Currently working as Data Analyst at Tiger Analytics</p>
-<p>Worked previously as NLP Engineer at <a href="https://www.linkedin.com/company/neuroreef-labs/">Neuroreef Lab</a> dedicated to advancing AI applications in healthcare. Here, I drive the development of <a href="https://carecortex.ai/">CareCortex</a>, an innovative AI copilot that assists doctors in real-time, capturing detailed medical notes aligned with clinical standards. My expertise spans large language models (LLMs), retrieval-augmented generation (RAG), and automated coding for Medical codes.</p>
-<p>In previous roles, including my internship, I developed robust machine learning pipelines for <a href="https://medaura.ai/">Medaura</a>, an interactive medical Q&amp;A product that draws insights from the extensive PubMed database.</p>
-<p>My academic journey at IIT Gandhinagar, guided by <a href="https://nipunbatra.github.io/">Dr.&nbsp;Nipun Batra</a>, sharpened my skills in scalable Machine learning. My research on satellite-based detection and compliance monitoring of brick kilns has been published in ACM Compass and NeurIPS 2023, focusing on using deep and active learning for environmental compliance, achieving high accuracy with reduced annotation.</p>
-<p>Here, I share technical insights, project highlights, and my exploration of AI’s potential to create meaningful, real-world impact. Dive in to discover more about my work and innovations at the intersection of machine learning, healthcare, and environmental sustainability.</p>
 
 
-</main></div>
+<p>This guide explains how to set up the Google AI Studio API key, install dependencies, and call Gemini models with Python.</p>
+<p>🔑 Get your API key from <a href="https://aistudio.google.com/">Google AI Studio</a> — no credit card required.</p>
+<p>⚡ The free tier comes with daily rate limits, so here we’ll simply configure fallback models to maximize your total number of Request per day of API calls.</p>
+<section id="gemini-model-rate-limits" class="level2">
+<h2 class="anchored" data-anchor-id="gemini-model-rate-limits">1. Gemini Model Rate Limits</h2>
+<p>Here’s a quick reference table of available Gemini models and their limits:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>RPM</th>
+<th>TPM</th>
+<th>RPD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Gemini 2.5 Pro</strong></td>
+<td>5</td>
+<td>250,000</td>
+<td>100</td>
+</tr>
+<tr class="even">
+<td><strong>Gemini 2.5 Flash</strong></td>
+<td>10</td>
+<td>250,000</td>
+<td>250</td>
+</tr>
+<tr class="odd">
+<td><strong>Gemini 2.5 Flash-Lite</strong></td>
+<td>15</td>
+<td>250,000</td>
+<td>1,000</td>
+</tr>
+<tr class="even">
+<td><strong>Gemini 2.0 Flash</strong></td>
+<td>15</td>
+<td>1,000,000</td>
+<td>200</td>
+</tr>
+<tr class="odd">
+<td><strong>Gemini 2.0 Flash-Lite</strong></td>
+<td>30</td>
+<td>1,000,000</td>
+<td>200</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="install-dependencies" class="level2">
+<h2 class="anchored" data-anchor-id="install-dependencies">2. Install Dependencies:</h2>
+<p>Make sure you have the latest google-genai package:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">!pip</span> install <span class="at">-q</span> <span class="at">-U</span> google-genai</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>⚡ Use Flash or Flash-Lite models for higher throughput or lightweight tasks. Use Pro for better reasoning and accuracy.</p>
+</section>
+<section id="set-up-the-api-key" class="level2">
+<h2 class="anchored" data-anchor-id="set-up-the-api-key">3. Set Up the API Key</h2>
+<p>Save it in an environment variable GEMINI_API_KEY.</p>
+<div id="6db30cf3" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the environment variable</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"GEMINI_API_KEY"</span>] <span class="op">=</span> <span class="st">"your_api_key_here"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(os.environ[<span class="st">"GEMINI_API_KEY"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
- <!-- /main -->
+</section>
+<section id="first-api-call" class="level2">
+<h2 class="anchored" data-anchor-id="first-api-call">4. First API Call</h2>
+<p>Here’s a simple example using Gemini 2.5 Pro:</p>
+<div id="cell-11" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> google <span class="im">import</span> genai</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The client gets the API key from the environment variable `GEMINI_API_KEY`.</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> genai.Client()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> client.models.generate_content(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span><span class="st">"gemini-2.5-pro"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    contents<span class="op">=</span><span class="st">"Explain India in few crisp points"</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(response.text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Of course. Here is India explained in a few crisp points:
+
+*   **A Land of Immense Diversity:** Home to over 1.4 billion people, India is a mosaic of countless cultures, languages (22 official), and religions (birthplace of Hinduism, Buddhism, Jainism, and Sikhism). The phrase "Unity in Diversity" is its essence.
+
+*   **The World's Largest Democracy:** It is a federal parliamentary republic with a robust electoral system. Despite its complexities, democratic traditions are deeply rooted.
+
+*   **A Fast-Growing Major Economy:** India has one of the world's fastest-growing economies, driven by a powerful service sector (especially IT), a large industrial base, and a significant agricultural sector.
+
+*   **An Ancient Civilization:** Boasting a history of over 5,000 years, it has been home to ancient civilizations (Indus Valley), powerful empires (Mauryan, Gupta, Mughal), and a colonial past, culminating in a non-violent independence movement led by Mahatma Gandhi.
+
+*   **Rich Cultural Influence:** A global hub for spirituality, yoga, vibrant cuisine, classical arts, and a massive film industry known as "Bollywood."
+
+*   **A Nation of Contrasts:** India is a study in contrasts, where ancient traditions coexist with modern technology, immense wealth with significant poverty, and serene landscapes with bustling, chaotic cities.</code></pre>
+</div>
+</div>
+</section>
+<section id="fallback-mechanism-with-multiple-models" class="level2">
+<h2 class="anchored" data-anchor-id="fallback-mechanism-with-multiple-models">5. Fallback Mechanism with Multiple Models</h2>
+<p>To make your app more resilient, you can try multiple models in order. If one fails (due to quota or availability), the next one is used automatically.</p>
+<div id="cell-13" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> google <span class="im">import</span> genai</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The client gets the API key from the environment variable `GEMINI_API_KEY`.</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> genai.Client()</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>MODELS <span class="op">=</span> [</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.5-pro"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.5-flash"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.5-flash-lite"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.0-flash"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.0-flash-lite"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_text(prompt: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">    Try each model in order and return the response text </span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">    from the first model that works.</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> model <span class="kw">in</span> MODELS:</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>            response <span class="op">=</span> client.models.generate_content(</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                model<span class="op">=</span>model,</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>                contents<span class="op">=</span>prompt</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"✅ Success with model: </span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> response.text</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"⚠️ Failed with model </span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"❌ All models failed."</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="64772d39" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> generate_text(<span class="st">"Explain India in few crisp points"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Final Response:</span><span class="ch">\n</span><span class="st">"</span>, text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Success with model: gemini-2.5-pro
+
+Final Response:
+ Of course. Here is an explanation of India in a few crisp points:
+
+*   **World's Largest Democracy:** With over 1.4 billion people, it is the most populous democracy on Earth, known for its vibrant and complex political landscape.
+
+*   **Ancient Civilization, Modern Nation:** Home to one of the world's oldest civilizations (Indus Valley), it is the birthplace of major religions like Hinduism, Buddhism, and Jainism. Today, it balances ancient traditions with modern aspirations.
+
+*   **A Fast-Growing Economic Power:** It is one of the world's fastest-growing major economies, a global hub for IT and software services, and has a successful space program (ISRO).
+
+*   **Unmatched Diversity:** India is a mosaic of cultures, with over 22 official languages, countless dialects, diverse cuisines, colourful festivals, and a vast array of ethnic groups living together.
+
+*   **Incredible Geographic Variety:** Its landscape spans from the snow-capped Himalayas in the north to tropical beaches in the south, encompassing vast deserts, fertile plains, and dense forests.</code></pre>
+</div>
+</div>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ol type="1">
+<li>Google docs: https://ai.google.dev/gemini-api/docs</li>
+<li>Rate limits: https://ai.google.dev/gemini-api/docs/rate-limits#free-tier</li>
+</ol>
+
+
+</section>
+
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
     const isCodeAnnotation = (el) => {
       for (const clz of el.classList) {
         if (clz.startsWith('code-annotation-')) {                     
