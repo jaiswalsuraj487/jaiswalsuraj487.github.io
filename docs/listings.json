@@ -14,6 +14,7 @@
   {
     "listing": "/blogs/index.html",
     "items": [
+      "/blogs/blogsData/free_llm_api.html",
       "/blogs/blogsData/graphrag.html",
       "/blogs/blogsData/CICD Pipeline Documentation.html",
       "/blogs/blogsData/conda_setup.html",
@@ -21,7 +22,6 @@
       "/blogs/blogsData/Logistic_regression_pyro.html",
       "/blogs/blogsData/Image_super_resolution.html",
       "/blogs/blogsData/blr_blog.html",
-      "/blogs/blogsData/free_llm_api.html",
       "/blogs/blogsData/demo.html",
       "/blogs/blogsData/Bayesian_Lineara_Regressiondemo.html"
     ]
