@@ -1,9 +1,27 @@
 # jaiswalsuraj487.github.io
-Quarto blog
-<br>
-Hi I'm Suraj Jaiswal, [link](https://jaiswalsuraj487.github.io/) to my blog.
+  
+Hi, I'm **Suraj Jaiswal** — welcome to my **Quarto-powered blog** ✨!  
+👉 [Visit my blog here](https://jaiswalsuraj487.github.io/)  
 
-Install the extension
+---
+
+## 🚀 Setup  
+
+Clone the repo and install the Quarto and required extension:  
+```bash
+conda install -n base -c conda-forge quarto
 quarto add quarto-ext/lightbox
+```
 
-quarto preview file_name.qmd (index.qmd).
+Preview the site locally:
+```bash
+quarto preview index.qmd
+```
+Render the site:
+```bash
+quarto render
+```
+Deploy the site to GitHub Pages:
+```bash
+quarto publish
+``` 

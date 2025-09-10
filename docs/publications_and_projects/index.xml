@@ -9,8 +9,8 @@
 <link>https://jaiswalsuraj487.github.io/publications_and_projects/</link>
 <atom:link href="https://jaiswalsuraj487.github.io/publications_and_projects/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
-<generator>quarto-1.6.33</generator>
-<lastBuildDate>Thu, 23 May 2024 18:30:00 GMT</lastBuildDate>
+<generator>quarto-1.7.33</generator>
+<lastBuildDate>Fri, 24 May 2024 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Eye in the Sky Detection and Compliance Monitoring of Brick</title>
   <dc:creator>Suraj Jaiswal</dc:creator>
@@ -46,7 +46,7 @@
   <category>Deep Learning</category>
   <category>Object Detection</category>
   <guid>https://jaiswalsuraj487.github.io/publications_and_projects/data/research_acm.html</guid>
-  <pubDate>Thu, 23 May 2024 18:30:00 GMT</pubDate>
+  <pubDate>Fri, 24 May 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Retrieval-Augmented Generation(RAG) and Hypothetical Document Embeddings~(HyDE)</title>
@@ -82,7 +82,7 @@
 <p><img src="https://jaiswalsuraj487.github.io/publications_and_projects/images/rag_hyde_hugginface/rag_archi.jpeg" width="700"></p>
 <p><img src="https://jaiswalsuraj487.github.io/publications_and_projects/images/rag_hyde_hugginface/rag_archi_2.png" width="700"></p>
 <p><a href="https://colab.research.google.com/github/jaiswalsuraj487/jaiswalsuraj487.github.io/blob/main/publications_and_projects/data/rag_hyde_huggingface.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a></p>
-<div id="cell-5" class="cell" data-outputid="56b2fb37-1e3c-4be2-e8b3-31ea3c985400">
+<div id="cell-5" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="56b2fb37-1e3c-4be2-e8b3-31ea3c985400">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># install required libraries</span></span>
@@ -172,7 +172,7 @@ background-color: null;
 font-style: inherit;"># Login to https://huggingface.co/ go to settings &gt; Access Tokens &gt; create a new token</span></span></code></pre></div>
 </div>
 <p>Taking open source models from hugging face <a href="https://huggingface.co/models">link</a></p>
-<div id="cell-8" class="cell" data-outputid="a63568fe-d549-490a-80b2-658d5e02aefc" data-execution_count="3">
+<div id="cell-8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="a63568fe-d549-490a-80b2-658d5e02aefc" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">llm_small<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>HuggingFaceHub(</span>
@@ -260,7 +260,7 @@ font-style: inherit;">512</span>}</span>
 </div>
 <section id="without-rag.-direct-query-to-llm" class="level2">
 <h2 class="anchored" data-anchor-id="without-rag.-direct-query-to-llm">Without RAG. Direct query to LLM</h2>
-<div id="cell-10" class="cell" data-outputid="3c3cdb06-c930-4169-b36d-de119c64c8b3" data-execution_count="4">
+<div id="cell-10" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="3c3cdb06-c930-4169-b36d-de119c64c8b3" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">query <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
@@ -285,13 +285,13 @@ font-style: inherit;">=</span>query)</span></code></pre></div>
   warn_deprecated(</code></pre>
 </div>
 </div>
-<div id="cell-11" class="cell" data-outputid="c7d13cc0-9ec5-40b0-c8f1-d56bdc0d8201" data-execution_count="5">
+<div id="cell-11" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;,&quot;height&quot;:91}}" data-outputid="c7d13cc0-9ec5-40b0-c8f1-d56bdc0d8201" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">base_response</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>"Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\n\n\nQuestion: What is performance of modele on detecting brick kilns\nHelpful Answer: The performance of the model on detecting brick kilns can be evaluated by calculating the accuracy, precision, recall, and F1 score. These metrics can be calculated by comparing the predicted results of the model with the actual results. The accuracy measures the percentage of correct predictions, while the precision measures the percentage of true positive predictions among all positive predictions. The recall measures the percentage of true positive predictions among all actual positive cases. The F1 score is the harmonic mean of precision and recall,"</code></pre>
 </div>
 </div>
-<div id="cell-12" class="cell" data-outputid="b171b9d3-cf60-459a-cd55-e87bd3c0fbf0" data-execution_count="6">
+<div id="cell-12" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="b171b9d3-cf60-459a-cd55-e87bd3c0fbf0" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">split_text <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> base_response.split(<span class="st" style="color: #20794D;
@@ -334,7 +334,7 @@ Helpful Answer: The performance of the model on detecting brick kilns can be eva
 </section>
 <section id="with-rag.-query-to-llm-with-retrieval" class="level2">
 <h2 class="anchored" data-anchor-id="with-rag.-query-to-llm-with-retrieval">With RAG. Query to LLM with retrieval</h2>
-<div id="cell-14" class="cell" data-outputid="e6c6b36d-3614-4f98-9206-197dc9c01016" data-execution_count="7">
+<div id="cell-14" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="e6c6b36d-3614-4f98-9206-197dc9c01016" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> google.colab <span class="im" style="color: #00769E;
@@ -404,7 +404,7 @@ background-color: null;
 font-style: inherit;"># len(documents)</span></span></code></pre></div>
 </div>
 <p>Doing for single pdf</p>
-<div id="cell-18" class="cell" data-outputid="c310edf6-73f9-42cf-840c-5256a40df2ba" data-execution_count="9">
+<div id="cell-18" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="c310edf6-73f9-42cf-840c-5256a40df2ba" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">documents <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> []</span>
@@ -421,7 +421,7 @@ font-style: inherit;">len</span>(documents)</span></code></pre></div>
 <pre><code>11</code></pre>
 </div>
 </div>
-<div id="cell-19" class="cell" data-outputid="49938467-0713-497f-f720-082ff456face" data-execution_count="10">
+<div id="cell-19" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="49938467-0713-497f-f720-082ff456face" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">documents[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]</span></code></pre></div>
@@ -429,7 +429,7 @@ font-style: inherit;">0</span>]</span></code></pre></div>
 <pre><code>Document(page_content='NeurIPS 2023 Workshop on Adaptive Experimental Design and Active Learning in the Real World\nTowards Scalable Identification of Brick Kilns from Satellite\nImagery with Active Learning\nAditi Agarwal, Suraj Jaiswal, Madhav Kanda, Dhruv Patel, Rishabh Mondal,\nVannsh Jani, Zeel B Patel, Nipun Batra\nIndian Institute of Technology, Gandhinagar\nSarath Guttikunda\nUrban EmissionsAbstract\nAir pollution is a leading cause of death globally, especially in south-east Asia. Brick 1\nproduction contributes significantly to air pollution. However, unlike other sources such 2\nas power plants, brick production is unregulated and thus hard to monitor. Traditional 3\nsurvey-based methods for kiln identification are time and resource-intensive. Similarly, it 4\nis time-consuming for air quality experts to annotate satellite imagery manually. Recently, 5\ncomputer vision machine learning models have helped reduce labeling costs, but they need 6\nsufficiently large labeled imagery. In this paper, we propose scalable methods using active 7\nlearning to accurately detect brick kilns with minimal manual labeling effort. Through this 8\nwork, we have identified more than 700 new brick kilns across the Indo-Gangetic region: 9\na highly populous and polluted region spanning 0.4 million square kilometers in India. In 10\naddition, we have deployed our model as a web application for automatically identifying 11\nbrick kilns given a specific area by the user. 12\nKeywords: Active Learning, Satellite Imagery, Sustainable Development, Air Pollution 13\n(a)\n (b)\n (c)\n (d)\nFigure 1: Screenshots from our web application that help detect brick kilns (a) Selecting the\ncoordinates of the bounding box (red rectangle) (b) Markers in the bounding box where the\nmodel predicts the existence of a brick kiln (c) Statistics of number of brick kilns detected,\ntheir coordinates and model’s predicted probabilities (d) Grad-CAM (Selvaraju et al., 2019)\nvisual showing where our model focuses on predicted brick kiln image (Best viewed in color)\n1. Introduction 14\nAir pollution kills seven million people worldwide, and 22% of casualties are only from 15\nIndia (UNEP, 2019). Annual average PM 2.5(Particulate matter of size ≤2.5µm) of 16\nIndia was 24 µg/m3in 2020, which is significantly higher than the annual WHO limit 17\nof 5 µg/m3(Guttikunda and Nishadh, 2022). Air quality researchers use physics-based 18\nsimulators such as CAMx1to model the air quality (Guttikunda et al., 2019) using an 19\ninventory of major sources. 20\n1.https://www.camx.com/\n1', metadata={'source': '/content/drive/MyDrive/Colab Notebooks/langchain/docs/NeurIPS23_Workshop_Accepted_BrickKilns.pdf', 'page': 0})</code></pre>
 </div>
 </div>
-<div id="cell-20" class="cell" data-outputid="8d84abba-a0f6-4491-9fd9-230a17b3aa5d" data-execution_count="11">
+<div id="cell-20" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="8d84abba-a0f6-4491-9fd9-230a17b3aa5d" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">text_splitter <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> CharacterTextSplitter(</span>
@@ -470,7 +470,7 @@ font-style: inherit;">len</span>(chunked_documents)</span></code></pre></div>
 </div>
 </div>
 <p>Creating the embeddings for the database</p>
-<div id="cell-22" class="cell" data-outputid="3d64cf7b-ef9e-4281-8c27-41461a7e5d2c" data-execution_count="12">
+<div id="cell-22" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="3d64cf7b-ef9e-4281-8c27-41461a7e5d2c" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1">embeddings <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> HuggingFaceEmbeddings()</span></code></pre></div>
@@ -512,7 +512,7 @@ background-color: null;
 font-style: inherit;">'/content/drive/MyDrive/Colab Notebooks/langchain/faiss_index_docstore_mapping_hf'</span>, embeddings)</span></code></pre></div>
 </div>
 <p>Performing the retrieval via semantic search in the vector database</p>
-<div id="cell-27" class="cell" data-outputid="0b74b87c-4e2c-4146-b8fc-d615d7b6146c" data-execution_count="15">
+<div id="cell-27" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="0b74b87c-4e2c-4146-b8fc-d615d7b6146c" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1">top_docs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> db_hf.similarity_search(query, k<span class="op" style="color: #5E5E5E;
@@ -570,13 +570,13 @@ font-style: inherit;">=</span>top_docs, question<span class="op" style="color: #
 background-color: null;
 font-style: inherit;">=</span>query)</span></code></pre></div>
 </div>
-<div id="cell-29" class="cell" data-outputid="fa88821f-7845-41c5-cef1-9fbd2ee5ce0a" data-execution_count="17">
+<div id="cell-29" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;,&quot;height&quot;:109}}" data-outputid="fa88821f-7845-41c5-cef1-9fbd2ee5ce0a" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1">response</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="17">
 <pre><code>"Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\n1000 images, and after manual inspection, we found 996 of them to be correctly classified. 281\nThus through our approach we were able to reduce the annotation 282\nBrick Kilns\nIndia\nFigure A: We initially manually located approximately 189 brick kilns in the Indo-Gangetic\nplain. Subsequently, our model automatically detected an additional 704 new brick kilns in\nthe vicinity of the manually identified ones, as illustrated in the figure\nA.4 Deployment 283\nWe deploy a web application on Streamlit, as depicted in Figure 1, offering users an acces- 284\nsible and interactive interface for brick kiln detection in a given area of interest. Once the 285\nbounding box is defined, our model identifies brick kilns within this area and provides the 286\ncoordinates of the brick kilns. Grad-CAM (Selvaraju et al., 2019) visuals accompany these 287\non the original brick kiln image to highlight the areas where the model focuses. 288\n11\n\nWe show that using our methods, we need to annotate only a small number of images to 39\nobtain brick kiln locations in a new region. On performing active learning on the Indian 40\ndataset, we concluded that we needed 70% fewer samples than random to achieve a similar 41\nF1 score. We also find that we could reach 97% of optimal F1 score with active learning, 42\nwhereas random could reach only 90% with the same number of samples labeled. 43\nFinally, we have developed a web application2offering users an accessible and interactive 44\ninterface for brick kiln detection in a given region of interest. Figure 1 shows our web 45\napplication which takes in bounding boxes of the area of interest and detects the kilns 46\npresent in the region while also showing Grad-CAM (Selvaraju et al., 2019) visuals to 47\nhighlight the focus area of the model. Our work is fully reproducible, and we intend to 48\nrelease the scripts and data upon acceptance. 49\n2. Dataset 50\n\nhighly populous region characterised with alarming levels of air pollution. Additionally, this 58\nregion is located in the highly fertile Indo-Gangetic plain which it a hotspot for production 59\nof bricks. The dataset also contains 2000 non-brick kiln images from structures visually 60\nsimilar to brick kilns to make the dataset more challenging and our model robust. These 61\n2.https://brick-kilns-detector.streamlit.app/\n2\n\n•In our current work, we only looked at the binary classification task. Drawing inspiration 155\nfrom (Lee et al., 2021), we plan to additionally localize the kilns in the image and extend 156\nour active learning pipeline towards multiple objectives: localization and classification. 157\n•Our current work treated the classification problem as a binary classification task. In the 158\nfuture, we plan to study this formulation as a one-class task. Correspondingly, we also 159\nplan to look at specialized losses such as the focal losses (Lin et al., 2017). 160\n6. Conclusion 161\nOur goal was to develop a scalable method to detect brick kilns. We conclude from our 162\nresults that satellite data can be used to detect brick kilns accurately. Further, we conclude 163\nthat we can develop accurate models by actively annotating images from the target region. 164\nWe believe that our work will likely benefit key stakeholders such as scientists building 165\n\nNeurIPS 2023 Workshop on Adaptive Experimental Design and Active Learning in the Real World\nTowards Scalable Identification of Brick Kilns from Satellite\nImagery with Active Learning\nAditi Agarwal, Suraj Jaiswal, Madhav Kanda, Dhruv Patel, Rishabh Mondal,\nVannsh Jani, Zeel B Patel, Nipun Batra\nIndian Institute of Technology, Gandhinagar\nSarath Guttikunda\nUrban EmissionsAbstract\nAir pollution is a leading cause of death globally, especially in south-east Asia. Brick 1\nproduction contributes significantly to air pollution. However, unlike other sources such 2\nas power plants, brick production is unregulated and thus hard to monitor. Traditional 3\nsurvey-based methods for kiln identification are time and resource-intensive. Similarly, it 4\nis time-consuming for air quality experts to annotate satellite imagery manually. Recently, 5\ncomputer vision machine learning models have helped reduce labeling costs, but they need 6\n\nQuestion: What is performance of modele on detecting brick kilns\nHelpful Answer: The model was able to reduce the annotation of 281 images to 282."</code></pre>
 </div>
 </div>
-<div id="cell-30" class="cell" data-outputid="5786e44f-0559-4545-a422-aab19a06c9db" data-execution_count="18">
+<div id="cell-30" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="5786e44f-0559-4545-a422-aab19a06c9db" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1">split_text <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> response.split(<span class="st" style="color: #20794D;
@@ -639,14 +639,14 @@ Helpful Answer: The model was able to reduce the annotation of 281 images to 282
 </ul>
 <p><a href="https://arxiv.org/abs/2212.10496">Paper link</a></p>
 <p><img src="https://jaiswalsuraj487.github.io/publications_and_projects/images/rag_hyde_hugginface/hyde_architecture.png" width="900"></p>
-<div id="cell-34" class="cell" data-outputid="53f68d8d-2bea-4bcc-cac0-e417efc6016f" data-execution_count="19">
+<div id="cell-34" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="53f68d8d-2bea-4bcc-cac0-e417efc6016f" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1">query, base_answer</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="19">
 <pre><code>('What is performance of modele on detecting brick kilns',
  'The performance of the model on detecting brick kilns can be evaluated by calculating the accuracy, precision, recall, and F1 score. These metrics can be calculated by comparing the predicted results of the model with the actual results. The accuracy measures the percentage of correct predictions, while the precision measures the percentage of true positive predictions among all positive predictions. The recall measures the percentage of true positive predictions among all actual positive cases. The F1 score is the harmonic mean of precision and recall,')</code></pre>
 </div>
 </div>
-<div id="cell-35" class="cell" data-outputid="fafce7da-0ec3-46bb-c560-7bdaddf140df" data-execution_count="20">
+<div id="cell-35" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="fafce7da-0ec3-46bb-c560-7bdaddf140df" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb35" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1">top_docs <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> db_hf.similarity_search(query<span class="op" style="color: #5E5E5E;
@@ -706,13 +706,13 @@ font-style: inherit;">=</span>top_docs, question<span class="op" style="color: #
 background-color: null;
 font-style: inherit;">=</span>query)</span></code></pre></div>
 </div>
-<div id="cell-37" class="cell" data-outputid="7df8ee0a-16f0-4411-8102-5f4905ebf6f1" data-execution_count="22">
+<div id="cell-37" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;,&quot;height&quot;:109}}" data-outputid="7df8ee0a-16f0-4411-8102-5f4905ebf6f1" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1">response_hyde</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="22">
 <pre><code>"Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\nWe show that using our methods, we need to annotate only a small number of images to 39\nobtain brick kiln locations in a new region. On performing active learning on the Indian 40\ndataset, we concluded that we needed 70% fewer samples than random to achieve a similar 41\nF1 score. We also find that we could reach 97% of optimal F1 score with active learning, 42\nwhereas random could reach only 90% with the same number of samples labeled. 43\nFinally, we have developed a web application2offering users an accessible and interactive 44\ninterface for brick kiln detection in a given region of interest. Figure 1 shows our web 45\napplication which takes in bounding boxes of the area of interest and detects the kilns 46\npresent in the region while also showing Grad-CAM (Selvaraju et al., 2019) visuals to 47\nhighlight the focus area of the model. Our work is fully reproducible, and we intend to 48\nrelease the scripts and data upon acceptance. 49\n2. Dataset 50\n\n1000 images, and after manual inspection, we found 996 of them to be correctly classified. 281\nThus through our approach we were able to reduce the annotation 282\nBrick Kilns\nIndia\nFigure A: We initially manually located approximately 189 brick kilns in the Indo-Gangetic\nplain. Subsequently, our model automatically detected an additional 704 new brick kilns in\nthe vicinity of the manually identified ones, as illustrated in the figure\nA.4 Deployment 283\nWe deploy a web application on Streamlit, as depicted in Figure 1, offering users an acces- 284\nsible and interactive interface for brick kiln detection in a given area of interest. Once the 285\nbounding box is defined, our model identifies brick kilns within this area and provides the 286\ncoordinates of the brick kilns. Grad-CAM (Selvaraju et al., 2019) visuals accompany these 287\non the original brick kiln image to highlight the areas where the model focuses. 288\n11\n\n(b)\n (c)\n (d)\nFigure 1: Screenshots from our web application that help detect brick kilns (a) Selecting the\ncoordinates of the bounding box (red rectangle) (b) Markers in the bounding box where the\nmodel predicts the existence of a brick kiln (c) Statistics of number of brick kilns detected,\ntheir coordinates and model’s predicted probabilities (d) Grad-CAM (Selvaraju et al., 2019)\nvisual showing where our model focuses on predicted brick kiln image (Best viewed in color)\n1. Introduction 14\nAir pollution kills seven million people worldwide, and 22% of casualties are only from 15\nIndia (UNEP, 2019). Annual average PM 2.5(Particulate matter of size ≤2.5µm) of 16\nIndia was 24 µg/m3in 2020, which is significantly higher than the annual WHO limit 17\nof 5 µg/m3(Guttikunda and Nishadh, 2022). Air quality researchers use physics-based 18\nsimulators such as CAMx1to model the air quality (Guttikunda et al., 2019) using an 19\ninventory of major sources. 20\n1.https://www.camx.com/\n1\n\nmaximise the information gained about the model parameters, i.e. maximise the mutual 97\ninformation between predictions and model posterior.It is mathematically defined as: 98\nI[y,θ|x,Dtrain] =H[y|x,Dtrain]−Ep(θ|Dtrain)[H[y|x,θ]]\nwith θthe model parameters and H[y|x,θ] is the entropy of ygiven model weights θ. 99\n3.Subset Scoring : We propose a new acquisition function to explicitly select the subset 100\nof images classified as brick kilns in each iteration. The intuition is to select the points 101\nthat are predicted as positive, but the model is not confident about them. Including 102\nsuch points may boost model’s performance for the positive class especially in case of 103\nclass imbalance. The function is defined as follows: 104\nS[y|x,Dtrain] =I(ˆy=c)·α[y|x,Dtrain] (2)\nwhere αcan be one of the acquisition functions discussed earlier. 105\n4.Random : This acquisition function is equivalent to choosing an image uniformly at 106\n\n•In our current work, we only looked at the binary classification task. Drawing inspiration 155\nfrom (Lee et al., 2021), we plan to additionally localize the kilns in the image and extend 156\nour active learning pipeline towards multiple objectives: localization and classification. 157\n•Our current work treated the classification problem as a binary classification task. In the 158\nfuture, we plan to study this formulation as a one-class task. Correspondingly, we also 159\nplan to look at specialized losses such as the focal losses (Lin et al., 2017). 160\n6. Conclusion 161\nOur goal was to develop a scalable method to detect brick kilns. We conclude from our 162\nresults that satellite data can be used to detect brick kilns accurately. Further, we conclude 163\nthat we can develop accurate models by actively annotating images from the target region. 164\nWe believe that our work will likely benefit key stakeholders such as scientists building 165\n\nQuestion: What is performance of modele on detecting brick kilns\nHelpful Answer: The model was able to reduce the annotation of brick kilns from 189 to 704 through active learning, achieving a similar F1 score with 70% fewer samples. The model was able to reach 97% of optimal F1 score with active learning, whereas random could reach only 90% with the same number of samples labeled. The model was also able to detect brick kilns in a new region with only a small number of annotated"</code></pre>
 </div>
 </div>
-<div id="cell-38" class="cell" data-outputid="0d866bee-a10a-4067-cd64-8293d038b68b" data-execution_count="23">
+<div id="cell-38" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="0d866bee-a10a-4067-cd64-8293d038b68b" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb40" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1">split_text <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> response_hyde.split(<span class="st" style="color: #20794D;
@@ -782,7 +782,7 @@ Helpful Answer: The model was able to reduce the annotation of brick kilns from 
  ]]></description>
   <category>NLP</category>
   <guid>https://jaiswalsuraj487.github.io/publications_and_projects/data/rag_hyde_huggingface.html</guid>
-  <pubDate>Sun, 25 Feb 2024 18:30:00 GMT</pubDate>
+  <pubDate>Mon, 26 Feb 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Image-to-Image for Climate Modelling using Auto-Encoders</title>
@@ -17948,7 +17948,7 @@ font-style: inherit;">'model/auto_conv_unet_in4_out2.pt'</span>))</span></code><
  ]]></description>
   <category>Deep Learning</category>
   <guid>https://jaiswalsuraj487.github.io/publications_and_projects/data/Autoencoder.html</guid>
-  <pubDate>Thu, 16 Nov 2023 18:30:00 GMT</pubDate>
+  <pubDate>Fri, 17 Nov 2023 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Hypernet and Neural Processes on CelebA</title>
@@ -21102,7 +21102,7 @@ Clipping input data to the valid range for imshow with RGB data ([0..1] for floa
   <category>Deep Learning</category>
   <category>Meta Learning</category>
   <guid>https://jaiswalsuraj487.github.io/publications_and_projects/data/Hypernet_neural_process.html</guid>
-  <pubDate>Tue, 07 Nov 2023 18:30:00 GMT</pubDate>
+  <pubDate>Wed, 08 Nov 2023 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Active Learning for CNN: A Core-Set Approach</title>
@@ -22605,7 +22605,9 @@ font-style: inherit;">False</span>)</span>
 <span id="cb67-14">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
-font-style: inherit;">if</span> strategy.__class__.<span class="va" style="color: #111111;
+font-style: inherit;">if</span> strategy.<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span>.<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">__name__</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -22622,7 +22624,9 @@ font-style: inherit;">=</span>n_query_samples</span>
 <span id="cb67-18">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
-font-style: inherit;">elif</span> strategy.__class__.<span class="va" style="color: #111111;
+font-style: inherit;">elif</span> strategy.<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span>.<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">__name__</span><span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -22673,7 +22677,9 @@ background-color: null;
 font-style: inherit;"># print(train_idx_copy.device, pool_idx_copy.device, best_indices[acquisition.__class__.__name__].device)</span></span>
 <span id="cb67-29">        train_idx_copy <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> torch.cat([train_idx_copy, best_indices[acquisition.__class__.<span class="va" style="color: #111111;
+font-style: inherit;">=</span> torch.cat([train_idx_copy, best_indices[acquisition.<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span>.<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">__name__</span>]])</span>
 <span id="cb67-30">        <span class="co" style="color: #5E5E5E;
@@ -22683,7 +22689,9 @@ font-style: inherit;"># pool_idx_copy = torch.cat([pool_idx_copy[i:i + 1] for i 
 background-color: null;
 font-style: inherit;">=</span> pool_idx_copy[<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">~</span>torch.isin(pool_idx_copy, best_indices[acquisition.__class__.<span class="va" style="color: #111111;
+font-style: inherit;">~</span>torch.isin(pool_idx_copy, best_indices[acquisition.<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span>.<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">__name__</span>])]</span>
 <span id="cb67-32">    class_counts <span class="op" style="color: #5E5E5E;
@@ -22755,7 +22763,9 @@ font-weight: bold;
 font-style: inherit;">in</span> seeds: </span>
 <span id="cb68-8">    <span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">print</span>(strategy.__class__.<span class="va" style="color: #111111;
+font-style: inherit;">print</span>(strategy.<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span>.<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">__name__</span>, <span class="st" style="color: #20794D;
 background-color: null;
@@ -22797,7 +22807,9 @@ font-style: inherit;">_</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">{</span>strategy<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">.</span>__class__<span class="sc" style="color: #5E5E5E;
+font-style: inherit;">.</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">.</span><span class="va" style="color: #111111;
 background-color: null;
@@ -22832,7 +22844,9 @@ font-style: inherit;">_</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">{</span>strategy<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">.</span>__class__<span class="sc" style="color: #5E5E5E;
+font-style: inherit;">.</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">.</span><span class="va" style="color: #111111;
 background-color: null;
@@ -22867,7 +22881,9 @@ font-style: inherit;">_</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">{</span>strategy<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">.</span>__class__<span class="sc" style="color: #5E5E5E;
+font-style: inherit;">.</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">.</span><span class="va" style="color: #111111;
 background-color: null;
@@ -23335,7 +23351,9 @@ font-weight: bold;
 font-style: inherit;">in</span> seeds: </span>
 <span id="cb174-6">    <span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">print</span>(strategy.__class__.<span class="va" style="color: #111111;
+font-style: inherit;">print</span>(strategy.<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span>.<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">__name__</span>, <span class="st" style="color: #20794D;
 background-color: null;
@@ -23378,7 +23396,9 @@ font-style: inherit;">_</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">{</span>strategy<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">.</span>__class__<span class="sc" style="color: #5E5E5E;
+font-style: inherit;">.</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">.</span><span class="va" style="color: #111111;
 background-color: null;
@@ -23413,7 +23433,9 @@ font-style: inherit;">_</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">{</span>strategy<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">.</span>__class__<span class="sc" style="color: #5E5E5E;
+font-style: inherit;">.</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">.</span><span class="va" style="color: #111111;
 background-color: null;
@@ -23448,7 +23470,9 @@ font-style: inherit;">_</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">{</span>strategy<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">.</span>__class__<span class="sc" style="color: #5E5E5E;
+font-style: inherit;">.</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__class__</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">.</span><span class="va" style="color: #111111;
 background-color: null;
@@ -27610,7 +27634,7 @@ font-style: inherit;"># Show the plot or save it to a file</span></span>
   <category>Active Learning</category>
   <category>Deep Learning</category>
   <guid>https://jaiswalsuraj487.github.io/publications_and_projects/data/diversity_acq_AL.html</guid>
-  <pubDate>Tue, 31 Oct 2023 18:30:00 GMT</pubDate>
+  <pubDate>Wed, 01 Nov 2023 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Towards Scalable Identification of Brick Kilns from Satellite Imagery with Active Learning</title>
@@ -27644,7 +27668,7 @@ font-style: inherit;"># Show the plot or save it to a file</span></span>
   <category>Active Learning</category>
   <category>Deep Learning</category>
   <guid>https://jaiswalsuraj487.github.io/publications_and_projects/data/research_neurips.html</guid>
-  <pubDate>Thu, 26 Oct 2023 18:30:00 GMT</pubDate>
+  <pubDate>Fri, 27 Oct 2023 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Active Learning: A Core-Set Approach demo</title>
@@ -28072,7 +28096,7 @@ Centroid of train features: tensor([0.3676, 0.6126])</code></pre>
  ]]></description>
   <category>Active Learning</category>
   <guid>https://jaiswalsuraj487.github.io/publications_and_projects/data/diveristy_acquisition_demo.html</guid>
-  <pubDate>Tue, 24 Oct 2023 18:30:00 GMT</pubDate>
+  <pubDate>Wed, 25 Oct 2023 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

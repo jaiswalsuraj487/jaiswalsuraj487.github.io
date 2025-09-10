@@ -1,5 +1,17 @@
 [
   {
+    "listing": "/publications_and_projects/index.html",
+    "items": [
+      "/publications_and_projects/data/research_acm.html",
+      "/publications_and_projects/data/rag_hyde_huggingface.html",
+      "/publications_and_projects/data/Autoencoder.html",
+      "/publications_and_projects/data/Hypernet_neural_process.html",
+      "/publications_and_projects/data/diversity_acq_AL.html",
+      "/publications_and_projects/data/research_neurips.html",
+      "/publications_and_projects/data/diveristy_acquisition_demo.html"
+    ]
+  },
+  {
     "listing": "/blogs/index.html",
     "items": [
       "/blogs/blogsData/graphrag.html",
@@ -11,18 +23,6 @@
       "/blogs/blogsData/blr_blog.html",
       "/blogs/blogsData/demo.html",
       "/blogs/blogsData/Bayesian_Lineara_Regressiondemo.html"
-    ]
-  },
-  {
-    "listing": "/publications_and_projects/index.html",
-    "items": [
-      "/publications_and_projects/data/research_acm.html",
-      "/publications_and_projects/data/rag_hyde_huggingface.html",
-      "/publications_and_projects/data/Autoencoder.html",
-      "/publications_and_projects/data/Hypernet_neural_process.html",
-      "/publications_and_projects/data/diversity_acq_AL.html",
-      "/publications_and_projects/data/research_neurips.html",
-      "/publications_and_projects/data/diveristy_acquisition_demo.html"
     ]
   }
 ]
