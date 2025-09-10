@@ -14,6 +14,7 @@
   {
     "listing": "/blogs/index.html",
     "items": [
+      "/blogs/blogsData/free_llm_api.html",
       "/blogs/blogsData/graphrag.html",
       "/blogs/blogsData/CICD Pipeline Documentation.html",
       "/blogs/blogsData/conda_setup.html",

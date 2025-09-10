@@ -10,7 +10,338 @@
 <atom:link href="https://jaiswalsuraj487.github.io/blogs/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.7.33</generator>
-<lastBuildDate>Tue, 30 Jul 2024 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 10 Sep 2025 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Using FREE Gemini API with Fallback</title>
+  <dc:creator>Suraj Jaiswal</dc:creator>
+  <link>https://jaiswalsuraj487.github.io/blogs/blogsData/free_llm_api.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This guide explains how to set up the Google AI Studio API key, install dependencies, and call Gemini models with Python.</p>
+<p>🔑 Get your API key from <a href="https://aistudio.google.com/">Google AI Studio</a> — no credit card required.</p>
+<p>⚡ The free tier comes with daily rate limits, so here we’ll simply configure fallback models to maximize your total number of Request per day of API calls.</p>
+<section id="gemini-model-rate-limits" class="level2">
+<h2 class="anchored" data-anchor-id="gemini-model-rate-limits">1. Gemini Model Rate Limits</h2>
+<p>Here’s a quick reference table of available Gemini models and their limits:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>RPM</th>
+<th>TPM</th>
+<th>RPD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Gemini 2.5 Pro</strong></td>
+<td>5</td>
+<td>250,000</td>
+<td>100</td>
+</tr>
+<tr class="even">
+<td><strong>Gemini 2.5 Flash</strong></td>
+<td>10</td>
+<td>250,000</td>
+<td>250</td>
+</tr>
+<tr class="odd">
+<td><strong>Gemini 2.5 Flash-Lite</strong></td>
+<td>15</td>
+<td>250,000</td>
+<td>1,000</td>
+</tr>
+<tr class="even">
+<td><strong>Gemini 2.0 Flash</strong></td>
+<td>15</td>
+<td>1,000,000</td>
+<td>200</td>
+</tr>
+<tr class="odd">
+<td><strong>Gemini 2.0 Flash-Lite</strong></td>
+<td>30</td>
+<td>1,000,000</td>
+<td>200</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="install-dependencies" class="level2">
+<h2 class="anchored" data-anchor-id="install-dependencies">2. Install Dependencies:</h2>
+<p>Make sure you have the latest google-genai package:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">!pip</span> install <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-q</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-U</span> google-genai</span></code></pre></div>
+<p>⚡ Use Flash or Flash-Lite models for higher throughput or lightweight tasks. Use Pro for better reasoning and accuracy.</p>
+</section>
+<section id="set-up-the-api-key" class="level2">
+<h2 class="anchored" data-anchor-id="set-up-the-api-key">3. Set Up the API Key</h2>
+<p>Save it in an environment variable GEMINI_API_KEY.</p>
+<div id="6db30cf3" class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> os</span>
+<span id="cb2-2"></span>
+<span id="cb2-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Set the environment variable</span></span>
+<span id="cb2-4">os.environ[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"GEMINI_API_KEY"</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"your_api_key_here"</span></span>
+<span id="cb2-5"></span>
+<span id="cb2-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Verify</span></span>
+<span id="cb2-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(os.environ[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"GEMINI_API_KEY"</span>])</span></code></pre></div>
+</div>
+</section>
+<section id="first-api-call" class="level2">
+<h2 class="anchored" data-anchor-id="first-api-call">4. First API Call</h2>
+<p>Here’s a simple example using Gemini 2.5 Pro:</p>
+<div id="cell-11" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> google <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> genai</span>
+<span id="cb3-2"></span>
+<span id="cb3-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># The client gets the API key from the environment variable `GEMINI_API_KEY`.</span></span>
+<span id="cb3-4">client <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> genai.Client()</span>
+<span id="cb3-5"></span>
+<span id="cb3-6">response <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> client.models.generate_content(</span>
+<span id="cb3-7">    model<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gemini-2.5-pro"</span>,</span>
+<span id="cb3-8">    contents<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Explain India in few crisp points"</span></span>
+<span id="cb3-9">)</span>
+<span id="cb3-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(response.text)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Of course. Here is India explained in a few crisp points:
+
+*   **A Land of Immense Diversity:** Home to over 1.4 billion people, India is a mosaic of countless cultures, languages (22 official), and religions (birthplace of Hinduism, Buddhism, Jainism, and Sikhism). The phrase "Unity in Diversity" is its essence.
+
+*   **The World's Largest Democracy:** It is a federal parliamentary republic with a robust electoral system. Despite its complexities, democratic traditions are deeply rooted.
+
+*   **A Fast-Growing Major Economy:** India has one of the world's fastest-growing economies, driven by a powerful service sector (especially IT), a large industrial base, and a significant agricultural sector.
+
+*   **An Ancient Civilization:** Boasting a history of over 5,000 years, it has been home to ancient civilizations (Indus Valley), powerful empires (Mauryan, Gupta, Mughal), and a colonial past, culminating in a non-violent independence movement led by Mahatma Gandhi.
+
+*   **Rich Cultural Influence:** A global hub for spirituality, yoga, vibrant cuisine, classical arts, and a massive film industry known as "Bollywood."
+
+*   **A Nation of Contrasts:** India is a study in contrasts, where ancient traditions coexist with modern technology, immense wealth with significant poverty, and serene landscapes with bustling, chaotic cities.</code></pre>
+</div>
+</div>
+</section>
+<section id="fallback-mechanism-with-multiple-models" class="level2">
+<h2 class="anchored" data-anchor-id="fallback-mechanism-with-multiple-models">5. Fallback Mechanism with Multiple Models</h2>
+<p>To make your app more resilient, you can try multiple models in order. If one fails (due to quota or availability), the next one is used automatically.</p>
+<div id="cell-13" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> google <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> genai</span>
+<span id="cb5-2"></span>
+<span id="cb5-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># The client gets the API key from the environment variable `GEMINI_API_KEY`.</span></span>
+<span id="cb5-4">client <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> genai.Client()</span>
+<span id="cb5-5"></span>
+<span id="cb5-6">MODELS <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [</span>
+<span id="cb5-7">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gemini-2.5-pro"</span>,</span>
+<span id="cb5-8">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gemini-2.5-flash"</span>,</span>
+<span id="cb5-9">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gemini-2.5-flash-lite"</span>,</span>
+<span id="cb5-10">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gemini-2.0-flash"</span>,</span>
+<span id="cb5-11">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gemini-2.0-flash-lite"</span>,</span>
+<span id="cb5-12">]</span>
+<span id="cb5-13"></span>
+<span id="cb5-14"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> generate_text(prompt: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>:</span>
+<span id="cb5-15">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb5-16"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Try each model in order and return the response text </span></span>
+<span id="cb5-17"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    from the first model that works.</span></span>
+<span id="cb5-18"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    """</span></span>
+<span id="cb5-19">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> model <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> MODELS:</span>
+<span id="cb5-20">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">try</span>:</span>
+<span id="cb5-21">            response <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> client.models.generate_content(</span>
+<span id="cb5-22">                model<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>model,</span>
+<span id="cb5-23">                contents<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>prompt</span>
+<span id="cb5-24">            )</span>
+<span id="cb5-25">            <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"✅ Success with model: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>model<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb5-26">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> response.text</span>
+<span id="cb5-27">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">except</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Exception</span> <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> e:</span>
+<span id="cb5-28">            <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"⚠️ Failed with model </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>model<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>e<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb5-29">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"❌ All models failed."</span></span>
+<span id="cb5-30"></span></code></pre></div>
+</div>
+<div id="64772d39" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">text <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> generate_text(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Explain India in few crisp points"</span>)</span>
+<span id="cb6-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Final Response:</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>, text)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Success with model: gemini-2.5-pro
+
+Final Response:
+ Of course. Here is an explanation of India in a few crisp points:
+
+*   **World's Largest Democracy:** With over 1.4 billion people, it is the most populous democracy on Earth, known for its vibrant and complex political landscape.
+
+*   **Ancient Civilization, Modern Nation:** Home to one of the world's oldest civilizations (Indus Valley), it is the birthplace of major religions like Hinduism, Buddhism, and Jainism. Today, it balances ancient traditions with modern aspirations.
+
+*   **A Fast-Growing Economic Power:** It is one of the world's fastest-growing major economies, a global hub for IT and software services, and has a successful space program (ISRO).
+
+*   **Unmatched Diversity:** India is a mosaic of cultures, with over 22 official languages, countless dialects, diverse cuisines, colourful festivals, and a vast array of ethnic groups living together.
+
+*   **Incredible Geographic Variety:** Its landscape spans from the snow-capped Himalayas in the north to tropical beaches in the south, encompassing vast deserts, fertile plains, and dense forests.</code></pre>
+</div>
+</div>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ol type="1">
+<li>Google docs: https://ai.google.dev/gemini-api/docs</li>
+<li>Rate limits: https://ai.google.dev/gemini-api/docs/rate-limits#free-tier</li>
+</ol>
+
+
+</section>
+
+ ]]></description>
+  <category>Agentic AI</category>
+  <category>NLP</category>
+  <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/free_llm_api.html</guid>
+  <pubDate>Wed, 10 Sep 2025 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Graph RAG</title>
   <dc:creator>Suraj Jaiswal</dc:creator>
@@ -1298,7 +1629,7 @@ font-style: inherit;">"Generated Moons Dataset"</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Logistic_regression_pyro_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="Logistic_regression_pyro_files/figure-html/cell-4-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Logistic_regression_pyro_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -1409,7 +1740,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Logistic_regression_pyro_files/figure-html/cell-8-output-2.png" class="img-fluid figure-img"></p>
+<p><a href="Logistic_regression_pyro_files/figure-html/cell-8-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Logistic_regression_pyro_files/figure-html/cell-8-output-2.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -1668,7 +1999,7 @@ font-style: inherit;"># Plot the decision boundary on the test data</span></span
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Logistic_regression_pyro_files/figure-html/cell-11-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="Logistic_regression_pyro_files/figure-html/cell-11-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Logistic_regression_pyro_files/figure-html/cell-11-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -1700,21 +2031,21 @@ font-style: inherit;"># Plot the decision boundary on the test data</span></span
 <p>Camera image:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-2-1-flower_blur_unblur.jpg" class="img-fluid figure-img"></p>
+<p><a href="Image_super_resolution_files/figure-html/cell-2-1-flower_blur_unblur.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="flower_blur_unblur.jpg"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-2-1-flower_blur_unblur.jpg" class="img-fluid figure-img" alt="flower_blur_unblur.jpg"></a></p>
 <figcaption>flower_blur_unblur.jpg</figcaption>
 </figure>
 </div>
 <p>Security camera image:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-2-3-numberplate_blur_unblur.jpg" class="img-fluid figure-img"></p>
+<p><a href="Image_super_resolution_files/figure-html/cell-2-3-numberplate_blur_unblur.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="numberplate_blur_unblur.jpg"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-2-3-numberplate_blur_unblur.jpg" class="img-fluid figure-img" alt="numberplate_blur_unblur.jpg"></a></p>
 <figcaption>numberplate_blur_unblur.jpg</figcaption>
 </figure>
 </div>
 <p>Geological image:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-2-2-geo_lr_hr.png" class="img-fluid figure-img"></p>
+<p><a href="Image_super_resolution_files/figure-html/cell-2-2-geo_lr_hr.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="geo_lr_hr.png"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-2-2-geo_lr_hr.png" class="img-fluid figure-img" alt="geo_lr_hr.png"></a></p>
 <figcaption>geo_lr_hr.png</figcaption>
 </figure>
 </div>
@@ -1830,7 +2161,7 @@ font-style: inherit;">'off'</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="Image_super_resolution_files/figure-html/cell-2-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -1970,7 +2301,7 @@ font-style: inherit;">1</span>))</span></code></pre></div>
 </div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-12-1-MLP_fig_imageclassification.jpg" class="img-fluid figure-img"></p>
+<p><a href="Image_super_resolution_files/figure-html/cell-12-1-MLP_fig_imageclassification.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="MLP_fig_imageclassification.jpg"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-12-1-MLP_fig_imageclassification.jpg" class="img-fluid figure-img" alt="MLP_fig_imageclassification.jpg"></a></p>
 <figcaption>MLP_fig_imageclassification.jpg</figcaption>
 </figure>
 </div>
@@ -2095,7 +2426,7 @@ MLP Accuracy: 0.9790999889373779</code></pre>
 </div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-14-1-CNN_fig_imageclassification.jpg" class="img-fluid figure-img"></p>
+<p><a href="Image_super_resolution_files/figure-html/cell-14-1-CNN_fig_imageclassification.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="CNN_fig_imageclassification.jpg"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-14-1-CNN_fig_imageclassification.jpg" class="img-fluid figure-img" alt="CNN_fig_imageclassification.jpg"></a></p>
 <figcaption>CNN_fig_imageclassification.jpg</figcaption>
 </figure>
 </div>
@@ -2368,7 +2699,7 @@ font-style: inherit;">'off'</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-7-output-2.png" class="img-fluid figure-img"></p>
+<p><a href="Image_super_resolution_files/figure-html/cell-7-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-7-output-2.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -2387,7 +2718,7 @@ font-style: inherit;">'off'</span>)</span>
 <p>Encoder is same as CNN where we have convolutional layers and max-pooling layers. But in decoder we have upsampling layers instead of max-pooling layers. So the image is not shrinked and we get the high resolution image.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-20-1-u-net-architecture.png" class="img-fluid figure-img"></p>
+<p><a href="Image_super_resolution_files/figure-html/cell-20-1-u-net-architecture.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="u-net-architecture.png"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-20-1-u-net-architecture.png" class="img-fluid figure-img" alt="u-net-architecture.png"></a></p>
 <figcaption>u-net-architecture.png</figcaption>
 </figure>
 </div>
@@ -2410,7 +2741,7 @@ font-style: inherit;">'off'</span>)</span>
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-24-1-gan_architecture.png" class="img-fluid figure-img"></p>
+<p><a href="Image_super_resolution_files/figure-html/cell-24-1-gan_architecture.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="gan_architecture.png"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-24-1-gan_architecture.png" class="img-fluid figure-img" alt="gan_architecture.png"></a></p>
 <figcaption>gan_architecture.png</figcaption>
 </figure>
 </div>
@@ -3664,7 +3995,7 @@ font-style: inherit;">1</span>)) </span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-16-output-2.png" class="img-fluid figure-img"></p>
+<p><a href="Image_super_resolution_files/figure-html/cell-16-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-16-output-2.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -3794,7 +4125,7 @@ font-style: inherit;">1</span>)) </span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-17-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="Image_super_resolution_files/figure-html/cell-17-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution_files/figure-html/cell-17-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -3846,7 +4177,7 @@ font-style: inherit;">1</span>)) </span></code></pre></div>
 <h1>Linear Regression</h1>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-5-1-LR.png" class="img-fluid figure-img"></p>
+<p><a href="blr_blog_files/figure-html/cell-5-1-LR.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="IMG src medium article"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-5-1-LR.png" class="img-fluid figure-img" alt="IMG src medium article"></a></p>
 <figcaption>IMG src medium article</figcaption>
 </figure>
 </div>
@@ -3973,7 +4304,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="blr_blog_files/figure-html/cell-3-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -4098,7 +4429,7 @@ font-style: inherit;">"$y$"</span>)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-8-output-2.png" class="img-fluid figure-img"></p>
+<p><a href="blr_blog_files/figure-html/cell-8-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-8-output-2.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -4210,7 +4541,7 @@ font-style: inherit;">5</span>) </span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="blr_blog_files/figure-html/cell-10-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -4293,7 +4624,7 @@ font-style: inherit;">5</span>) </span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="blr_blog_files/figure-html/cell-14-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -4485,7 +4816,7 @@ font-style: inherit;">5</span>) </span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-18-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="blr_blog_files/figure-html/cell-18-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-18-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -4625,7 +4956,7 @@ font-style: inherit;"># Display the plot</span></span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-19-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="blr_blog_files/figure-html/cell-19-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-19-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -5019,7 +5350,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-29-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="blr_blog_files/figure-html/cell-29-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-29-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -5667,7 +5998,7 @@ font-style: inherit;">15</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-34-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="blr_blog_files/figure-html/cell-34-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog_files/figure-html/cell-34-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -5842,7 +6173,7 @@ font-style: inherit;">5</span>) </span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/demo_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="demo_files/figure-html/cell-4-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/demo_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -5963,7 +6294,7 @@ font-style: inherit;">5</span>) </span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/demo_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="demo_files/figure-html/cell-10-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/demo_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -6144,7 +6475,7 @@ font-style: inherit;">5</span>) </span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/demo_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="demo_files/figure-html/cell-14-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/demo_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -6284,7 +6615,7 @@ font-style: inherit;"># Display the plot</span></span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/demo_files/figure-html/cell-15-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="demo_files/figure-html/cell-15-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/demo_files/figure-html/cell-15-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -6919,7 +7250,7 @@ font-style: inherit;">15</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/demo_files/figure-html/cell-21-output-1.png" width="998" height="1190" class="figure-img"></p>
+<p><a href="demo_files/figure-html/cell-21-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/demo_files/figure-html/cell-21-output-1.png" width="998" height="1190" class="figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -7364,7 +7695,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Bayesian_Lineara_Regressiondemo_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></p>
+<p><a href="Bayesian_Lineara_Regressiondemo_files/figure-html/cell-14-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="https://jaiswalsuraj487.github.io/blogs/blogsData/Bayesian_Lineara_Regressiondemo_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>

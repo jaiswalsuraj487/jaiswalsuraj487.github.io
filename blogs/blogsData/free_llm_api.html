@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Suraj Jaiswal">
-<meta name="dcterms.date" content="2023-10-25">
+<meta name="dcterms.date" content="2025-09-10">
 
-<title>Active Learning: A Core-Set Approach demo – Suraj Jaiswal</title>
+<title>Using FREE Gemini API with Fallback – Suraj Jaiswal</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -77,9 +77,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../../site_libs/bootstrap/bootstrap-6ec84bd1cbca259591e26654c72239a2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
-<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
-<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -163,7 +160,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#intuition-behind-diversity-active-learning" id="toc-intuition-behind-diversity-active-learning" class="nav-link active" data-scroll-target="#intuition-behind-diversity-active-learning">Intuition behind Diversity Active Learning</a></li>
+  <li><a href="#gemini-model-rate-limits" id="toc-gemini-model-rate-limits" class="nav-link active" data-scroll-target="#gemini-model-rate-limits">1. Gemini Model Rate Limits</a></li>
+  <li><a href="#install-dependencies" id="toc-install-dependencies" class="nav-link" data-scroll-target="#install-dependencies">2. Install Dependencies:</a></li>
+  <li><a href="#set-up-the-api-key" id="toc-set-up-the-api-key" class="nav-link" data-scroll-target="#set-up-the-api-key">3. Set Up the API Key</a></li>
+  <li><a href="#first-api-call" id="toc-first-api-call" class="nav-link" data-scroll-target="#first-api-call">4. First API Call</a></li>
+  <li><a href="#fallback-mechanism-with-multiple-models" id="toc-fallback-mechanism-with-multiple-models" class="nav-link" data-scroll-target="#fallback-mechanism-with-multiple-models">5. Fallback Mechanism with Multiple Models</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
     </div>
@@ -172,9 +174,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Active Learning: A Core-Set Approach demo</h1>
+<h1 class="title">Using FREE Gemini API with Fallback</h1>
   <div class="quarto-categories">
-    <div class="quarto-category">Active Learning</div>
+    <div class="quarto-category">Agentic AI</div>
+    <div class="quarto-category">NLP</div>
   </div>
   </div>
 
@@ -192,7 +195,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 25, 2023</p>
+      <p class="date">September 10, 2025</p>
     </div>
   </div>
   
@@ -204,146 +207,167 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="intuition-behind-diversity-active-learning" class="level1">
-<h1>Intuition behind Diversity Active Learning</h1>
-<p>We want to select the most uncertain samples from the unlabeled pool. However, we also want to ensure that the selected samples are diverse. This is because if we select similar samples, we will not be able to learn much from them.</p>
-<p>Here we wish to work on images, so we can use their latent representation to select a pool point which is furthest in the latent dimension space from the train data.</p>
-<p>Let’s see how we can do this. Below is an example of random points in 2D space. We want to select the point which is furthest from the train data. We can do this by finding the point which has the maximum distance from the train data. This is the intuition behind diversity acquisition.</p>
-<div id="cell-2" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt </span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> astra.torch.al <span class="im">import</span> Furthest, Centroid</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This guide explains how to set up the Google AI Studio API key, install dependencies, and call Gemini models with Python.</p>
+<p>🔑 Get your API key from <a href="https://aistudio.google.com/">Google AI Studio</a> — no credit card required.</p>
+<p>⚡ The free tier comes with daily rate limits, so here we’ll simply configure fallback models to maximize your total number of Request per day of API calls.</p>
+<section id="gemini-model-rate-limits" class="level2">
+<h2 class="anchored" data-anchor-id="gemini-model-rate-limits">1. Gemini Model Rate Limits</h2>
+<p>Here’s a quick reference table of available Gemini models and their limits:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>RPM</th>
+<th>TPM</th>
+<th>RPD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Gemini 2.5 Pro</strong></td>
+<td>5</td>
+<td>250,000</td>
+<td>100</td>
+</tr>
+<tr class="even">
+<td><strong>Gemini 2.5 Flash</strong></td>
+<td>10</td>
+<td>250,000</td>
+<td>250</td>
+</tr>
+<tr class="odd">
+<td><strong>Gemini 2.5 Flash-Lite</strong></td>
+<td>15</td>
+<td>250,000</td>
+<td>1,000</td>
+</tr>
+<tr class="even">
+<td><strong>Gemini 2.0 Flash</strong></td>
+<td>15</td>
+<td>1,000,000</td>
+<td>200</td>
+</tr>
+<tr class="odd">
+<td><strong>Gemini 2.0 Flash-Lite</strong></td>
+<td>30</td>
+<td>1,000,000</td>
+<td>200</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="install-dependencies" class="level2">
+<h2 class="anchored" data-anchor-id="install-dependencies">2. Install Dependencies:</h2>
+<p>Make sure you have the latest google-genai package:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">!pip</span> install <span class="at">-q</span> <span class="at">-U</span> google-genai</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>⚡ Use Flash or Flash-Lite models for higher throughput or lightweight tasks. Use Pro for better reasoning and accuracy.</p>
+</section>
+<section id="set-up-the-api-key" class="level2">
+<h2 class="anchored" data-anchor-id="set-up-the-api-key">3. Set Up the API Key</h2>
+<p>Save it in an environment variable GEMINI_API_KEY.</p>
+<div id="6db30cf3" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the environment variable</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"GEMINI_API_KEY"</span>] <span class="op">=</span> <span class="st">"your_api_key_here"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(os.environ[<span class="st">"GEMINI_API_KEY"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-3" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> torch.cuda.is_available():</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    num_gpu <span class="op">=</span> torch.cuda.device_count()</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Number of available GPUs: </span><span class="sc">{</span>num_gpu<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(num_gpu):</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        device <span class="op">=</span> torch.device(<span class="ss">f"cuda:</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        device_name <span class="op">=</span> torch.cuda.get_device_name(i)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"GPU </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>device_name<span class="sc">}</span><span class="ss">"</span>, device)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No GPUs available, using CPU."</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">'cuda:2'</span>)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>device</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="first-api-call" class="level2">
+<h2 class="anchored" data-anchor-id="first-api-call">4. First API Call</h2>
+<p>Here’s a simple example using Gemini 2.5 Pro:</p>
+<div id="cell-11" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> google <span class="im">import</span> genai</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The client gets the API key from the environment variable `GEMINI_API_KEY`.</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> genai.Client()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> client.models.generate_content(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span><span class="st">"gemini-2.5-pro"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    contents<span class="op">=</span><span class="st">"Explain India in few crisp points"</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(response.text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Number of available GPUs: 4
-GPU 0: NVIDIA A100-SXM4-80GB cuda:0
-GPU 1: NVIDIA A100-SXM4-80GB cuda:1
-GPU 2: NVIDIA A100-SXM4-80GB cuda:2
-GPU 3: NVIDIA A100-SXM4-80GB cuda:3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>/home/jaiswalsuraj/miniconda3/envs/torch_gpu/lib/python3.10/site-packages/torch/cuda/__init__.py:611: UserWarning: Can't initialize NVML
-  warnings.warn("Can't initialize NVML")</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>device(type='cuda', index=2)</code></pre>
-</div>
-</div>
-<div id="cell-4" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dummy data</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>n_train <span class="op">=</span> <span class="dv">5</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>n_pool <span class="op">=</span> <span class="dv">10</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>n_features <span class="op">=</span> <span class="dv">2</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">0</span>)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate random train and pool features</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>train_features <span class="op">=</span> torch.rand(n_train, n_features)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>pool_features <span class="op">=</span> torch.rand(n_pool, n_features)</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>plt.scatter(train_features[:, <span class="dv">0</span>], train_features[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Train Data'</span>, marker<span class="op">=</span><span class="st">'o'</span>)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>plt.scatter(pool_features[:, <span class="dv">0</span>], pool_features[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Pool Data'</span>, marker<span class="op">=</span><span class="st">'x'</span>)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.scatter(centroid_feature[0], centroid_feature[1], label='Centroid', marker='s', c='red')</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Feature 1'</span>)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Feature 2'</span>)</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Train and Pool Data farthest from Centroid'</span>)</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><a href="diveristy_acquisition_demo_files/figure-html/cell-4-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="diveristy_acquisition_demo_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></a></p>
-</figure>
+<pre><code>Of course. Here is India explained in a few crisp points:
+
+*   **A Land of Immense Diversity:** Home to over 1.4 billion people, India is a mosaic of countless cultures, languages (22 official), and religions (birthplace of Hinduism, Buddhism, Jainism, and Sikhism). The phrase "Unity in Diversity" is its essence.
+
+*   **The World's Largest Democracy:** It is a federal parliamentary republic with a robust electoral system. Despite its complexities, democratic traditions are deeply rooted.
+
+*   **A Fast-Growing Major Economy:** India has one of the world's fastest-growing economies, driven by a powerful service sector (especially IT), a large industrial base, and a significant agricultural sector.
+
+*   **An Ancient Civilization:** Boasting a history of over 5,000 years, it has been home to ancient civilizations (Indus Valley), powerful empires (Mauryan, Gupta, Mughal), and a colonial past, culminating in a non-violent independence movement led by Mahatma Gandhi.
+
+*   **Rich Cultural Influence:** A global hub for spirituality, yoga, vibrant cuisine, classical arts, and a massive film industry known as "Bollywood."
+
+*   **A Nation of Contrasts:** India is a study in contrasts, where ancient traditions coexist with modern technology, immense wealth with significant poverty, and serene landscapes with bustling, chaotic cities.</code></pre>
 </div>
 </div>
+</section>
+<section id="fallback-mechanism-with-multiple-models" class="level2">
+<h2 class="anchored" data-anchor-id="fallback-mechanism-with-multiple-models">5. Fallback Mechanism with Multiple Models</h2>
+<p>To make your app more resilient, you can try multiple models in order. If one fails (due to quota or availability), the next one is used automatically.</p>
+<div id="cell-13" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> google <span class="im">import</span> genai</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The client gets the API key from the environment variable `GEMINI_API_KEY`.</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> genai.Client()</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>MODELS <span class="op">=</span> [</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.5-pro"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.5-flash"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.5-flash-lite"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.0-flash"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.0-flash-lite"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_text(prompt: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">    Try each model in order and return the response text </span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">    from the first model that works.</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> model <span class="kw">in</span> MODELS:</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>            response <span class="op">=</span> client.models.generate_content(</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                model<span class="op">=</span>model,</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>                contents<span class="op">=</span>prompt</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"✅ Success with model: </span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> response.text</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"⚠️ Failed with model </span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"❌ All models failed."</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-5" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n_samples <span class="op">=</span> <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="cell-6" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>acquisition <span class="op">=</span> Furthest()</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>selected_indices <span class="op">=</span> acquisition.acquire_scores(</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                    train_features.cpu(), pool_features.cpu(), n<span class="op">=</span>n_samples</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                )</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>selected_indices </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>[8, 9]</code></pre>
-</div>
-</div>
-<div id="cell-7" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Index of the n farthest Pool Feature from train features:"</span>, selected_indices)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>plt.scatter(pool_features[selected_indices][:,<span class="dv">0</span>], pool_features[selected_indices][:,<span class="dv">1</span>], label<span class="op">=</span><span class="st">'Selected data'</span>, marker<span class="op">=</span><span class="st">'s'</span>, c<span class="op">=</span><span class="st">'green'</span>)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>plt.scatter(train_features[:, <span class="dv">0</span>], train_features[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Train Data'</span>, marker<span class="op">=</span><span class="st">'o'</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>plt.scatter(pool_features[:, <span class="dv">0</span>], pool_features[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Pool Data'</span>, marker<span class="op">=</span><span class="st">'x'</span>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Feature 1'</span>)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Feature 2'</span>)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Train and Pool Data farthest from Centroid'</span>)</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="64772d39" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> generate_text(<span class="st">"Explain India in few crisp points"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Final Response:</span><span class="ch">\n</span><span class="st">"</span>, text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Index of the n farthest Pool Feature from train features: [8, 9]</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><a href="diveristy_acquisition_demo_files/figure-html/cell-7-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="diveristy_acquisition_demo_files/figure-html/cell-7-output-2.png" class="img-fluid figure-img"></a></p>
-</figure>
-</div>
-</div>
-</div>
-<div id="cell-8" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>acquisition <span class="op">=</span> Centroid()</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>selected_indices <span class="op">=</span> acquisition.acquire_scores(</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                    train_features.cpu(), pool_features.cpu(), n<span class="op">=</span>n_samples</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                )</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>selected_indices</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
-<pre><code>[8, 1]</code></pre>
+<pre><code>✅ Success with model: gemini-2.5-pro
+
+Final Response:
+ Of course. Here is an explanation of India in a few crisp points:
+
+*   **World's Largest Democracy:** With over 1.4 billion people, it is the most populous democracy on Earth, known for its vibrant and complex political landscape.
+
+*   **Ancient Civilization, Modern Nation:** Home to one of the world's oldest civilizations (Indus Valley), it is the birthplace of major religions like Hinduism, Buddhism, and Jainism. Today, it balances ancient traditions with modern aspirations.
+
+*   **A Fast-Growing Economic Power:** It is one of the world's fastest-growing major economies, a global hub for IT and software services, and has a successful space program (ISRO).
+
+*   **Unmatched Diversity:** India is a mosaic of cultures, with over 22 official languages, countless dialects, diverse cuisines, colourful festivals, and a vast array of ethnic groups living together.
+
+*   **Incredible Geographic Variety:** Its landscape spans from the snow-capped Himalayas in the north to tropical beaches in the south, encompassing vast deserts, fertile plains, and dense forests.</code></pre>
 </div>
 </div>
-<div id="cell-9" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>centroid_feature <span class="op">=</span> torch.mean(train_features, dim<span class="op">=</span><span class="dv">0</span>) <span class="co">#.unsqueeze(0).squeeze()</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Index of the n farthest Pool Feature from Centroid of train features:"</span>, selected_indices)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Centroid of train features:'</span>, centroid_feature)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>plt.scatter(pool_features[selected_indices][:,<span class="dv">0</span>], pool_features[selected_indices][:,<span class="dv">1</span>], label<span class="op">=</span><span class="st">'Selected Data'</span>, marker<span class="op">=</span><span class="st">'s'</span>, c<span class="op">=</span><span class="st">'green'</span>)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>plt.scatter(train_features[:, <span class="dv">0</span>], train_features[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Train Data'</span>, marker<span class="op">=</span><span class="st">'o'</span>)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>plt.scatter(pool_features[:, <span class="dv">0</span>], pool_features[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Pool Data'</span>, marker<span class="op">=</span><span class="st">'x'</span>)</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>plt.scatter(centroid_feature[<span class="dv">0</span>], centroid_feature[<span class="dv">1</span>], label<span class="op">=</span><span class="st">'Centroid'</span>, marker<span class="op">=</span><span class="st">'s'</span>, c<span class="op">=</span><span class="st">'red'</span>)</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Feature 1'</span>)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Feature 2'</span>)</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Train and Pool Data farthest from Centroid'</span>)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Index of the n farthest Pool Feature from Centroid of train features: [8, 1]
-Centroid of train features: tensor([0.3676, 0.6126])</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><a href="diveristy_acquisition_demo_files/figure-html/cell-9-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="diveristy_acquisition_demo_files/figure-html/cell-9-output-2.png" class="img-fluid figure-img"></a></p>
-</figure>
-</div>
-</div>
-</div>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ol type="1">
+<li>Google docs: https://ai.google.dev/gemini-api/docs</li>
+<li>Rate limits: https://ai.google.dev/gemini-api/docs/rate-limits#free-tier</li>
+</ol>
 
 
 </section>
@@ -749,38 +773,6 @@ Centroid of train features: tensor([0.3676, 0.6126])</code></pre>
   });
   </script>
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
-(function() {
-  let previousOnload = window.onload;
-  window.onload = () => {
-    if (previousOnload) {
-      previousOnload();
-    }
-    lightboxQuarto.on('slide_before_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      const href = trigger.getAttribute('href');
-      if (href !== null) {
-        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
-        if (imgEl !== null) {
-          const srcAttr = imgEl.getAttribute("src");
-          if (srcAttr && srcAttr.startsWith("data:")) {
-            slideConfig.href = srcAttr;
-          }
-        }
-      } 
-    });
-  
-    lightboxQuarto.on('slide_after_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(slideNode);
-      }
-    });
-  
-  };
-  
-})();
-          </script>
 
 
 
