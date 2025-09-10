@@ -22,7 +22,9 @@ Welcome to My Portfolio!
 
 Check out my [Resume](https://jaiswalsuraj487.github.io/resume/Suraj_Jaiswal_Resume.pdf) to know more about me.
 
-I'm a Machine Learning Engineer working at [Neuroreef Lab](https://www.linkedin.com/company/neuroreef-labs/) dedicated to advancing AI applications in healthcare. Here, I drive the development of [CareCortex](https://carecortex.ai/), an innovative AI copilot that assists doctors in real-time, capturing detailed medical notes aligned with clinical standards. My expertise spans large language models (LLMs), retrieval-augmented generation (RAG), and automated coding for Medical codes.
+Currently working as Data Analyst at Tiger Analytics
+
+Worked previously as NLP Engineer at [Neuroreef Lab](https://www.linkedin.com/company/neuroreef-labs/) dedicated to advancing AI applications in healthcare. Here, I drive the development of [CareCortex](https://carecortex.ai/), an innovative AI copilot that assists doctors in real-time, capturing detailed medical notes aligned with clinical standards. My expertise spans large language models (LLMs), retrieval-augmented generation (RAG), and automated coding for Medical codes.
 
 In previous roles, including my internship, I developed robust machine learning pipelines for [Medaura](https://medaura.ai/), an interactive medical Q&A product that draws insights from the extensive PubMed database.
 
