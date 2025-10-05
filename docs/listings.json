@@ -2,6 +2,7 @@
   {
     "listing": "/publications_and_projects/index.html",
     "items": [
+      "/publications_and_projects/data/research_acm_journel.html",
       "/publications_and_projects/data/research_acm.html",
       "/publications_and_projects/data/rag_hyde_huggingface.html",
       "/publications_and_projects/data/Autoencoder.html",
