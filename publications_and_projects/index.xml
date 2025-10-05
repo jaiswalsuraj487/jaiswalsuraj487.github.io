@@ -10,7 +10,53 @@
 <atom:link href="https://jaiswalsuraj487.github.io/publications_and_projects/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.7.33</generator>
-<lastBuildDate>Fri, 24 May 2024 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 16 Jul 2025 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Space to Policy: Scalable Brick Kiln Detection and Automatic Compliance Monitoring with Geospatial Data</title>
+  <dc:creator>Suraj Jaiswal</dc:creator>
+  <link>https://jaiswalsuraj487.github.io/publications_and_projects/data/research_acm_journel.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><strong><a href="https://dl.acm.org/doi/full/10.1145/3736649">Paper</a> accepted</strong> in <strong>ACM Journal on Computing and Sustainable Societies</strong></p>
+<!-- Live Streamlit Demo App: [link](https://brick-kilns-detector.streamlit.app/) -->
+<p><img src="https://jaiswalsuraj487.github.io/publications_and_projects/images/research_acm_journel/image.png" alt="Predicted brick kiln samples" style="max-width:100%; height:auto; display:block; margin:auto;"></p>
+<p align="center">
+<em>Figure:</em> A few samples of predicted brick kilns of each brick kiln category from our model. The first, second, and third rows correspond to <strong>CFCBK</strong>, <strong>FCBK</strong>, and <strong>Zigzag</strong>, respectively.
+</p>
+<ul>
+<li><strong>Objective:</strong> Built a scalable <strong>machine learning pipeline</strong> to detect and classify <strong>30,638 brick kilns</strong> across five states in India using <strong>Planet Labs satellite imagery</strong>.<br>
+</li>
+<li><strong>Context:</strong> Brick kilns contribute <strong>8–14% of India’s air pollution</strong> — accurate detection is vital for emission inventories and environmental governance.<br>
+</li>
+<li><strong>Technical Approach:</strong>
+<ul>
+<li>Trained <strong>YOLO-OBB models</strong> for oriented bounding box detection.<br>
+</li>
+<li>Developed a <strong>custom geo-annotation tool</strong> using <strong>Leafmap</strong> for labeling and visualization.<br>
+</li>
+<li>Implemented <strong>iterative hand-validation</strong> improving detection precision to <strong>82%</strong>.<br>
+</li>
+</ul></li>
+<li><strong>Dataset:</strong> Created the <strong>largest open brick kiln dataset</strong> (30k+ validated samples across 520,000 km²).<br>
+</li>
+<li><strong>Validation:</strong> Strong real-world correlation (<strong>r = 0.94</strong>) with official <strong>UPPCB 2023 survey</strong>.<br>
+</li>
+<li><strong>Impact:</strong> Enabled <strong>automated compliance analysis</strong> and <strong>policy integration</strong>, bridging the gap between <strong>AI, satellite imagery, and governance</strong>.</li>
+</ul>
+<p>To know more check: <a href="https://dl.acm.org/doi/full/10.1145/3736649">Paper</a></p>
+
+
+
+ ]]></description>
+  <category>Object Detection</category>
+  <category>Deep Learning</category>
+  <category>Satellite Imagery</category>
+  <guid>https://jaiswalsuraj487.github.io/publications_and_projects/data/research_acm_journel.html</guid>
+  <pubDate>Wed, 16 Jul 2025 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Eye in the Sky Detection and Compliance Monitoring of Brick</title>
   <dc:creator>Suraj Jaiswal</dc:creator>
