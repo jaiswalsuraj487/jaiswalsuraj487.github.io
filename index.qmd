@@ -15,7 +15,9 @@ about:
     - icon: github
       text: Github
       href: https://github.com/jaiswalsuraj487
-
+    - icon: google-scholar
+      text: Scholar
+      href: https://scholar.google.com/citations?user=560LfBoAAAAJ&hl=en
 ---
 
 Welcome to My Portfolio!
