@@ -11,12 +11,12 @@ about:
       href: mailto:jaiswalsuraj@iitgn.ac.in
     - icon: linkedin
       text: LinkedIn
-      href: https://www.linkedin.com/in/suraj-jaiswal-3494261b6/
+      href: https://www.linkedin.com/in/surajjaiswal007/
     - icon: github
       text: Github
       href: https://github.com/jaiswalsuraj487
     - icon: google-scholar
-      text: Scholar
+      text: Google Scholar
       href: https://scholar.google.com/citations?user=560LfBoAAAAJ&hl=en
 ---
 
