@@ -9,8 +9,8 @@
 <link>https://jaiswalsuraj487.github.io/blogs/</link>
 <atom:link href="https://jaiswalsuraj487.github.io/blogs/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
-<generator>quarto-1.7.33</generator>
-<lastBuildDate>Wed, 10 Sep 2025 00:00:00 GMT</lastBuildDate>
+<generator>quarto-1.6.33</generator>
+<lastBuildDate>Tue, 09 Sep 2025 18:30:00 GMT</lastBuildDate>
 <item>
   <title>Using FREE Gemini API with Fallback</title>
   <dc:creator>Suraj Jaiswal</dc:creator>
@@ -340,7 +340,7 @@ Final Response:
   <category>Agentic AI</category>
   <category>NLP</category>
   <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/free_llm_api.html</guid>
-  <pubDate>Wed, 10 Sep 2025 00:00:00 GMT</pubDate>
+  <pubDate>Tue, 09 Sep 2025 18:30:00 GMT</pubDate>
 </item>
 <item>
   <title>Graph RAG</title>
@@ -432,7 +432,7 @@ font-style: inherit;">"what are the top methods in this study?"</span></span></c
  ]]></description>
   <category>NLP</category>
   <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/graphrag.html</guid>
-  <pubDate>Tue, 30 Jul 2024 00:00:00 GMT</pubDate>
+  <pubDate>Mon, 29 Jul 2024 18:30:00 GMT</pubDate>
 </item>
 <item>
   <title>CI/CD Pipeline Documentation</title>
@@ -1242,7 +1242,7 @@ font-style: inherit;">]</span></span></code></pre></div>
  ]]></description>
   <category>System</category>
   <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/CICD Pipeline Documentation.html</guid>
-  <pubDate>Tue, 02 Jul 2024 00:00:00 GMT</pubDate>
+  <pubDate>Mon, 01 Jul 2024 18:30:00 GMT</pubDate>
 </item>
 <item>
   <title>Setting up Conda Environment for ML Projects</title>
@@ -1348,7 +1348,7 @@ font-style: inherit;">-hs</span></span></code></pre></div>
  ]]></description>
   <category>System</category>
   <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/conda_setup.html</guid>
-  <pubDate>Sun, 16 Jun 2024 00:00:00 GMT</pubDate>
+  <pubDate>Sat, 15 Jun 2024 18:30:00 GMT</pubDate>
 </item>
 <item>
   <title>Process and Screen</title>
@@ -1437,7 +1437,7 @@ font-style: inherit;">-hs</span></span></code></pre></div>
  ]]></description>
   <category>System</category>
   <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/process_and_screen.html</guid>
-  <pubDate>Sat, 18 Nov 2023 00:00:00 GMT</pubDate>
+  <pubDate>Fri, 17 Nov 2023 18:30:00 GMT</pubDate>
 </item>
 <item>
   <title>Logistic Regression using the Pyro</title>
@@ -2010,7 +2010,7 @@ font-style: inherit;"># Plot the decision boundary on the test data</span></span
  ]]></description>
   <category>Regression</category>
   <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/Logistic_regression_pyro.html</guid>
-  <pubDate>Thu, 09 Nov 2023 00:00:00 GMT</pubDate>
+  <pubDate>Wed, 08 Nov 2023 18:30:00 GMT</pubDate>
 </item>
 <item>
   <title>Image Super Resolution</title>
@@ -4150,7 +4150,7 @@ font-style: inherit;">1</span>)) </span></code></pre></div>
  ]]></description>
   <category>Deep Learning</category>
   <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/Image_super_resolution.html</guid>
-  <pubDate>Wed, 12 Jul 2023 00:00:00 GMT</pubDate>
+  <pubDate>Tue, 11 Jul 2023 18:30:00 GMT</pubDate>
 </item>
 <item>
   <title>Baysian Linear Regression blog</title>
@@ -6014,7 +6014,7 @@ font-style: inherit;">15</span>)</span>
   <category>Regression</category>
   <category>Bayesian</category>
   <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/blr_blog.html</guid>
-  <pubDate>Sun, 18 Jun 2023 00:00:00 GMT</pubDate>
+  <pubDate>Sat, 17 Jun 2023 18:30:00 GMT</pubDate>
 </item>
 <item>
   <title>Plots for bayesian LR</title>
@@ -7260,7 +7260,7 @@ font-style: inherit;">15</span>)</span>
 
  ]]></description>
   <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/demo.html</guid>
-  <pubDate>Mon, 12 Jun 2023 00:00:00 GMT</pubDate>
+  <pubDate>Sun, 11 Jun 2023 18:30:00 GMT</pubDate>
 </item>
 <item>
   <title>Baysian Linear Regression</title>
@@ -7707,7 +7707,7 @@ font-style: inherit;">;</span></span></code></pre></div>
 
  ]]></description>
   <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/Bayesian_Lineara_Regressiondemo.html</guid>
-  <pubDate>Mon, 05 Jun 2023 00:00:00 GMT</pubDate>
+  <pubDate>Sun, 04 Jun 2023 18:30:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
