@@ -5,8 +5,12 @@ website:
   title: "Suraj Jaiswal"
   site-url: https://jaiswalsuraj487.github.io/
   description: "Senior AI Engineer specializing in GenAI, NLP, and Computer Vision. Published at NeurIPS and ACM. Open to ML/AI Engineer roles."
-  open-graph: true
-  twitter-card: true
+  open-graph:
+    title: "Suraj Jaiswal | Senior AI Engineer | GenAI & NLP"
+    description: "Senior AI Engineer specializing in GenAI, NLP, and Computer Vision. Published at NeurIPS and ACM. Open to ML/AI Engineer roles."
+  twitter-card:
+    title: "Suraj Jaiswal | Senior AI Engineer | GenAI & NLP"
+    description: "Senior AI Engineer specializing in GenAI, NLP, and Computer Vision. Published at NeurIPS and ACM. Open to ML/AI Engineer roles."
   navbar:
     left:
       - href: about.qmd
