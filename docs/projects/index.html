@@ -6,10 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Suraj Jaiswal and Ayush Shrivastava">
-<meta name="dcterms.date" content="2024-06-16">
 
-<title>Setting up Conda Environment for ML Projects – Suraj Jaiswal</title>
+<title>Projects – Suraj Jaiswal</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,59 +20,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../../">
-<script src="../../site_libs/quarto-html/quarto.js"></script>
-<script src="../../site_libs/quarto-html/popper.min.js"></script>
-<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-07ba0ad10f5680c660e360ac31d2f3b6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-8bda806db8b623a4dafb352339cca83f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-listing/list.min.js"></script>
+<script src="../site_libs/quarto-listing/quarto-listing.js"></script>
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-07ba0ad10f5680c660e360ac31d2f3b6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-8bda806db8b623a4dafb352339cca83f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -102,10 +68,68 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script>
 
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-listing .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
 
-<link rel="stylesheet" href="../../styles.css">
-</head>
+    const options = {
+      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+<link rel="alternate" type="application/rss+xml" title="Suraj Jaiswal" href="index.xml" data-external="1"></head>
 
 <body class="nav-fixed">
 
@@ -114,7 +138,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../../index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">Suraj Jaiswal</span>
     </a>
   </div>
@@ -125,25 +149,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html"> 
+    <a class="nav-link" href="../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../blogs/index.html"> 
+    <a class="nav-link" href="../blogs/index.html"> 
 <span class="menu-text">Blogs</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../projects/index.html"> 
+    <a class="nav-link active" href="../projects/index.html" aria-current="page"> 
 <span class="menu-text">Projects</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../publications_and_projects/index.html"> 
+    <a class="nav-link" href="../publications_and_projects/index.html"> 
 <span class="menu-text">Publications</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../resume/Suraj_Jaiswal_Resume.pdf"> 
+    <a class="nav-link" href="../resume/Suraj_Jaiswal_Resume.pdf"> 
 <span class="menu-text">Resume</span></a>
   </li>  
 </ul>
@@ -154,50 +178,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#install-conda" id="toc-install-conda" class="nav-link active" data-scroll-target="#install-conda">Install Conda</a></li>
-  <li><a href="#creating-conda-environment" id="toc-creating-conda-environment" class="nav-link" data-scroll-target="#creating-conda-environment">Creating Conda Environment</a></li>
-  <li><a href="#installing-pytorch" id="toc-installing-pytorch" class="nav-link" data-scroll-target="#installing-pytorch">Installing Pytorch</a></li>
-  <li><a href="#to-check-occupied-space-in-folder" id="toc-to-check-occupied-space-in-folder" class="nav-link" data-scroll-target="#to-check-occupied-space-in-folder">To check occupied space in folder</a></li>
-  <li><a href="#some-useful-shortcuts" id="toc-some-useful-shortcuts" class="nav-link" data-scroll-target="#some-useful-shortcuts">Some useful shortcuts:</a></li>
-  </ul>
-</nav>
-    </div>
+        
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(4)</span></div><div class="category" data-category="Q29tcHV0ZXIgVmlzaW9u">Computer Vision <span class="quarto-category-count">(1)</span></div><div class="category" data-category="R2VuQUk=">GenAI <span class="quarto-category-count">(3)</span></div><div class="category" data-category="SGVhbHRoY2FyZQ==">Healthcare <span class="quarto-category-count">(1)</span></div><div class="category" data-category="TUxPcHM=">MLOps <span class="quarto-category-count">(2)</span></div><div class="category" data-category="TkxQ">NLP <span class="quarto-category-count">(2)</span></div></div></div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content column-page-left" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Setting up Conda Environment for ML Projects</h1>
-  <div class="quarto-categories">
-    <div class="quarto-category">System</div>
-  </div>
-  </div>
+<h1 class="title">Projects</h1>
+</div>
 
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page-left">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Suraj Jaiswal and Ayush Shrivastava </p>
-          </div>
-  </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">June 16, 2024</p>
-    </div>
-  </div>
   
     
   </div>
@@ -207,53 +206,164 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This blogpost is written for myself as I keep forgetting the steps to set up a conda environment for my ML projects.</p>
-<section id="install-conda" class="level2">
-<h2 class="anchored" data-anchor-id="install-conda">Install Conda</h2>
-<p>These four commands quickly and quietly install the latest 64-bit version of the installer and then clean up after themselves. To install a different version or architecture of Miniconda for Linux, change the name of the <code>.sh</code> installer in the <code>wget</code> command.</p>
-<p>Visit the <a href="https://docs.anaconda.com/free/miniconda/">Miniconda website</a> to find the latest version of Miniconda for Linux.</p>
-<p><img src="../../blogs/blogsData/images/conda_image.png" alt="conda logo" width="300" height="auto"></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/miniconda3</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh <span class="at">-O</span> ~/miniconda3/miniconda.sh</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> ~/miniconda3/miniconda.sh <span class="at">-b</span> <span class="at">-u</span> <span class="at">-p</span> ~/miniconda3</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> ~/miniconda3/miniconda.sh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>After installing, initialize your newly-installed Miniconda. The following commands initialize for bash and zsh shells:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">~/miniconda3/bin/conda</span> init bash</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">~/miniconda3/bin/conda</span> init zsh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>you can run <code>conda -V</code> to check if conda is installed correctly.</p>
-</section>
-<section id="creating-conda-environment" class="level2">
-<h2 class="anchored" data-anchor-id="creating-conda-environment">Creating Conda Environment</h2>
-<p>The below command will create the conda environment with the name <code>EnvName</code> and python version 3.9.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">--name</span> EnvName python=3.9 jupyter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>To activate the environment, run the below command:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate EnvName</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="installing-pytorch" class="level2">
-<h2 class="anchored" data-anchor-id="installing-pytorch">Installing Pytorch</h2>
-<p>Visit the <a href="https://pytorch.org/get-started/locally/">Pytorch website</a> to find the latest version of Pytorch. You can choose your system configuration and get the command to install Pytorch.</p>
-<p><img src="../../blogs/blogsData/images/ChooseBuild.png" alt="ChooseBuild" width="700" height="auto"></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install pytorch torchvision torchaudio pytorch-cuda=11.8 <span class="at">-c</span> pytorch <span class="at">-c</span> nvidia</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>check if everything is installed correctly by running the below command:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import torch; print(torch.__version__)"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Installing other libraries and packages.</p>
-</section>
-<section id="to-check-occupied-space-in-folder" class="level2">
-<h2 class="anchored" data-anchor-id="to-check-occupied-space-in-folder">To check occupied space in folder</h2>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> du <span class="at">-hs</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="some-useful-shortcuts" class="level2">
-<h2 class="anchored" data-anchor-id="some-useful-shortcuts">Some useful shortcuts:</h2>
-<ul>
-<li>To wrap words in VS code, use <code>Alt + Z</code></li>
-<li>To traverse between in mouse focus between files in VS code, use <code>Alt + Left/Right Arrow</code></li>
-</ul>
-<p>For more visit <a href="https://ayushshrivstava.github.io/">Ayush Shrivastava</a></p>
 
 
-</section>
 
-</main> <!-- /main -->
+
+<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
+<div class="list quarto-listing-default">
+<div class="quarto-post image-right" data-index="0" data-categories="Q29tcHV0ZXIgVmlzaW9uLE1MT3Bz" data-listing-date-sort="1743445800000" data-listing-file-modified-sort="1776549566024" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="435">
+<div class="thumbnail">
+<p><a href="../projects/data/safety_monitoring_pipeline.html" class="no-external"></a></p><a href="../projects/data/safety_monitoring_pipeline.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="../projects/data/safety_monitoring_pipeline.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="../projects/data/safety_monitoring_pipeline.html" class="no-external">Real-Time Safety Monitoring Pipeline</a>
+</h3>
+<div class="listing-subtitle">
+<a href="../projects/data/safety_monitoring_pipeline.html" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('Q29tcHV0ZXIgVmlzaW9u'); return false;">
+Computer Vision
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('TUxPcHM='); return false;">
+MLOps
+</div>
+</div>
+<div class="listing-description">
+<a href="../projects/data/safety_monitoring_pipeline.html" class="no-external">An edge-deployed, real-time compliance monitoring system for a chemical factory where workers operate on hazardous chemical containers. The system enforces multiple safety…</a>
+</div>
+</div>
+<div class="metadata">
+<a href="../projects/data/safety_monitoring_pipeline.html" class="no-external">
+<div class="listing-date">
+Apr 1, 2025
+</div>
+<div class="listing-author">
+Suraj Jaiswal
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="R2VuQUksTkxQ" data-listing-date-sort="1740767400000" data-listing-file-modified-sort="1776549197905" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="107">
+<div class="thumbnail">
+<p><a href="../projects/data/llm_code_evaluator.html" class="no-external"></a></p><a href="../projects/data/llm_code_evaluator.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="../projects/data/llm_code_evaluator.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="../projects/data/llm_code_evaluator.html" class="no-external">LLM-Based Code Evaluator</a>
+</h3>
+<div class="listing-subtitle">
+<a href="../projects/data/llm_code_evaluator.html" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('R2VuQUk='); return false;">
+GenAI
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('TkxQ'); return false;">
+NLP
+</div>
+</div>
+<div class="listing-description">
+<a href="../projects/data/llm_code_evaluator.html" class="no-external">Built an automated code evaluation system using LLMs to assess code quality, correctness, and adherence to requirements — replacing slow manual review workflows.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="../projects/data/llm_code_evaluator.html" class="no-external">
+<div class="listing-date">
+Mar 1, 2025
+</div>
+<div class="listing-author">
+Suraj Jaiswal
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-categories="R2VuQUksTUxPcHM=" data-listing-date-sort="1738348200000" data-listing-file-modified-sort="1776549234297" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="130">
+<div class="thumbnail">
+<p><a href="../projects/data/genai_bom_pipeline.html" class="no-external"></a></p><a href="../projects/data/genai_bom_pipeline.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="../projects/data/genai_bom_pipeline.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="../projects/data/genai_bom_pipeline.html" class="no-external">GenAI Bill-of-Materials Automation Pipeline</a>
+</h3>
+<div class="listing-subtitle">
+<a href="../projects/data/genai_bom_pipeline.html" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('R2VuQUk='); return false;">
+GenAI
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('TUxPcHM='); return false;">
+MLOps
+</div>
+</div>
+<div class="listing-description">
+<a href="../projects/data/genai_bom_pipeline.html" class="no-external">Designed and deployed a GenAI pipeline at Tiger Analytics to automate Bill-of-Materials (BoM) generation for lighting parts — replacing a largely manual, time-intensive…</a>
+</div>
+</div>
+<div class="metadata">
+<a href="../projects/data/genai_bom_pipeline.html" class="no-external">
+<div class="listing-date">
+Feb 1, 2025
+</div>
+<div class="listing-author">
+Suraj Jaiswal
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="3" data-categories="TkxQLEdlbkFJLEhlYWx0aGNhcmU=" data-listing-date-sort="1722450600000" data-listing-file-modified-sort="1776549217137" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="148">
+<div class="thumbnail">
+<p><a href="../projects/data/medical_rag_coding.html" class="no-external"></a></p><a href="../projects/data/medical_rag_coding.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="../projects/data/medical_rag_coding.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="../projects/data/medical_rag_coding.html" class="no-external">Medical RAG System for Automated Billing Code Generation</a>
+</h3>
+<div class="listing-subtitle">
+<a href="../projects/data/medical_rag_coding.html" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('TkxQ'); return false;">
+NLP
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('R2VuQUk='); return false;">
+GenAI
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('SGVhbHRoY2FyZQ=='); return false;">
+Healthcare
+</div>
+</div>
+<div class="listing-description">
+<a href="../projects/data/medical_rag_coding.html" class="no-external">Built a Retrieval-Augmented Generation (RAG) system at NeuroReef Labs to automate medical billing code generation from clinical notes and patient visit records.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="../projects/data/medical_rag_coding.html" class="no-external">
+<div class="listing-date">
+Aug 1, 2024
+</div>
+<div class="listing-author">
+Suraj Jaiswal
+</div>
+</a>
+</div>
+</div>
+</div>
+<div class="listing-no-matching d-none">
+No matching items
+</div>
+</div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

@@ -4,16 +4,19 @@ project:
 website:
   title: "Suraj Jaiswal"
   site-url: https://jaiswalsuraj487.github.io/
+  description: "Senior AI Engineer specializing in GenAI, NLP, and Computer Vision. Published at NeurIPS and ACM. Open to ML/AI Engineer roles."
+  open-graph: true
+  twitter-card: true
   navbar:
     left:
-      - href: index.qmd
-        text: Home
-      # - href: about.qmd
-      #   text: About
+      - href: about.qmd
+        text: About
       - href: blogs/index.qmd
         text: Blogs
-      - href: publications_and_projects/index.qmd 
-        text: Publications and Projects
+      - href: projects/index.qmd
+        text: Projects
+      - href: publications_and_projects/index.qmd
+        text: Publications
     right: 
       - href: resume/Suraj_Jaiswal_Resume.pdf
         text: Resume

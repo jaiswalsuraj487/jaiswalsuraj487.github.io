@@ -26,5 +26,14 @@
       "/blogs/blogsData/demo.html",
       "/blogs/blogsData/Bayesian_Lineara_Regressiondemo.html"
     ]
+  },
+  {
+    "listing": "/projects/index.html",
+    "items": [
+      "/projects/data/safety_monitoring_pipeline.html",
+      "/projects/data/llm_code_evaluator.html",
+      "/projects/data/genai_bom_pipeline.html",
+      "/projects/data/medical_rag_coding.html"
+    ]
   }
 ]

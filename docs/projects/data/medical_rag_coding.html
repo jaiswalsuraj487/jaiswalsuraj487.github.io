@@ -6,10 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Suraj Jaiswal and Ayush Shrivastava">
-<meta name="dcterms.date" content="2024-06-16">
+<meta name="author" content="Suraj Jaiswal">
+<meta name="dcterms.date" content="2024-08-01">
 
-<title>Setting up Conda Environment for ML Projects – Suraj Jaiswal</title>
+<title>Medical RAG System for Automated Billing Code Generation – Suraj Jaiswal</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,40 +21,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -157,27 +123,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#install-conda" id="toc-install-conda" class="nav-link active" data-scroll-target="#install-conda">Install Conda</a></li>
-  <li><a href="#creating-conda-environment" id="toc-creating-conda-environment" class="nav-link" data-scroll-target="#creating-conda-environment">Creating Conda Environment</a></li>
-  <li><a href="#installing-pytorch" id="toc-installing-pytorch" class="nav-link" data-scroll-target="#installing-pytorch">Installing Pytorch</a></li>
-  <li><a href="#to-check-occupied-space-in-folder" id="toc-to-check-occupied-space-in-folder" class="nav-link" data-scroll-target="#to-check-occupied-space-in-folder">To check occupied space in folder</a></li>
-  <li><a href="#some-useful-shortcuts" id="toc-some-useful-shortcuts" class="nav-link" data-scroll-target="#some-useful-shortcuts">Some useful shortcuts:</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Setting up Conda Environment for ML Projects</h1>
+<h1 class="title">Medical RAG System for Automated Billing Code Generation</h1>
   <div class="quarto-categories">
-    <div class="quarto-category">System</div>
+    <div class="quarto-category">NLP</div>
+    <div class="quarto-category">GenAI</div>
+    <div class="quarto-category">Healthcare</div>
   </div>
   </div>
 
@@ -188,14 +146,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Suraj Jaiswal and Ayush Shrivastava </p>
+             <p>Suraj Jaiswal </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 16, 2024</p>
+      <p class="date">August 1, 2024</p>
     </div>
   </div>
   
@@ -207,51 +165,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This blogpost is written for myself as I keep forgetting the steps to set up a conda environment for my ML projects.</p>
-<section id="install-conda" class="level2">
-<h2 class="anchored" data-anchor-id="install-conda">Install Conda</h2>
-<p>These four commands quickly and quietly install the latest 64-bit version of the installer and then clean up after themselves. To install a different version or architecture of Miniconda for Linux, change the name of the <code>.sh</code> installer in the <code>wget</code> command.</p>
-<p>Visit the <a href="https://docs.anaconda.com/free/miniconda/">Miniconda website</a> to find the latest version of Miniconda for Linux.</p>
-<p><img src="../../blogs/blogsData/images/conda_image.png" alt="conda logo" width="300" height="auto"></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/miniconda3</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh <span class="at">-O</span> ~/miniconda3/miniconda.sh</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> ~/miniconda3/miniconda.sh <span class="at">-b</span> <span class="at">-u</span> <span class="at">-p</span> ~/miniconda3</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> ~/miniconda3/miniconda.sh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>After installing, initialize your newly-installed Miniconda. The following commands initialize for bash and zsh shells:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">~/miniconda3/bin/conda</span> init bash</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">~/miniconda3/bin/conda</span> init zsh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>you can run <code>conda -V</code> to check if conda is installed correctly.</p>
-</section>
-<section id="creating-conda-environment" class="level2">
-<h2 class="anchored" data-anchor-id="creating-conda-environment">Creating Conda Environment</h2>
-<p>The below command will create the conda environment with the name <code>EnvName</code> and python version 3.9.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">--name</span> EnvName python=3.9 jupyter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>To activate the environment, run the below command:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate EnvName</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="installing-pytorch" class="level2">
-<h2 class="anchored" data-anchor-id="installing-pytorch">Installing Pytorch</h2>
-<p>Visit the <a href="https://pytorch.org/get-started/locally/">Pytorch website</a> to find the latest version of Pytorch. You can choose your system configuration and get the command to install Pytorch.</p>
-<p><img src="../../blogs/blogsData/images/ChooseBuild.png" alt="ChooseBuild" width="700" height="auto"></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install pytorch torchvision torchaudio pytorch-cuda=11.8 <span class="at">-c</span> pytorch <span class="at">-c</span> nvidia</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>check if everything is installed correctly by running the below command:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import torch; print(torch.__version__)"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Installing other libraries and packages.</p>
-</section>
-<section id="to-check-occupied-space-in-folder" class="level2">
-<h2 class="anchored" data-anchor-id="to-check-occupied-space-in-folder">To check occupied space in folder</h2>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> du <span class="at">-hs</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="some-useful-shortcuts" class="level2">
-<h2 class="anchored" data-anchor-id="some-useful-shortcuts">Some useful shortcuts:</h2>
+<p>Built a Retrieval-Augmented Generation (RAG) system at <a href="https://www.linkedin.com/company/neuroreef-labs/">NeuroReef Labs</a> to automate medical billing code generation from clinical notes and patient visit records.</p>
+<p><strong>Problem:</strong> Medical coders manually assign ICD-10, CPT, SNOMED, and HCC codes to every patient visit — a slow, error-prone process that delays billing and reimbursement.</p>
+<p><strong>Solution:</strong></p>
 <ul>
-<li>To wrap words in VS code, use <code>Alt + Z</code></li>
-<li>To traverse between in mouse focus between files in VS code, use <code>Alt + Left/Right Arrow</code></li>
+<li>RAG pipeline over clinical documentation to retrieve relevant coding guidelines and past examples</li>
+<li>LLM generates billing codes grounded in retrieved context, reducing hallucinations</li>
+<li><strong>HyDE (Hypothetical Document Embeddings)</strong> used in the medical chatbot over Athena EHR data for improved retrieval quality</li>
+<li>Applied <strong>few-shot prompt tuning</strong> for medical guideline-consistent outputs</li>
 </ul>
-<p>For more visit <a href="https://ayushshrivstava.github.io/">Ayush Shrivastava</a></p>
+<p><strong>Codes Automated:</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Code Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ICD-10</td>
+<td>Diagnosis classification</td>
+</tr>
+<tr class="even">
+<td>CPT</td>
+<td>Procedure billing</td>
+</tr>
+<tr class="odd">
+<td>SNOMED</td>
+<td>Clinical terminology</td>
+</tr>
+<tr class="even">
+<td>HCC</td>
+<td>Risk adjustment for Medicare</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tech Stack:</strong> <code>Python</code> <code>OpenAI API</code> <code>RAG</code> <code>HyDE</code> <code>HuggingFace</code> <code>Athena EHR</code> <code>Prompt Engineering</code></p>
+<p><strong>Impact:</strong> Reduced manual coding effort for medical billing, improving accuracy and turnaround time for reimbursement workflows.</p>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

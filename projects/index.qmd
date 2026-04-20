@@ -1,5 +1,5 @@
 ---
-title: Publications
+title: Projects
 listing:
     sort: 'date desc'
     contents: 'data'
@@ -10,6 +10,3 @@ listing:
     type: default
 page-layout: full
 ---
-
-
-

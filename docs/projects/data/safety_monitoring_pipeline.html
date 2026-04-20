@@ -6,10 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Suraj Jaiswal and Ayush Shrivastava">
-<meta name="dcterms.date" content="2024-06-16">
+<meta name="author" content="Suraj Jaiswal">
+<meta name="dcterms.date" content="2025-04-01">
 
-<title>Setting up Conda Environment for ML Projects – Suraj Jaiswal</title>
+<title>Real-Time Safety Monitoring Pipeline – Suraj Jaiswal</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,40 +21,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -162,11 +128,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#install-conda" id="toc-install-conda" class="nav-link active" data-scroll-target="#install-conda">Install Conda</a></li>
-  <li><a href="#creating-conda-environment" id="toc-creating-conda-environment" class="nav-link" data-scroll-target="#creating-conda-environment">Creating Conda Environment</a></li>
-  <li><a href="#installing-pytorch" id="toc-installing-pytorch" class="nav-link" data-scroll-target="#installing-pytorch">Installing Pytorch</a></li>
-  <li><a href="#to-check-occupied-space-in-folder" id="toc-to-check-occupied-space-in-folder" class="nav-link" data-scroll-target="#to-check-occupied-space-in-folder">To check occupied space in folder</a></li>
-  <li><a href="#some-useful-shortcuts" id="toc-some-useful-shortcuts" class="nav-link" data-scroll-target="#some-useful-shortcuts">Some useful shortcuts:</a></li>
+  <li><a href="#use-cases" id="toc-use-cases" class="nav-link active" data-scroll-target="#use-cases">Use Cases</a></li>
+  <li><a href="#method" id="toc-method" class="nav-link" data-scroll-target="#method">Method</a></li>
+  <li><a href="#implementation" id="toc-implementation" class="nav-link" data-scroll-target="#implementation">Implementation</a></li>
+  <li><a href="#deployment-architecture" id="toc-deployment-architecture" class="nav-link" data-scroll-target="#deployment-architecture">Deployment Architecture</a></li>
+  <li><a href="#outcomes" id="toc-outcomes" class="nav-link" data-scroll-target="#outcomes">Outcomes</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
   </ul>
 </nav>
     </div>
@@ -175,9 +142,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Setting up Conda Environment for ML Projects</h1>
+<h1 class="title">Real-Time Safety Monitoring Pipeline</h1>
   <div class="quarto-categories">
-    <div class="quarto-category">System</div>
+    <div class="quarto-category">Computer Vision</div>
+    <div class="quarto-category">MLOps</div>
   </div>
   </div>
 
@@ -188,14 +156,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Suraj Jaiswal and Ayush Shrivastava </p>
+             <p>Suraj Jaiswal </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 16, 2024</p>
+      <p class="date">April 1, 2025</p>
     </div>
   </div>
   
@@ -207,48 +175,128 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This blogpost is written for myself as I keep forgetting the steps to set up a conda environment for my ML projects.</p>
-<section id="install-conda" class="level2">
-<h2 class="anchored" data-anchor-id="install-conda">Install Conda</h2>
-<p>These four commands quickly and quietly install the latest 64-bit version of the installer and then clean up after themselves. To install a different version or architecture of Miniconda for Linux, change the name of the <code>.sh</code> installer in the <code>wget</code> command.</p>
-<p>Visit the <a href="https://docs.anaconda.com/free/miniconda/">Miniconda website</a> to find the latest version of Miniconda for Linux.</p>
-<p><img src="../../blogs/blogsData/images/conda_image.png" alt="conda logo" width="300" height="auto"></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/miniconda3</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh <span class="at">-O</span> ~/miniconda3/miniconda.sh</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> ~/miniconda3/miniconda.sh <span class="at">-b</span> <span class="at">-u</span> <span class="at">-p</span> ~/miniconda3</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> ~/miniconda3/miniconda.sh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>After installing, initialize your newly-installed Miniconda. The following commands initialize for bash and zsh shells:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">~/miniconda3/bin/conda</span> init bash</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">~/miniconda3/bin/conda</span> init zsh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>you can run <code>conda -V</code> to check if conda is installed correctly.</p>
-</section>
-<section id="creating-conda-environment" class="level2">
-<h2 class="anchored" data-anchor-id="creating-conda-environment">Creating Conda Environment</h2>
-<p>The below command will create the conda environment with the name <code>EnvName</code> and python version 3.9.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">--name</span> EnvName python=3.9 jupyter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>To activate the environment, run the below command:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate EnvName</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="installing-pytorch" class="level2">
-<h2 class="anchored" data-anchor-id="installing-pytorch">Installing Pytorch</h2>
-<p>Visit the <a href="https://pytorch.org/get-started/locally/">Pytorch website</a> to find the latest version of Pytorch. You can choose your system configuration and get the command to install Pytorch.</p>
-<p><img src="../../blogs/blogsData/images/ChooseBuild.png" alt="ChooseBuild" width="700" height="auto"></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install pytorch torchvision torchaudio pytorch-cuda=11.8 <span class="at">-c</span> pytorch <span class="at">-c</span> nvidia</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>check if everything is installed correctly by running the below command:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import torch; print(torch.__version__)"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Installing other libraries and packages.</p>
-</section>
-<section id="to-check-occupied-space-in-folder" class="level2">
-<h2 class="anchored" data-anchor-id="to-check-occupied-space-in-folder">To check occupied space in folder</h2>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> du <span class="at">-hs</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="some-useful-shortcuts" class="level2">
-<h2 class="anchored" data-anchor-id="some-useful-shortcuts">Some useful shortcuts:</h2>
+<p>An edge-deployed, real-time compliance monitoring system for a chemical factory where workers operate on hazardous chemical containers. The system enforces multiple safety use cases simultaneously using a modular deep learning pipeline.</p>
+<hr>
+<section id="use-cases" class="level2">
+<h2 class="anchored" data-anchor-id="use-cases">Use Cases</h2>
 <ul>
-<li>To wrap words in VS code, use <code>Alt + Z</code></li>
-<li>To traverse between in mouse focus between files in VS code, use <code>Alt + Left/Right Arrow</code></li>
+<li><strong>PPE compliance:</strong> Detect whether workers wear safety vest and hard hat</li>
+<li><strong>Harness &amp; lanyard:</strong> Verify workers on containers are tethered to the ceiling via harness and lanyard</li>
+<li><strong>Container tracking:</strong> Detect ingoing/outgoing trucks with containers and extract ISO numbers via OCR</li>
 </ul>
-<p>For more visit <a href="https://ayushshrivstava.github.io/">Ayush Shrivastava</a></p>
+<hr>
+</section>
+<section id="method" class="level2">
+<h2 class="anchored" data-anchor-id="method">Method</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>YOLOX</strong></td>
+<td>Person and container detection</td>
+</tr>
+<tr class="even">
+<td><strong>MobileNet</strong></td>
+<td>Safety vest, hard hat, harness classification</td>
+</tr>
+<tr class="odd">
+<td><strong>OCSort</strong></td>
+<td>Stable multi-object tracking for unique ID assignment</td>
+</tr>
+<tr class="even">
+<td><strong>Segmentation</strong></td>
+<td>Inclusion/exclusion zone identification</td>
+</tr>
+<tr class="odd">
+<td><strong>OCR</strong></td>
+<td>Parse ISO numbers from container surfaces</td>
+</tr>
+<tr class="even">
+<td><strong>Qwen 7B (quantized VLM)</strong></td>
+<td>Lanyard detection (thin rope — classical models insufficient)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="implementation" class="level2">
+<h2 class="anchored" data-anchor-id="implementation">Implementation</h2>
+<p><strong>Dataset Collection:</strong> - Recorded video from live CCTV RTSP streams - Ran GroundingDINO auto-annotation over videos to extract person and container crops - Parent person crop used to generate safety vest, hard hat, and harness instances - Validated and cleaned dataset before training</p>
+<p><strong>Inference Flow — PPE:</strong></p>
+<pre><code>Video → extract frame → YOLOX (person) → OCSort (tracking)
+→ parallel: (a) safety_vest  (b) hard_hat  (c) harness
+→ if harness detected → Qwen 7B VLM for lanyard check</code></pre>
+<p><strong>Inference Flow — Container ISO:</strong></p>
+<pre><code>Video → extract frames → YOLOX (container) → OCSort (tracking)
+→ OCR on container crop → extract ISO number</code></pre>
+<blockquote class="blockquote">
+<p>Qwen 7B VLM is called <strong>only when harness is detected</strong> to minimize API calls (each VLM call takes 2–3 seconds).</p>
+</blockquote>
+<hr>
+</section>
+<section id="deployment-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="deployment-architecture">Deployment Architecture</h2>
+<p>Hosted on <strong>Triton Server</strong> with separate Docker containers per module on an edge device:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Container</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>s3_sync</code></td>
+<td>Syncs model versions and run configs with AWS S3</td>
+</tr>
+<tr class="even">
+<td><code>triton_hosting</code></td>
+<td>Queue-based async, scalable model request processing</td>
+</tr>
+<tr class="odd">
+<td><code>vlm_inference</code></td>
+<td>Hosts Qwen7B quantized (called conditionally)</td>
+</tr>
+<tr class="even">
+<td><code>use_case_aggregation</code></td>
+<td>Runs main inference loop, saves JSON annotation logs</td>
+</tr>
+<tr class="odd">
+<td><code>violation_detection</code></td>
+<td>Checks intervals — flags violations if PPE absent &gt; N seconds, pushes to frontend DB</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="outcomes" class="level2">
+<h2 class="anchored" data-anchor-id="outcomes">Outcomes</h2>
+<ul>
+<li>Detected safety vest, hard hat, harness, and lanyard compliance in real time</li>
+<li>Container ISO numbers accurately extracted via OCR</li>
+<li>Interval-based violation detection reduced false positives</li>
+<li>Modular pipeline handled multiple workers and containers simultaneously with stable tracking</li>
+</ul>
+<p><strong>Tech Stack:</strong> <code>Python</code> <code>YOLOX</code> <code>MobileNet</code> <code>OCSort</code> <code>GroundingDINO</code> <code>Qwen 7B</code> <code>Triton Server</code> <code>Docker</code> <code>AWS S3</code> <code>AWS IoT Core</code> <code>OCR</code></p>
+<hr>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<p>A modular, edge-deployed pipeline combining detection (YOLOX), tracking (OCSort), classification (MobileNet), and VLM-based reasoning (Qwen7B) is highly effective for real-time multi-use-case industrial compliance. Conditional VLM inference significantly reduced latency and API costs without compromising accuracy.</p>
+<p><strong>Known limitations:</strong> Lanyard detection is challenging due to its thin, flexible nature. VLM inference latency (2–3s/call) is a bottleneck. Performance degrades in poor lighting or suboptimal CCTV placement.</p>
 
 
 </section>

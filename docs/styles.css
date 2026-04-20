@@ -1,1 +1,88 @@
-/* css styles */
+
+/* Profile header */
+.profile-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.profile-photo {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.profile-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 4px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.875em;
+  color: #333;
+}
+
+.profile-links a:hover {
+  border-color: #1a56db;
+  color: #1a56db;
+}
+
+/* Name title size */
+.profile-name {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+/* Skill badges — pill style */
+code {
+  background-color: #f0f4ff;
+  color: #1a56db;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.82em;
+  font-weight: 500;
+  border: 1px solid #c7d7fa;
+  font-family: inherit;
+}
+
+/* Breathing room between badge lines */
+p:has(code) {
+  line-height: 2.4;
+}
+
+/* Left/right padding for full-page content */
+main.content {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Space between sections (after bullet lists) */
+ul + p {
+  margin-top: 1.8rem;
+}
+
+/* Section labels (Currently / Previously / Research) — larger, accented */
+p > strong:first-child {
+  font-size: 1.05rem;
+  color: #1a56db;
+  border-left: 3px solid #1a56db;
+  padding-left: 0.5rem;
+}

@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>Suraj Jaiswal</title>
+<link>https://jaiswalsuraj487.github.io/projects/</link>
+<atom:link href="https://jaiswalsuraj487.github.io/projects/index.xml" rel="self" type="application/rss+xml"/>
+<description></description>
+<generator>quarto-1.6.33</generator>
+<lastBuildDate>Mon, 31 Mar 2025 18:30:00 GMT</lastBuildDate>
+<item>
+  <title>Real-Time Safety Monitoring Pipeline</title>
+  <dc:creator>Suraj Jaiswal</dc:creator>
+  <link>https://jaiswalsuraj487.github.io/projects/data/safety_monitoring_pipeline.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>An edge-deployed, real-time compliance monitoring system for a chemical factory where workers operate on hazardous chemical containers. The system enforces multiple safety use cases simultaneously using a modular deep learning pipeline.</p>
+<hr>
+<section id="use-cases" class="level2">
+<h2 class="anchored" data-anchor-id="use-cases">Use Cases</h2>
+<ul>
+<li><strong>PPE compliance:</strong> Detect whether workers wear safety vest and hard hat</li>
+<li><strong>Harness &amp; lanyard:</strong> Verify workers on containers are tethered to the ceiling via harness and lanyard</li>
+<li><strong>Container tracking:</strong> Detect ingoing/outgoing trucks with containers and extract ISO numbers via OCR</li>
+</ul>
+<hr>
+</section>
+<section id="method" class="level2">
+<h2 class="anchored" data-anchor-id="method">Method</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>YOLOX</strong></td>
+<td>Person and container detection</td>
+</tr>
+<tr class="even">
+<td><strong>MobileNet</strong></td>
+<td>Safety vest, hard hat, harness classification</td>
+</tr>
+<tr class="odd">
+<td><strong>OCSort</strong></td>
+<td>Stable multi-object tracking for unique ID assignment</td>
+</tr>
+<tr class="even">
+<td><strong>Segmentation</strong></td>
+<td>Inclusion/exclusion zone identification</td>
+</tr>
+<tr class="odd">
+<td><strong>OCR</strong></td>
+<td>Parse ISO numbers from container surfaces</td>
+</tr>
+<tr class="even">
+<td><strong>Qwen 7B (quantized VLM)</strong></td>
+<td>Lanyard detection (thin rope — classical models insufficient)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="implementation" class="level2">
+<h2 class="anchored" data-anchor-id="implementation">Implementation</h2>
+<p><strong>Dataset Collection:</strong> - Recorded video from live CCTV RTSP streams - Ran GroundingDINO auto-annotation over videos to extract person and container crops - Parent person crop used to generate safety vest, hard hat, and harness instances - Validated and cleaned dataset before training</p>
+<p><strong>Inference Flow — PPE:</strong></p>
+<pre><code>Video → extract frame → YOLOX (person) → OCSort (tracking)
+→ parallel: (a) safety_vest  (b) hard_hat  (c) harness
+→ if harness detected → Qwen 7B VLM for lanyard check</code></pre>
+<p><strong>Inference Flow — Container ISO:</strong></p>
+<pre><code>Video → extract frames → YOLOX (container) → OCSort (tracking)
+→ OCR on container crop → extract ISO number</code></pre>
+<blockquote class="blockquote">
+<p>Qwen 7B VLM is called <strong>only when harness is detected</strong> to minimize API calls (each VLM call takes 2–3 seconds).</p>
+</blockquote>
+<hr>
+</section>
+<section id="deployment-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="deployment-architecture">Deployment Architecture</h2>
+<p>Hosted on <strong>Triton Server</strong> with separate Docker containers per module on an edge device:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Container</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>s3_sync</code></td>
+<td>Syncs model versions and run configs with AWS S3</td>
+</tr>
+<tr class="even">
+<td><code>triton_hosting</code></td>
+<td>Queue-based async, scalable model request processing</td>
+</tr>
+<tr class="odd">
+<td><code>vlm_inference</code></td>
+<td>Hosts Qwen7B quantized (called conditionally)</td>
+</tr>
+<tr class="even">
+<td><code>use_case_aggregation</code></td>
+<td>Runs main inference loop, saves JSON annotation logs</td>
+</tr>
+<tr class="odd">
+<td><code>violation_detection</code></td>
+<td>Checks intervals — flags violations if PPE absent &gt; N seconds, pushes to frontend DB</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="outcomes" class="level2">
+<h2 class="anchored" data-anchor-id="outcomes">Outcomes</h2>
+<ul>
+<li>Detected safety vest, hard hat, harness, and lanyard compliance in real time</li>
+<li>Container ISO numbers accurately extracted via OCR</li>
+<li>Interval-based violation detection reduced false positives</li>
+<li>Modular pipeline handled multiple workers and containers simultaneously with stable tracking</li>
+</ul>
+<p><strong>Tech Stack:</strong> <code>Python</code> <code>YOLOX</code> <code>MobileNet</code> <code>OCSort</code> <code>GroundingDINO</code> <code>Qwen 7B</code> <code>Triton Server</code> <code>Docker</code> <code>AWS S3</code> <code>AWS IoT Core</code> <code>OCR</code></p>
+<hr>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<p>A modular, edge-deployed pipeline combining detection (YOLOX), tracking (OCSort), classification (MobileNet), and VLM-based reasoning (Qwen7B) is highly effective for real-time multi-use-case industrial compliance. Conditional VLM inference significantly reduced latency and API costs without compromising accuracy.</p>
+<p><strong>Known limitations:</strong> Lanyard detection is challenging due to its thin, flexible nature. VLM inference latency (2–3s/call) is a bottleneck. Performance degrades in poor lighting or suboptimal CCTV placement.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Computer Vision</category>
+  <category>MLOps</category>
+  <guid>https://jaiswalsuraj487.github.io/projects/data/safety_monitoring_pipeline.html</guid>
+  <pubDate>Mon, 31 Mar 2025 18:30:00 GMT</pubDate>
+</item>
+<item>
+  <title>LLM-Based Code Evaluator</title>
+  <dc:creator>Suraj Jaiswal</dc:creator>
+  <link>https://jaiswalsuraj487.github.io/projects/data/llm_code_evaluator.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Built an automated code evaluation system using LLMs to assess code quality, correctness, and adherence to requirements — replacing slow manual review workflows.</p>
+<p><strong>Key Highlights:</strong></p>
+<ul>
+<li><strong>3× throughput improvement</strong> over manual evaluation baseline</li>
+<li><strong>90% reduction</strong> in manual review time</li>
+<li>Multi-threaded Streamlit UI enabling parallel evaluation of multiple submissions</li>
+</ul>
+<p><strong>Technical Approach:</strong></p>
+<ul>
+<li>OpenAI API for LLM-based code assessment with structured prompt engineering</li>
+<li>Multi-threaded execution for parallel evaluation runs</li>
+<li>Configurable scoring rubrics per evaluation criteria (correctness, style, efficiency)</li>
+<li>Streamlit frontend for reviewers to inspect and override evaluations</li>
+</ul>
+<p><strong>Tech Stack:</strong> <code>Python</code> <code>OpenAI API</code> <code>Streamlit</code> <code>Prompt Engineering</code> <code>Multi-threading</code></p>
+<p><strong>Impact:</strong> Scaled code review capacity by 3× while cutting reviewer time by 90%, enabling faster hiring and assessment pipelines.</p>
+
+
+
+ ]]></description>
+  <category>GenAI</category>
+  <category>NLP</category>
+  <guid>https://jaiswalsuraj487.github.io/projects/data/llm_code_evaluator.html</guid>
+  <pubDate>Fri, 28 Feb 2025 18:30:00 GMT</pubDate>
+</item>
+<item>
+  <title>GenAI Bill-of-Materials Automation Pipeline</title>
+  <dc:creator>Suraj Jaiswal</dc:creator>
+  <link>https://jaiswalsuraj487.github.io/projects/data/genai_bom_pipeline.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Designed and deployed a GenAI pipeline at <a href="https://www.tigeranalytics.com/">Tiger Analytics</a> to automate Bill-of-Materials (BoM) generation for lighting parts — replacing a largely manual, time-intensive process.</p>
+<p><strong>Problem:</strong> Generating structured BoMs for lighting components required engineers to manually extract and organize part specifications from unstructured documents, taking significant time per product.</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li>LLM-based structured extraction pipeline using <strong>AWS Bedrock</strong> to parse product datasheets and specifications</li>
+<li>Experiment tracking and model versioning with <strong>MLflow</strong></li>
+<li>Containerised with <strong>Docker</strong> for reproducible, production-ready deployment</li>
+<li>Output structured BoMs with part names, specifications, quantities, and supplier info</li>
+</ul>
+<p><strong>Key Results:</strong></p>
+<ul>
+<li><strong>80% reduction</strong> in manual BoM generation time</li>
+<li>Consistent structured output across diverse document formats (PDFs, HTML specs, Excel sheets)</li>
+</ul>
+<p><strong>Tech Stack:</strong> <code>Python</code> <code>AWS Bedrock</code> <code>MLflow</code> <code>Docker</code> <code>Prompt Engineering</code> <code>Structured Extraction</code></p>
+<p><strong>Impact:</strong> Freed up engineering time from repetitive data entry, enabling faster product configuration and procurement workflows.</p>
+
+
+
+ ]]></description>
+  <category>GenAI</category>
+  <category>MLOps</category>
+  <guid>https://jaiswalsuraj487.github.io/projects/data/genai_bom_pipeline.html</guid>
+  <pubDate>Fri, 31 Jan 2025 18:30:00 GMT</pubDate>
+</item>
+<item>
+  <title>Medical RAG System for Automated Billing Code Generation</title>
+  <dc:creator>Suraj Jaiswal</dc:creator>
+  <link>https://jaiswalsuraj487.github.io/projects/data/medical_rag_coding.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Built a Retrieval-Augmented Generation (RAG) system at <a href="https://www.linkedin.com/company/neuroreef-labs/">NeuroReef Labs</a> to automate medical billing code generation from clinical notes and patient visit records.</p>
+<p><strong>Problem:</strong> Medical coders manually assign ICD-10, CPT, SNOMED, and HCC codes to every patient visit — a slow, error-prone process that delays billing and reimbursement.</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li>RAG pipeline over clinical documentation to retrieve relevant coding guidelines and past examples</li>
+<li>LLM generates billing codes grounded in retrieved context, reducing hallucinations</li>
+<li><strong>HyDE (Hypothetical Document Embeddings)</strong> used in the medical chatbot over Athena EHR data for improved retrieval quality</li>
+<li>Applied <strong>few-shot prompt tuning</strong> for medical guideline-consistent outputs</li>
+</ul>
+<p><strong>Codes Automated:</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Code Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ICD-10</td>
+<td>Diagnosis classification</td>
+</tr>
+<tr class="even">
+<td>CPT</td>
+<td>Procedure billing</td>
+</tr>
+<tr class="odd">
+<td>SNOMED</td>
+<td>Clinical terminology</td>
+</tr>
+<tr class="even">
+<td>HCC</td>
+<td>Risk adjustment for Medicare</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tech Stack:</strong> <code>Python</code> <code>OpenAI API</code> <code>RAG</code> <code>HyDE</code> <code>HuggingFace</code> <code>Athena EHR</code> <code>Prompt Engineering</code></p>
+<p><strong>Impact:</strong> Reduced manual coding effort for medical billing, improving accuracy and turnaround time for reimbursement workflows.</p>
+
+
+
+ ]]></description>
+  <category>NLP</category>
+  <category>GenAI</category>
+  <category>Healthcare</category>
+  <guid>https://jaiswalsuraj487.github.io/projects/data/medical_rag_coding.html</guid>
+  <pubDate>Wed, 31 Jul 2024 18:30:00 GMT</pubDate>
+</item>
+</channel>
+</rss>

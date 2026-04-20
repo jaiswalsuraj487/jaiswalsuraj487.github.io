@@ -1,5 +1,81 @@
 ---
-title: "About"
+title: "About Me"
 ---
 
-About this site
+## Who I Am
+
+I'm a Senior AI Engineer with 3+ years of experience building production GenAI and ML systems across healthcare, industrial automation, and environmental monitoring. I hold an M.Tech in Computer Science from IIT Gandhinagar, where my research on scalable satellite-based detection was published at NeurIPS 2023, ACM Compass 2024, and ACM Journal 2025.
+
+I care about AI that does something real — systems that reduce manual work by 80%, catch safety violations in real time, or help doctors spend less time on paperwork. That's the kind of work I want to keep doing.
+
+Currently exploring **Senior AI/ML Engineer**, **NLP Engineer**, and **Applied Scientist** roles. Open to full-time positions in India or remote.
+
+---
+
+## Experience
+
+**Senior AI/ML Associate — Tiger Analytics** `Dec 2024 – Present`
+
+- Multi-agent AI interview orchestrator (LangChain + LangGraph) with async FastAPI + WebSocket backend
+- GenAI Bill-of-Materials pipeline (AWS Bedrock + MLflow + Docker) — **80% reduction** in manual generation time
+- LLM code evaluator — **3× throughput**, **90% reduction** in manual review time
+- Real-time safety monitoring pipeline (CCTV/RTSP + AWS IoT Core) — **~100ms** latency
+- CV stack: GroundingDINO auto-annotation, YOLOX detection, OCSort tracking, PPE + harness classification, OCR for ISO extraction
+
+**NLP Engineer — NeuroReef Labs** `Oct 2023 – Oct 2024`
+
+- [CareCortex](https://carecortex.ai/) — AI copilot for real-time medical note-taking, fine-tuned on clinical guidelines
+- RAG system for automated ICD-10, CPT, SNOMED, and HCC medical billing code generation
+- Medical chatbot using HyDE + RAG over Athena EHR data
+
+**Researcher — IIT Gandhinagar** `Jul 2022 – Oct 2023`
+
+- Detected and classified **30,638 brick kilns** across 5 Indian states — 82% precision over 520,000 km²
+- Published at NeurIPS 2023 (best paper nominee), ACM Compass 2024, ACM Journal 2025
+
+---
+
+## Skills
+
+**GenAI / NLP**
+`LangChain` `LangGraph` `RAG` `HyDE` `OpenAI API` `HuggingFace` `Prompt Engineering` `Fine-tuning`
+
+**ML / Computer Vision**
+`PyTorch` `TensorFlow` `Scikit-learn` `YOLOv8` `YOLOX` `YOLO-OBB` `GroundingDINO` `OCSort` `Active Learning`
+
+**Backend / MLOps / Infra**
+`FastAPI` `WebSocket` `Docker` `MLflow` `AWS (S3, EC2, Bedrock, ECR, IoT Core)` `Boto3` `GitHub Actions`
+
+**Languages & Tools**
+`Python` `SQL` `C` `Streamlit` `Leafmap` `Git`
+
+---
+
+## Education
+
+| Degree | Institution | Year |
+|---|---|---|
+| M.Tech — Computer Science & Engineering | Indian Institute of Technology Gandhinagar (IIT-GN) | 2022 – 2024 |
+| B.Tech — Computer Science & Engineering | Gujarat Technological University | 2018 – 2022 |
+
+---
+
+## Achievements
+
+- **Hackathon Winner** — "AI Engine for Google Drive", ThirdAI Corp. Built Neural DB for semantic search over Drive documents.
+- **GATE Computer Science** — 97th percentile (Graduate Aptitude Test in Engineering)
+- **NeurIPS 2023 Best Paper Nominee** — Workshop on Active Learning in the Real World
+
+---
+
+## What I'm Looking For
+
+I'm actively exploring roles where I can:
+
+- Build and ship production-grade GenAI / NLP systems
+- Work on problems with measurable real-world impact
+- Collaborate with a strong technical team
+
+**Target roles:** Senior AI Engineer · Senior ML Engineer · NLP Engineer · Applied Scientist
+**Open to:** Full-time · India (on-site or hybrid) · Remote
+**Reach me:** [jaiswalsuraj487@gmail.com](mailto:jaiswalsuraj487@gmail.com) · [LinkedIn](https://www.linkedin.com/in/surajjaiswal007/)
