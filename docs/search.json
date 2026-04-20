@@ -263,7 +263,7 @@
     "href": "blogs/blogsData/blr_blog.html",
     "title": "Baysian Linear Regression blog",
     "section": "",
-    "text": "Welcome to my blog on Bayesian linear regression, where we explore the power of this technique. While traditional linear regression provides point estimates, Bayesian linear regression incorporates prior knowledge and quantifies uncertainty. By combining observed data with prior beliefs, we make more informed decisions. Throughout this blog, we’ll delve into key components like probalistic approch to linear regression, basics of types of uncertainity, prior distributions, likelihood functions, and posterior inference. Let’s embark on this enlightening journey together."
+    "text": "—title: “Baysian Linear Regression blog”author: “Suraj Jaiswal”date: “June 18, 2023”format: htmlcategories: [“Regression”, “Bayesian”]execute: freeze: true—\nWelcome to my blog on Bayesian linear regression, where we explore the power of this technique. While traditional linear regression provides point estimates, Bayesian linear regression incorporates prior knowledge and quantifies uncertainty. By combining observed data with prior beliefs, we make more informed decisions. Throughout this blog, we’ll delve into key components like probalistic approch to linear regression, basics of types of uncertainity, prior distributions, likelihood functions, and posterior inference. Let’s embark on this enlightening journey together."
   },
   {
     "objectID": "blogs/blogsData/blr_blog.html#maximum-likelihood",

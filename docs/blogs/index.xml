@@ -8,7 +8,7 @@
 <title>Suraj Jaiswal</title>
 <link>https://jaiswalsuraj487.github.io/blogs/</link>
 <atom:link href="https://jaiswalsuraj487.github.io/blogs/index.xml" rel="self" type="application/rss+xml"/>
-<description></description>
+<description>Senior AI Engineer specializing in GenAI, NLP, and Computer Vision. Published at NeurIPS and ACM. Open to ML/AI Engineer roles.</description>
 <generator>quarto-1.6.33</generator>
 <lastBuildDate>Tue, 09 Sep 2025 18:30:00 GMT</lastBuildDate>
 <item>
@@ -4161,6 +4161,7 @@ font-style: inherit;">1</span>)) </span></code></pre></div>
 
 
 
+<p>—title: “Baysian Linear Regression blog”author: “Suraj Jaiswal”date: “June 18, 2023”format: htmlcategories: [“Regression”, “Bayesian”]execute: freeze: true—</p>
 <p>Welcome to my blog on Bayesian linear regression, where we explore the power of this technique. While traditional linear regression provides point estimates, Bayesian linear regression incorporates prior knowledge and quantifies uncertainty. By combining observed data with prior beliefs, we make more informed decisions. Throughout this blog, we’ll delve into key components like probalistic approch to linear regression, basics of types of uncertainity, prior distributions, likelihood functions, and posterior inference. Let’s embark on this enlightening journey together.</p>
 <section id="what-is-uncertainity" class="level1">
 <h1>What is Uncertainity?</h1>
