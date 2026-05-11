@@ -10,7 +10,409 @@
 <atom:link href="https://jaiswalsuraj487.github.io/blogs/index.xml" rel="self" type="application/rss+xml"/>
 <description>Senior AI Engineer specializing in GenAI, NLP, and Computer Vision. Published at NeurIPS and ACM. Open to ML/AI Engineer roles.</description>
 <generator>quarto-1.6.33</generator>
-<lastBuildDate>Tue, 09 Sep 2025 18:30:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 05 May 2026 18:30:00 GMT</lastBuildDate>
+<item>
+  <title>Supercharging Claude Code: Plugins, MCP Servers &amp; Skills</title>
+  <dc:creator>Suraj Jaiswal</dc:creator>
+  <link>https://jaiswalsuraj487.github.io/blogs/blogsData/claude_code_plugins_mcp_skills.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="supercharging-claude-code-plugins-mcp-servers-skills" class="level1">
+<h1>Supercharging Claude Code: Plugins, MCP Servers &amp; Skills</h1>
+<p>Claude Code is Anthropic’s official CLI for interacting with Claude directly in your terminal. Out of the box it’s powerful — but the real magic comes from extending it with <strong>plugins</strong>, <strong>MCP servers</strong>, and <strong>skills</strong>. This post walks through exactly what I set up and how to replicate it on any machine.</p>
+<hr>
+<section id="whats-the-difference" class="level2">
+<h2 class="anchored" data-anchor-id="whats-the-difference">What’s the difference?</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>What it is</th>
+<th>How to use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Plugin</strong></td>
+<td>Bundles skills + agents + hooks into one installable package</td>
+<td><code>/plugin install &lt;name&gt;@claude-plugins-official</code></td>
+</tr>
+<tr class="even">
+<td><strong>MCP Server</strong></td>
+<td>External tool Claude can call (browser, Drive, DB, APIs)</td>
+<td><code>claude mcp add &lt;name&gt; -- &lt;command&gt;</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Skill</strong></td>
+<td>A slash command that loads specific workflow instructions</td>
+<td><code>/skill-name</code> in the prompt</td>
+</tr>
+<tr class="even">
+<td><strong>Agent</strong></td>
+<td>A specialized sub-agent Claude can spawn for a task</td>
+<td><code>@agent-name</code> in the prompt</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="prerequisites" class="level2">
+<h2 class="anchored" data-anchor-id="prerequisites">Prerequisites</h2>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Install Claude Code</span></span>
+<span id="cb1-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">npm</span> install <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-g</span> @anthropic-ai/claude-code</span>
+<span id="cb1-3"></span>
+<span id="cb1-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Verify</span></span>
+<span id="cb1-5"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">claude</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--version</span></span></code></pre></div>
+<hr>
+</section>
+<section id="install-node.js-required-for-mcp-servers" class="level2">
+<h2 class="anchored" data-anchor-id="install-node.js-required-for-mcp-servers">1. Install Node.js (required for MCP servers)</h2>
+<p>Most MCP servers run via <code>npx</code>. Check first:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">which</span> node <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">&amp;&amp;</span> <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">node</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--version</span></span></code></pre></div>
+<p>If not found, install via Homebrew (macOS):</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">brew</span> install node</span></code></pre></div>
+<hr>
+</section>
+<section id="add-context7-mcp-live-library-docs" class="level2">
+<h2 class="anchored" data-anchor-id="add-context7-mcp-live-library-docs">2. Add Context7 MCP — Live Library Docs</h2>
+<p><a href="https://github.com/upstash/context7">Context7</a> by Upstash fetches up-to-date documentation for any library on demand. Instead of Claude guessing from training data, it pulls current docs.</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">claude</span> mcp add context7 <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--</span> npx <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-y</span> @upstash/context7-mcp</span></code></pre></div>
+<p>Verify it’s connected:</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">claude</span> mcp list</span></code></pre></div>
+<p><strong>Usage:</strong> Just mention the library in your prompt:</p>
+<pre><code>how do I use useQuery in TanStack Query v5? use context7</code></pre>
+<hr>
+</section>
+<section id="install-ralph-loop-plugin-autonomous-dev-loops" class="level2">
+<h2 class="anchored" data-anchor-id="install-ralph-loop-plugin-autonomous-dev-loops">3. Install ralph-loop Plugin — Autonomous Dev Loops</h2>
+<p><code>ralph-loop</code> implements the <strong>Ralph Wiggum technique</strong> — an iterative loop where Claude keeps working on a task until it’s done or hits a max iteration limit. Great for “fix all failing tests” type tasks.</p>
+<p>Inside Claude Code:</p>
+<pre><code>/plugin install ralph-loop@claude-plugins-official
+/reload-plugins</code></pre>
+<p><strong>Usage:</strong></p>
+<pre><code>/ralph-loop "fix all failing tests" --max-iterations 10 --completion-promise "ALL TESTS PASS"
+/cancel-ralph   ← to stop the loop early</code></pre>
+<p><strong>ralph-loop vs /loop skill:</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th><code>/loop</code></th>
+<th><code>/ralph-loop</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Trigger</td>
+<td>Time-based (every N minutes)</td>
+<td>Completion-based</td>
+</tr>
+<tr class="even">
+<td>Stops when</td>
+<td>You cancel it</td>
+<td>Promise met or max iterations hit</td>
+</tr>
+<tr class="odd">
+<td>Context</td>
+<td>Fresh each run</td>
+<td>Preserves file changes + git history</td>
+</tr>
+<tr class="even">
+<td>Best for</td>
+<td>Polling / monitoring</td>
+<td>Autonomous task completion</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="install-agent-browser-browser-automation" class="level2">
+<h2 class="anchored" data-anchor-id="install-agent-browser-browser-automation">4. Install agent-browser — Browser Automation</h2>
+<p><code>agent-browser</code> by Vercel Labs is a native Rust CLI for browser automation. It lets Claude navigate websites, fill forms, click buttons, extract data, and take screenshots — all from the terminal.</p>
+<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Step 1: Install CLI</span></span>
+<span id="cb9-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">npm</span> install <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-g</span> agent-browser</span>
+<span id="cb9-3"></span>
+<span id="cb9-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Step 2: Download Chrome for Testing</span></span>
+<span id="cb9-5"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">agent-browser</span> install</span>
+<span id="cb9-6"></span>
+<span id="cb9-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Step 3: Register as Claude Code skill (run inside Claude Code)</span></span>
+<span id="cb9-8"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">npx</span> skills add https://github.com/vercel-labs/agent-browser <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--skill</span> agent-browser <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-y</span></span></code></pre></div>
+<p><strong>Usage — just describe the task naturally:</strong></p>
+<pre><code>open linkedin.com and search for AI Engineer jobs in India
+take a screenshot of the results
+find salary data for Amazon ML Engineer roles in Canada</code></pre>
+<p><strong>Note:</strong> The skill installs at the <strong>project level</strong> by default. For global access across all projects, add the <code>-g</code> flag:</p>
+<div class="sourceCode" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">npx</span> skills add https://github.com/vercel-labs/agent-browser <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--skill</span> agent-browser <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-y</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-g</span></span></code></pre></div>
+<hr>
+</section>
+<section id="install-superpowers-plugin-dev-workflow-skills" class="level2">
+<h2 class="anchored" data-anchor-id="install-superpowers-plugin-dev-workflow-skills">5. Install superpowers Plugin — Dev Workflow Skills</h2>
+<p>The <code>superpowers</code> plugin adds a full suite of structured development workflow skills:</p>
+<pre><code>/plugin install superpowers@claude-plugins-official
+/reload-plugins</code></pre>
+<p>Skills included:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Skill</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>/brainstorming</code></td>
+<td>Before any feature work — explores intent first</td>
+</tr>
+<tr class="even">
+<td><code>/writing-plans</code></td>
+<td>Plan multi-step implementation before touching code</td>
+</tr>
+<tr class="odd">
+<td><code>/executing-plans</code></td>
+<td>Execute a written plan with review checkpoints</td>
+</tr>
+<tr class="even">
+<td><code>/systematic-debugging</code></td>
+<td>Structured bug fixing workflow</td>
+</tr>
+<tr class="odd">
+<td><code>/test-driven-development</code></td>
+<td>TDD before writing implementation code</td>
+</tr>
+<tr class="even">
+<td><code>/dispatching-parallel-agents</code></td>
+<td>Run 2+ independent tasks in parallel</td>
+</tr>
+<tr class="odd">
+<td><code>/verification-before-completion</code></td>
+<td>Verify before claiming anything is “done”</td>
+</tr>
+<tr class="even">
+<td><code>/finishing-a-development-branch</code></td>
+<td>Guided merge/PR/cleanup after implementation</td>
+</tr>
+<tr class="odd">
+<td><code>/using-git-worktrees</code></td>
+<td>Isolated feature branches with safety checks</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="install-feature-dev-plugin-feature-development-agents" class="level2">
+<h2 class="anchored" data-anchor-id="install-feature-dev-plugin-feature-development-agents">6. Install feature-dev Plugin — Feature Development Agents</h2>
+<pre><code>/plugin install feature-dev@claude-plugins-official
+/reload-plugins</code></pre>
+<p>Adds 3 specialized agents:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Agent</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>@code-architect</code></td>
+<td>Designs architecture and implementation blueprints</td>
+</tr>
+<tr class="even">
+<td><code>@code-explorer</code></td>
+<td>Deep-dives into existing codebase to map patterns</td>
+</tr>
+<tr class="odd">
+<td><code>@code-reviewer</code></td>
+<td>Reviews for bugs, security, and code quality</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Usage:</strong></p>
+<pre><code>@code-architect design a FastAPI authentication system with JWT
+@code-explorer how does the data pipeline work in this repo?
+@code-reviewer check my last commit for issues</code></pre>
+<hr>
+</section>
+<section id="install-code-simplifier-plugin" class="level2">
+<h2 class="anchored" data-anchor-id="install-code-simplifier-plugin">7. Install code-simplifier Plugin</h2>
+<pre><code>/plugin install code-simplifier@claude-plugins-official
+/reload-plugins</code></pre>
+<p>Adds <code>@code-simplifier</code> agent — reviews recently changed code for reuse, quality, and efficiency, then fixes issues found.</p>
+<hr>
+</section>
+<section id="checking-whats-installed" class="level2">
+<h2 class="anchored" data-anchor-id="checking-whats-installed">Checking what’s installed</h2>
+<p>Inside Claude Code, run <code>/context</code> to see everything loaded:</p>
+<pre><code>/context     ← shows MCP tools, skills, agents, memory, token usage
+/mcp         ← manage MCP server connections
+/skills      ← browse available skills
+/agents      ← browse available agents
+/plugin list ← list installed plugins</code></pre>
+<hr>
+</section>
+<section id="full-setup-checklist" class="level2">
+<h2 class="anchored" data-anchor-id="full-setup-checklist">Full setup checklist</h2>
+<div class="sourceCode" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Terminal (outside Claude Code)</span></span>
+<span id="cb17-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">brew</span> install node</span>
+<span id="cb17-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">npm</span> install <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-g</span> agent-browser</span>
+<span id="cb17-4"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">agent-browser</span> install</span>
+<span id="cb17-5"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">claude</span> mcp add context7 <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--</span> npx <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-y</span> @upstash/context7-mcp</span>
+<span id="cb17-6"></span>
+<span id="cb17-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Inside Claude Code prompt</span></span>
+<span id="cb17-8"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">/plugin</span> install ralph-loop@claude-plugins-official</span>
+<span id="cb17-9"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">/plugin</span> install superpowers@claude-plugins-official</span>
+<span id="cb17-10"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">/plugin</span> install feature-dev@claude-plugins-official</span>
+<span id="cb17-11"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">/plugin</span> install code-simplifier@claude-plugins-official</span>
+<span id="cb17-12"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">/reload-plugins</span></span>
+<span id="cb17-13"></span>
+<span id="cb17-14"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Add agent-browser skill</span></span>
+<span id="cb17-15"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">npx</span> skills add https://github.com/vercel-labs/agent-browser <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--skill</span> agent-browser <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-y</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-g</span></span></code></pre></div>
+<hr>
+</section>
+<section id="replicating-on-a-new-machine" class="level2">
+<h2 class="anchored" data-anchor-id="replicating-on-a-new-machine">Replicating on a new machine</h2>
+<p>Everything except <code>agent-browser</code> skill (project-local) is stored in <code>~/.claude.json</code> and <code>~/.claude/</code> — so it follows your user account. On a new machine:</p>
+<ol type="1">
+<li>Install Claude Code + Node.js</li>
+<li>Re-run <code>claude mcp add</code> for each MCP server</li>
+<li>Re-run <code>/plugin install</code> for each plugin inside Claude Code</li>
+<li>Re-run <code>npx skills add</code> for agent-browser</li>
+</ol>
+<blockquote class="blockquote">
+<p>Tip: Keep this checklist bookmarked — it takes under 5 minutes to fully replicate your setup on any machine.</p>
+</blockquote>
+<hr>
+</section>
+<section id="resources" class="level2">
+<h2 class="anchored" data-anchor-id="resources">Resources</h2>
+<ul>
+<li><a href="https://code.claude.com/docs">Claude Code Docs</a></li>
+<li><a href="https://github.com/anthropics/claude-plugins-official">claude-plugins-official (GitHub)</a></li>
+<li><a href="https://github.com/upstash/context7">Context7 MCP</a></li>
+<li><a href="https://github.com/vercel-labs/agent-browser">agent-browser (Vercel Labs)</a></li>
+</ul>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <category>Agentic AI</category>
+  <category>Developer Tools</category>
+  <category>Claude Code</category>
+  <guid>https://jaiswalsuraj487.github.io/blogs/blogsData/claude_code_plugins_mcp_skills.html</guid>
+  <pubDate>Tue, 05 May 2026 18:30:00 GMT</pubDate>
+</item>
 <item>
   <title>Using FREE Gemini API with Fallback</title>
   <dc:creator>Suraj Jaiswal</dc:creator>

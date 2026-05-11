@@ -15,6 +15,7 @@
   {
     "listing": "/blogs/index.html",
     "items": [
+      "/blogs/blogsData/claude_code_plugins_mcp_skills.html",
       "/blogs/blogsData/free_llm_api.html",
       "/blogs/blogsData/graphrag.html",
       "/blogs/blogsData/CICD Pipeline Documentation.html",
