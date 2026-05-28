@@ -2,14 +2,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.33">
+<meta name="generator" content="quarto-1.7.33">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Suraj Jaiswal">
-<meta name="dcterms.date" content="2025-09-10">
+<meta name="dcterms.date" content="2026-05-27">
+<meta name="description" content="Structured outputs, retry/fallback semantics, mid-stream failover, and observability — building real LLM infrastructure on Gemini, Groq, Cerebras, and OpenRouter free tiers.">
 
-<title>Using FREE Gemini API with Fallback – Suraj Jaiswal</title>
+<title>Production-Grade Multi-Provider LLM Fallback on Free Tiers (2026) – Suraj Jaiswal</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,8 +24,9 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -35,7 +37,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -66,15 +68,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
-<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-07ba0ad10f5680c660e360ac31d2f3b6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-8bda806db8b623a4dafb352339cca83f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-6ec84bd1cbca259591e26654c72239a2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -113,7 +116,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="twitter:card" content="summary">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -168,11 +171,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#gemini-model-rate-limits" id="toc-gemini-model-rate-limits" class="nav-link active" data-scroll-target="#gemini-model-rate-limits">1. Gemini Model Rate Limits</a></li>
-  <li><a href="#install-dependencies" id="toc-install-dependencies" class="nav-link" data-scroll-target="#install-dependencies">2. Install Dependencies:</a></li>
-  <li><a href="#set-up-the-api-key" id="toc-set-up-the-api-key" class="nav-link" data-scroll-target="#set-up-the-api-key">3. Set Up the API Key</a></li>
-  <li><a href="#first-api-call" id="toc-first-api-call" class="nav-link" data-scroll-target="#first-api-call">4. First API Call</a></li>
-  <li><a href="#fallback-mechanism-with-multiple-models" id="toc-fallback-mechanism-with-multiple-models" class="nav-link" data-scroll-target="#fallback-mechanism-with-multiple-models">5. Fallback Mechanism with Multiple Models</a></li>
+  <li><a href="#honest-capacity-math" id="toc-honest-capacity-math" class="nav-link active" data-scroll-target="#honest-capacity-math">1. Honest Capacity Math</a></li>
+  <li><a href="#quality-tiers-not-all-free-models-are-equal" id="toc-quality-tiers-not-all-free-models-are-equal" class="nav-link" data-scroll-target="#quality-tiers-not-all-free-models-are-equal">2. Quality Tiers — Not All Free Models Are Equal</a></li>
+  <li><a href="#the-setup" id="toc-the-setup" class="nav-link" data-scroll-target="#the-setup">3. The Setup</a></li>
+  <li><a href="#retry-vs.-fallback-they-are-not-the-same" id="toc-retry-vs.-fallback-they-are-not-the-same" class="nav-link" data-scroll-target="#retry-vs.-fallback-they-are-not-the-same">4. Retry vs.&nbsp;Fallback — They Are Not the Same</a></li>
+  <li><a href="#structured-outputs-that-survive-failover" id="toc-structured-outputs-that-survive-failover" class="nav-link" data-scroll-target="#structured-outputs-that-survive-failover">5. Structured Outputs That Survive Failover</a></li>
+  <li><a href="#streaming-with-mid-stream-failover" id="toc-streaming-with-mid-stream-failover" class="nav-link" data-scroll-target="#streaming-with-mid-stream-failover">6. Streaming With Mid-Stream Failover</a></li>
+  <li><a href="#observability-know-which-provider-served-what" id="toc-observability-know-which-provider-served-what" class="nav-link" data-scroll-target="#observability-know-which-provider-served-what">7. Observability — Know Which Provider Served What</a></li>
+  <li><a href="#langchain-langgraph-integration-that-goes-beyond-toys" id="toc-langchain-langgraph-integration-that-goes-beyond-toys" class="nav-link" data-scroll-target="#langchain-langgraph-integration-that-goes-beyond-toys">8. LangChain &amp; LangGraph Integration That Goes Beyond Toys</a></li>
+  <li><a href="#embeddings-long-context-rag-on-free-tiers" id="toc-embeddings-long-context-rag-on-free-tiers" class="nav-link" data-scroll-target="#embeddings-long-context-rag-on-free-tiers">9. Embeddings &amp; Long-Context RAG on Free Tiers</a>
+  <ul class="collapse">
+  <li><a href="#long-context-why-geminis-1m-window-matters-in-practice" id="toc-long-context-why-geminis-1m-window-matters-in-practice" class="nav-link" data-scroll-target="#long-context-why-geminis-1m-window-matters-in-practice">Long context — why Gemini’s 1M window matters in practice</a></li>
+  </ul></li>
+  <li><a href="#the-full-stack-cost-quality-capacity" id="toc-the-full-stack-cost-quality-capacity" class="nav-link" data-scroll-target="#the-full-stack-cost-quality-capacity">10. The Full Stack — Cost, Quality, Capacity</a>
+  <ul class="collapse">
+  <li><a href="#when-free-stops-working" id="toc-when-free-stops-working" class="nav-link" data-scroll-target="#when-free-stops-working">When free stops working</a></li>
+  </ul></li>
+  <li><a href="#what-this-buys-you" id="toc-what-this-buys-you" class="nav-link" data-scroll-target="#what-this-buys-you">What This Buys You</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -182,13 +197,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Using FREE Gemini API with Fallback</h1>
+<div class="quarto-title-block"><div><h1 class="title">Production-Grade Multi-Provider LLM Fallback on Free Tiers (2026)</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
   <div class="quarto-categories">
     <div class="quarto-category">Agentic AI</div>
     <div class="quarto-category">NLP</div>
+    <div class="quarto-category">LLM</div>
+    <div class="quarto-category">Infrastructure</div>
+    <div class="quarto-category">RAG</div>
   </div>
   </div>
 
+<div>
+  <div class="description">
+    Structured outputs, retry/fallback semantics, mid-stream failover, and observability — building real LLM infrastructure on Gemini, Groq, Cerebras, and OpenRouter free tiers.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
@@ -203,10 +226,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 10, 2025</p>
+      <p class="date">May 27, 2026</p>
     </div>
   </div>
   
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">May 27, 2026</p>
+    </div>
+  </div>
     
   </div>
   
@@ -215,406 +244,965 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This guide explains how to set up the Google AI Studio API key, install dependencies, and call Gemini models with Python.</p>
-<p>🔑 Get your API key from <a href="https://aistudio.google.com/">Google AI Studio</a> — no credit card required.</p>
-<p>⚡ The free tier comes with daily rate limits, so here we’ll simply configure fallback models to maximize your total number of Request per day of API calls.</p>
-<section id="gemini-model-rate-limits" class="level2">
-<h2 class="anchored" data-anchor-id="gemini-model-rate-limits">1. Gemini Model Rate Limits</h2>
-<p>Here’s a quick reference table of available Gemini models and their limits:</p>
+<blockquote class="blockquote">
+<p>📌 <strong>Rate limits and pricing verified:</strong> 27 May 2026. Free-tier terms drift quarterly — re-verify before deploying.</p>
+</blockquote>
+<p>We will cover six things the typical “free LLM API” post skips:</p>
+<ol type="1">
+<li><strong>Quality tiers</strong> — which free models are interchangeable, which aren’t.</li>
+<li><strong>Structured outputs</strong> that survive failover (the biggest silent-failure trap).</li>
+<li><strong>Retry vs.&nbsp;fallback</strong> — they are not the same operation.</li>
+<li><strong>Streaming</strong> with mid-stream failover.</li>
+<li><strong>Observability</strong> — knowing which provider served what.</li>
+<li><strong>Embeddings &amp; long-context RAG</strong> on free tiers.</li>
+</ol>
+<p>By the end, you’ll have ~400 lines of infrastructure code that handles a real workload without surprises.</p>
+<hr>
+<section id="honest-capacity-math" class="level2">
+<h2 class="anchored" data-anchor-id="honest-capacity-math">1. Honest Capacity Math</h2>
+<p>Here’s the actual arithmetic, per provider, assuming a typical 800-input / 600-output token prompt:</p>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
 <thead>
 <tr class="header">
-<th>Model</th>
-<th>RPM</th>
-<th>TPM</th>
-<th>RPD</th>
+<th>Provider</th>
+<th>Free limit</th>
+<th>Daily request capacity (800/600 tokens)</th>
+<th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><strong>Gemini 2.5 Pro</strong></td>
-<td>5</td>
-<td>250,000</td>
+<td>5 RPM, 100 RPD</td>
 <td>100</td>
+<td>Hard daily cap</td>
 </tr>
 <tr class="even">
 <td><strong>Gemini 2.5 Flash</strong></td>
-<td>10</td>
-<td>250,000</td>
+<td>10 RPM, 250 RPD</td>
 <td>250</td>
+<td>Hard daily cap</td>
 </tr>
 <tr class="odd">
 <td><strong>Gemini 2.5 Flash-Lite</strong></td>
-<td>15</td>
-<td>250,000</td>
+<td>15 RPM, 1,000 RPD</td>
 <td>1,000</td>
+<td>Hard daily cap</td>
 </tr>
 <tr class="even">
-<td><strong>Gemini 2.0 Flash</strong></td>
-<td>15</td>
-<td>1,000,000</td>
-<td>200</td>
+<td><strong>Groq Llama 3.3 70B</strong></td>
+<td>30 RPM, 14,400 RPD, 6K TPM</td>
+<td>~7,500 (TPM-bound)</td>
+<td>TPM is the real ceiling</td>
 </tr>
 <tr class="odd">
-<td><strong>Gemini 2.0 Flash-Lite</strong></td>
-<td>30</td>
-<td>1,000,000</td>
-<td>200</td>
+<td><strong>Cerebras Llama 3.3 70B</strong></td>
+<td>30 RPM, 1M tokens/day</td>
+<td>~700 (token-bound)</td>
+<td>Token cap, not request cap</td>
+</tr>
+<tr class="even">
+<td><strong>OpenRouter free models</strong></td>
+<td>20 RPM, 200 RPD per <code>:free</code> model</td>
+<td>~200 per model</td>
+<td>Multiple <code>:free</code> models stack</td>
 </tr>
 </tbody>
 </table>
+<p><strong>Realistic combined capacity for a mixed workload: ~8,000–10,000 requests/day</strong>, not 20,000. Anyone telling you otherwise is adding RPDs without accounting for TPM and token caps.</p>
+<p>That’s still plenty for prototyping, soft-launches, internal tools, and RAG eval harnesses. Be honest about the ceiling.</p>
+<hr>
 </section>
-<section id="install-dependencies" class="level2">
-<h2 class="anchored" data-anchor-id="install-dependencies">2. Install Dependencies:</h2>
-<p>Make sure you have the latest google-genai package:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">!pip</span> install <span class="at">-q</span> <span class="at">-U</span> google-genai</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>⚡ Use Flash or Flash-Lite models for higher throughput or lightweight tasks. Use Pro for better reasoning and accuracy.</p>
+<section id="quality-tiers-not-all-free-models-are-equal" class="level2">
+<h2 class="anchored" data-anchor-id="quality-tiers-not-all-free-models-are-equal">2. Quality Tiers — Not All Free Models Are Equal</h2>
+<p>The biggest mistake in naive fallback patterns: treating models as interchangeable. They aren’t. Failing over from Gemini 2.5 Pro to Gemma 3 27B will silently degrade reasoning quality even when the API call “succeeds.”</p>
+<p><strong>Reasoning tier</strong> — comparable on hard multi-step problems:</p>
+<ul>
+<li>Gemini 2.5 Pro</li>
+<li>DeepSeek R1 (via OpenRouter)</li>
+<li>GPT-OSS 120B (via Groq)</li>
+<li>o3-mini (via GitHub Models)</li>
+</ul>
+<p><strong>Workhorse tier</strong> — strong general-purpose, weaker on multi-hop:</p>
+<ul>
+<li>Gemini 2.5 Flash</li>
+<li>Llama 3.3 70B (Groq, Cerebras)</li>
+<li>Qwen3 32B (OpenRouter)</li>
+<li>Mistral Large</li>
+</ul>
+<p><strong>Routing/classification tier</strong> — use for cheap calls, not for the actual work:</p>
+<ul>
+<li>Gemini 2.5 Flash-Lite</li>
+<li>Gemma 3 27B</li>
+<li>Llama 3.1 8B</li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Rule:</strong> Only fall back <em>within the same tier</em>. If your prompt needs reasoning-tier quality, your fallback ladder should be Gemini 2.5 Pro → DeepSeek R1 → GPT-OSS 120B — not Gemini Pro → Gemma 3.</p>
+</div>
+</div>
+<hr>
 </section>
-<section id="set-up-the-api-key" class="level2">
-<h2 class="anchored" data-anchor-id="set-up-the-api-key">3. Set Up the API Key</h2>
-<p>Save it in an environment variable GEMINI_API_KEY.</p>
-<div id="6db30cf3" class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the environment variable</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"GEMINI_API_KEY"</span>] <span class="op">=</span> <span class="st">"your_api_key_here"</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(os.environ[<span class="st">"GEMINI_API_KEY"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="the-setup" class="level2">
+<h2 class="anchored" data-anchor-id="the-setup">3. The Setup</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="ex">pip</span> install <span class="at">-q</span> <span class="at">-U</span> openai pydantic tenacity httpx prometheus-client</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a><span class="im">import</span> os</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="im">from</span> typing <span class="im">import</span> Literal</span>
+<span id="cb2-3"><a href="#cb2-3"></a></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="co"># Tier-aware provider catalog</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a>PROVIDERS: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">dict</span>] <span class="op">=</span> {</span>
+<span id="cb2-6"><a href="#cb2-6"></a>    <span class="co"># ---------- Reasoning tier ----------</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>    <span class="st">"gemini-pro"</span>: {</span>
+<span id="cb2-8"><a href="#cb2-8"></a>        <span class="st">"base_url"</span>: <span class="st">"https://generativelanguage.googleapis.com/v1beta/openai/"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"GEMINI_API_KEY"</span>],</span>
+<span id="cb2-10"><a href="#cb2-10"></a>        <span class="st">"model"</span>: <span class="st">"gemini-2.5-pro"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11"></a>        <span class="st">"tier"</span>: <span class="st">"reasoning"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb2-13"><a href="#cb2-13"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb2-14"><a href="#cb2-14"></a>        <span class="st">"context_window"</span>: <span class="dv">1_048_576</span>,</span>
+<span id="cb2-15"><a href="#cb2-15"></a>    },</span>
+<span id="cb2-16"><a href="#cb2-16"></a>    <span class="st">"openrouter-deepseek"</span>: {</span>
+<span id="cb2-17"><a href="#cb2-17"></a>        <span class="st">"base_url"</span>: <span class="st">"https://openrouter.ai/api/v1"</span>,</span>
+<span id="cb2-18"><a href="#cb2-18"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"OPENROUTER_API_KEY"</span>],</span>
+<span id="cb2-19"><a href="#cb2-19"></a>        <span class="st">"model"</span>: <span class="st">"deepseek/deepseek-r1:free"</span>,</span>
+<span id="cb2-20"><a href="#cb2-20"></a>        <span class="st">"tier"</span>: <span class="st">"reasoning"</span>,</span>
+<span id="cb2-21"><a href="#cb2-21"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb2-22"><a href="#cb2-22"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb2-23"><a href="#cb2-23"></a>        <span class="st">"context_window"</span>: <span class="dv">163_840</span>,</span>
+<span id="cb2-24"><a href="#cb2-24"></a>    },</span>
+<span id="cb2-25"><a href="#cb2-25"></a>    <span class="st">"groq-gpt-oss"</span>: {</span>
+<span id="cb2-26"><a href="#cb2-26"></a>        <span class="st">"base_url"</span>: <span class="st">"https://api.groq.com/openai/v1"</span>,</span>
+<span id="cb2-27"><a href="#cb2-27"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"GROQ_API_KEY"</span>],</span>
+<span id="cb2-28"><a href="#cb2-28"></a>        <span class="st">"model"</span>: <span class="st">"openai/gpt-oss-120b"</span>,</span>
+<span id="cb2-29"><a href="#cb2-29"></a>        <span class="st">"tier"</span>: <span class="st">"reasoning"</span>,</span>
+<span id="cb2-30"><a href="#cb2-30"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb2-31"><a href="#cb2-31"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb2-32"><a href="#cb2-32"></a>        <span class="st">"context_window"</span>: <span class="dv">131_072</span>,</span>
+<span id="cb2-33"><a href="#cb2-33"></a>    },</span>
+<span id="cb2-34"><a href="#cb2-34"></a>    <span class="co"># ---------- Workhorse tier ----------</span></span>
+<span id="cb2-35"><a href="#cb2-35"></a>    <span class="st">"gemini-flash"</span>: {</span>
+<span id="cb2-36"><a href="#cb2-36"></a>        <span class="st">"base_url"</span>: <span class="st">"https://generativelanguage.googleapis.com/v1beta/openai/"</span>,</span>
+<span id="cb2-37"><a href="#cb2-37"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"GEMINI_API_KEY"</span>],</span>
+<span id="cb2-38"><a href="#cb2-38"></a>        <span class="st">"model"</span>: <span class="st">"gemini-2.5-flash"</span>,</span>
+<span id="cb2-39"><a href="#cb2-39"></a>        <span class="st">"tier"</span>: <span class="st">"workhorse"</span>,</span>
+<span id="cb2-40"><a href="#cb2-40"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb2-41"><a href="#cb2-41"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb2-42"><a href="#cb2-42"></a>        <span class="st">"context_window"</span>: <span class="dv">1_048_576</span>,</span>
+<span id="cb2-43"><a href="#cb2-43"></a>    },</span>
+<span id="cb2-44"><a href="#cb2-44"></a>    <span class="st">"groq-llama"</span>: {</span>
+<span id="cb2-45"><a href="#cb2-45"></a>        <span class="st">"base_url"</span>: <span class="st">"https://api.groq.com/openai/v1"</span>,</span>
+<span id="cb2-46"><a href="#cb2-46"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"GROQ_API_KEY"</span>],</span>
+<span id="cb2-47"><a href="#cb2-47"></a>        <span class="st">"model"</span>: <span class="st">"llama-3.3-70b-versatile"</span>,</span>
+<span id="cb2-48"><a href="#cb2-48"></a>        <span class="st">"tier"</span>: <span class="st">"workhorse"</span>,</span>
+<span id="cb2-49"><a href="#cb2-49"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb2-50"><a href="#cb2-50"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb2-51"><a href="#cb2-51"></a>        <span class="st">"context_window"</span>: <span class="dv">131_072</span>,</span>
+<span id="cb2-52"><a href="#cb2-52"></a>    },</span>
+<span id="cb2-53"><a href="#cb2-53"></a>    <span class="st">"cerebras-llama"</span>: {</span>
+<span id="cb2-54"><a href="#cb2-54"></a>        <span class="st">"base_url"</span>: <span class="st">"https://api.cerebras.ai/v1"</span>,</span>
+<span id="cb2-55"><a href="#cb2-55"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"CEREBRAS_API_KEY"</span>],</span>
+<span id="cb2-56"><a href="#cb2-56"></a>        <span class="st">"model"</span>: <span class="st">"llama-3.3-70b"</span>,</span>
+<span id="cb2-57"><a href="#cb2-57"></a>        <span class="st">"tier"</span>: <span class="st">"workhorse"</span>,</span>
+<span id="cb2-58"><a href="#cb2-58"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb2-59"><a href="#cb2-59"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb2-60"><a href="#cb2-60"></a>        <span class="st">"context_window"</span>: <span class="dv">128_000</span>,</span>
+<span id="cb2-61"><a href="#cb2-61"></a>    },</span>
+<span id="cb2-62"><a href="#cb2-62"></a>    <span class="co"># ---------- Routing tier ----------</span></span>
+<span id="cb2-63"><a href="#cb2-63"></a>    <span class="st">"gemini-flash-lite"</span>: {</span>
+<span id="cb2-64"><a href="#cb2-64"></a>        <span class="st">"base_url"</span>: <span class="st">"https://generativelanguage.googleapis.com/v1beta/openai/"</span>,</span>
+<span id="cb2-65"><a href="#cb2-65"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"GEMINI_API_KEY"</span>],</span>
+<span id="cb2-66"><a href="#cb2-66"></a>        <span class="st">"model"</span>: <span class="st">"gemini-2.5-flash-lite"</span>,</span>
+<span id="cb2-67"><a href="#cb2-67"></a>        <span class="st">"tier"</span>: <span class="st">"routing"</span>,</span>
+<span id="cb2-68"><a href="#cb2-68"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb2-69"><a href="#cb2-69"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb2-70"><a href="#cb2-70"></a>        <span class="st">"context_window"</span>: <span class="dv">1_048_576</span>,</span>
+<span id="cb2-71"><a href="#cb2-71"></a>    },</span>
+<span id="cb2-72"><a href="#cb2-72"></a>}</span>
+<span id="cb2-73"><a href="#cb2-73"></a></span>
+<span id="cb2-74"><a href="#cb2-74"></a>Tier <span class="op">=</span> Literal[<span class="st">"reasoning"</span>, <span class="st">"workhorse"</span>, <span class="st">"routing"</span>]</span>
+<span id="cb2-75"><a href="#cb2-75"></a></span>
+<span id="cb2-76"><a href="#cb2-76"></a><span class="kw">def</span> providers_for_tier(tier: Tier) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="cb2-77"><a href="#cb2-77"></a>    <span class="co">"""Return providers strictly within or above the requested tier."""</span></span>
+<span id="cb2-78"><a href="#cb2-78"></a>    rank <span class="op">=</span> {<span class="st">"routing"</span>: <span class="dv">0</span>, <span class="st">"workhorse"</span>: <span class="dv">1</span>, <span class="st">"reasoning"</span>: <span class="dv">2</span>}</span>
+<span id="cb2-79"><a href="#cb2-79"></a>    <span class="cf">return</span> [p <span class="cf">for</span> p <span class="kw">in</span> PROVIDERS.values() <span class="cf">if</span> rank[p[<span class="st">"tier"</span>]] <span class="op">&gt;=</span> rank[tier]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
 </div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>GitHub Models intentionally omitted</strong> from the unified client. It routes through Azure AI Inference and needs <code>api-key</code> header semantics that differ from OpenAI’s <code>Authorization: Bearer</code>. Worth using — just not through this client. Use the <code>azure-ai-inference</code> SDK separately.</p>
+</div>
+</div>
+<hr>
 </section>
-<section id="first-api-call" class="level2">
-<h2 class="anchored" data-anchor-id="first-api-call">4. First API Call</h2>
-<p>Here’s a simple example using Gemini 2.5 Pro:</p>
-<div id="cell-11" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> google <span class="im">import</span> genai</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The client gets the API key from the environment variable `GEMINI_API_KEY`.</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> genai.Client()</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> client.models.generate_content(</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span><span class="st">"gemini-2.5-pro"</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    contents<span class="op">=</span><span class="st">"Explain India in few crisp points"</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(response.text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Of course. Here is India explained in a few crisp points:
-
-*   **A Land of Immense Diversity:** Home to over 1.4 billion people, India is a mosaic of countless cultures, languages (22 official), and religions (birthplace of Hinduism, Buddhism, Jainism, and Sikhism). The phrase "Unity in Diversity" is its essence.
-
-*   **The World's Largest Democracy:** It is a federal parliamentary republic with a robust electoral system. Despite its complexities, democratic traditions are deeply rooted.
-
-*   **A Fast-Growing Major Economy:** India has one of the world's fastest-growing economies, driven by a powerful service sector (especially IT), a large industrial base, and a significant agricultural sector.
-
-*   **An Ancient Civilization:** Boasting a history of over 5,000 years, it has been home to ancient civilizations (Indus Valley), powerful empires (Mauryan, Gupta, Mughal), and a colonial past, culminating in a non-violent independence movement led by Mahatma Gandhi.
-
-*   **Rich Cultural Influence:** A global hub for spirituality, yoga, vibrant cuisine, classical arts, and a massive film industry known as "Bollywood."
-
-*   **A Nation of Contrasts:** India is a study in contrasts, where ancient traditions coexist with modern technology, immense wealth with significant poverty, and serene landscapes with bustling, chaotic cities.</code></pre>
-</div>
-</div>
+<section id="retry-vs.-fallback-they-are-not-the-same" class="level2">
+<h2 class="anchored" data-anchor-id="retry-vs.-fallback-they-are-not-the-same">4. Retry vs.&nbsp;Fallback — They Are Not the Same</h2>
+<p>The single biggest mistake in naive fallback code: treating every exception identically.</p>
+<ul>
+<li><strong>Rate limit (HTTP 429)</strong> → retry the <em>same provider</em> with exponential backoff. Failing over immediately wastes quota you might recover in 60 seconds.</li>
+<li><strong>Timeout / 5xx</strong> → retry once with backoff, then fall over.</li>
+<li><strong>Auth (401/403)</strong> → fall over immediately. No amount of waiting fixes a bad key.</li>
+<li><strong>Invalid request (400)</strong> → do not fall over. The prompt itself is broken; the next provider will also reject it.</li>
+<li><strong>Schema validation failure</strong> → fall over with a stricter prompt.</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="im">import</span> httpx</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="im">import</span> logging</span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="im">from</span> tenacity <span class="im">import</span> (</span>
+<span id="cb3-4"><a href="#cb3-4"></a>    retry, retry_if_exception, stop_after_attempt,</span>
+<span id="cb3-5"><a href="#cb3-5"></a>    wait_exponential, RetryError,</span>
+<span id="cb3-6"><a href="#cb3-6"></a>)</span>
+<span id="cb3-7"><a href="#cb3-7"></a></span>
+<span id="cb3-8"><a href="#cb3-8"></a>logger <span class="op">=</span> logging.getLogger(<span class="va">__name__</span>)</span>
+<span id="cb3-9"><a href="#cb3-9"></a></span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="kw">class</span> ProviderRetryable(<span class="pp">Exception</span>):</span>
+<span id="cb3-11"><a href="#cb3-11"></a>    <span class="co">"""Should retry the same provider."""</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a><span class="kw">class</span> ProviderFailover(<span class="pp">Exception</span>):</span>
+<span id="cb3-13"><a href="#cb3-13"></a>    <span class="co">"""Should fail over to the next provider."""</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a><span class="kw">class</span> ProviderFatal(<span class="pp">Exception</span>):</span>
+<span id="cb3-15"><a href="#cb3-15"></a>    <span class="co">"""Do not retry or fail over — the prompt itself is broken."""</span></span>
+<span id="cb3-16"><a href="#cb3-16"></a></span>
+<span id="cb3-17"><a href="#cb3-17"></a><span class="kw">def</span> classify_error(exc: <span class="pp">Exception</span>) <span class="op">-&gt;</span> <span class="bu">type</span>[<span class="pp">Exception</span>]:</span>
+<span id="cb3-18"><a href="#cb3-18"></a>    <span class="co">"""Map a raw exception to one of our three categories."""</span></span>
+<span id="cb3-19"><a href="#cb3-19"></a>    <span class="cf">if</span> <span class="bu">isinstance</span>(exc, httpx.TimeoutException):</span>
+<span id="cb3-20"><a href="#cb3-20"></a>        <span class="cf">return</span> ProviderFailover</span>
+<span id="cb3-21"><a href="#cb3-21"></a>    status <span class="op">=</span> <span class="bu">getattr</span>(exc, <span class="st">"status_code"</span>, <span class="va">None</span>) <span class="kw">or</span> <span class="bu">getattr</span>(</span>
+<span id="cb3-22"><a href="#cb3-22"></a>        <span class="bu">getattr</span>(exc, <span class="st">"response"</span>, <span class="va">None</span>), <span class="st">"status_code"</span>, <span class="va">None</span></span>
+<span id="cb3-23"><a href="#cb3-23"></a>    )</span>
+<span id="cb3-24"><a href="#cb3-24"></a>    <span class="cf">if</span> status <span class="op">==</span> <span class="dv">429</span>:</span>
+<span id="cb3-25"><a href="#cb3-25"></a>        <span class="cf">return</span> ProviderRetryable</span>
+<span id="cb3-26"><a href="#cb3-26"></a>    <span class="cf">if</span> status <span class="kw">in</span> (<span class="dv">500</span>, <span class="dv">502</span>, <span class="dv">503</span>, <span class="dv">504</span>):</span>
+<span id="cb3-27"><a href="#cb3-27"></a>        <span class="cf">return</span> ProviderFailover</span>
+<span id="cb3-28"><a href="#cb3-28"></a>    <span class="cf">if</span> status <span class="kw">in</span> (<span class="dv">401</span>, <span class="dv">403</span>):</span>
+<span id="cb3-29"><a href="#cb3-29"></a>        <span class="cf">return</span> ProviderFailover</span>
+<span id="cb3-30"><a href="#cb3-30"></a>    <span class="cf">if</span> status <span class="op">==</span> <span class="dv">400</span>:</span>
+<span id="cb3-31"><a href="#cb3-31"></a>        <span class="cf">return</span> ProviderFatal</span>
+<span id="cb3-32"><a href="#cb3-32"></a>    <span class="cf">return</span> ProviderFailover  <span class="co"># default: try the next provider</span></span>
+<span id="cb3-33"><a href="#cb3-33"></a></span>
+<span id="cb3-34"><a href="#cb3-34"></a><span class="at">@retry</span>(</span>
+<span id="cb3-35"><a href="#cb3-35"></a>    retry<span class="op">=</span>retry_if_exception(<span class="kw">lambda</span> e: <span class="bu">isinstance</span>(e, ProviderRetryable)),</span>
+<span id="cb3-36"><a href="#cb3-36"></a>    stop<span class="op">=</span>stop_after_attempt(<span class="dv">3</span>),</span>
+<span id="cb3-37"><a href="#cb3-37"></a>    wait<span class="op">=</span>wait_exponential(multiplier<span class="op">=</span><span class="dv">2</span>, <span class="bu">min</span><span class="op">=</span><span class="dv">2</span>, <span class="bu">max</span><span class="op">=</span><span class="dv">30</span>),</span>
+<span id="cb3-38"><a href="#cb3-38"></a>    reraise<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb3-39"><a href="#cb3-39"></a>)</span>
+<span id="cb3-40"><a href="#cb3-40"></a><span class="kw">def</span> call_with_retry(client_call, <span class="op">*</span>args, <span class="op">**</span>kwargs):</span>
+<span id="cb3-41"><a href="#cb3-41"></a>    <span class="co">"""Run a provider call with rate-limit-aware retry, but no failover."""</span></span>
+<span id="cb3-42"><a href="#cb3-42"></a>    <span class="cf">try</span>:</span>
+<span id="cb3-43"><a href="#cb3-43"></a>        <span class="cf">return</span> client_call(<span class="op">*</span>args, <span class="op">**</span>kwargs)</span>
+<span id="cb3-44"><a href="#cb3-44"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb3-45"><a href="#cb3-45"></a>        category <span class="op">=</span> classify_error(e)</span>
+<span id="cb3-46"><a href="#cb3-46"></a>        <span class="cf">if</span> category <span class="kw">is</span> ProviderRetryable:</span>
+<span id="cb3-47"><a href="#cb3-47"></a>            logger.warning(<span class="st">"rate limited, backing off: </span><span class="sc">%s</span><span class="st">"</span>, e)</span>
+<span id="cb3-48"><a href="#cb3-48"></a>            <span class="cf">raise</span> ProviderRetryable(<span class="bu">str</span>(e)) <span class="im">from</span> e</span>
+<span id="cb3-49"><a href="#cb3-49"></a>        <span class="cf">if</span> category <span class="kw">is</span> ProviderFatal:</span>
+<span id="cb3-50"><a href="#cb3-50"></a>            <span class="cf">raise</span> ProviderFatal(<span class="bu">str</span>(e)) <span class="im">from</span> e</span>
+<span id="cb3-51"><a href="#cb3-51"></a>        <span class="cf">raise</span> ProviderFailover(<span class="bu">str</span>(e)) <span class="im">from</span> e</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>That gives us correct semantics: retry where retry helps, fail over where it doesn’t, and stop entirely on prompts that no provider can serve.</p>
+<hr>
 </section>
-<section id="fallback-mechanism-with-multiple-models" class="level2">
-<h2 class="anchored" data-anchor-id="fallback-mechanism-with-multiple-models">5. Fallback Mechanism with Multiple Models</h2>
-<p>To make your app more resilient, you can try multiple models in order. If one fails (due to quota or availability), the next one is used automatically.</p>
-<div id="cell-13" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> google <span class="im">import</span> genai</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The client gets the API key from the environment variable `GEMINI_API_KEY`.</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> genai.Client()</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>MODELS <span class="op">=</span> [</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.5-pro"</span>,</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.5-flash"</span>,</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.5-flash-lite"</span>,</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.0-flash"</span>,</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gemini-2.0-flash-lite"</span>,</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_text(prompt: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">    Try each model in order and return the response text </span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">    from the first model that works.</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> model <span class="kw">in</span> MODELS:</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>            response <span class="op">=</span> client.models.generate_content(</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                model<span class="op">=</span>model,</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>                contents<span class="op">=</span>prompt</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"✅ Success with model: </span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> response.text</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"⚠️ Failed with model </span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"❌ All models failed."</span></span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="64772d39" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> generate_text(<span class="st">"Explain India in few crisp points"</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Final Response:</span><span class="ch">\n</span><span class="st">"</span>, text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>✅ Success with model: gemini-2.5-pro
-
-Final Response:
- Of course. Here is an explanation of India in a few crisp points:
-
-*   **World's Largest Democracy:** With over 1.4 billion people, it is the most populous democracy on Earth, known for its vibrant and complex political landscape.
-
-*   **Ancient Civilization, Modern Nation:** Home to one of the world's oldest civilizations (Indus Valley), it is the birthplace of major religions like Hinduism, Buddhism, and Jainism. Today, it balances ancient traditions with modern aspirations.
-
-*   **A Fast-Growing Economic Power:** It is one of the world's fastest-growing major economies, a global hub for IT and software services, and has a successful space program (ISRO).
-
-*   **Unmatched Diversity:** India is a mosaic of cultures, with over 22 official languages, countless dialects, diverse cuisines, colourful festivals, and a vast array of ethnic groups living together.
-
-*   **Incredible Geographic Variety:** Its landscape spans from the snow-capped Himalayas in the north to tropical beaches in the south, encompassing vast deserts, fertile plains, and dense forests.</code></pre>
-</div>
-</div>
+<section id="structured-outputs-that-survive-failover" class="level2">
+<h2 class="anchored" data-anchor-id="structured-outputs-that-survive-failover">5. Structured Outputs That Survive Failover</h2>
+<p>This is the gap that breaks naive fallback patterns silently. Gemini might return clean JSON; Llama 3.3 might wrap it in markdown fences; DeepSeek R1 might prepend a <code>&lt;think&gt;</code> block. Without validation at the boundary, your downstream parser receives garbage and you’ll spend hours debugging.</p>
+<p>Fix it with Pydantic + a tolerant JSON extractor + a validation step on every provider’s output.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="im">import</span> json</span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="im">import</span> re</span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel, ValidationError</span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="im">from</span> typing <span class="im">import</span> Type, TypeVar</span>
+<span id="cb4-5"><a href="#cb4-5"></a></span>
+<span id="cb4-6"><a href="#cb4-6"></a>T <span class="op">=</span> TypeVar(<span class="st">"T"</span>, bound<span class="op">=</span>BaseModel)</span>
+<span id="cb4-7"><a href="#cb4-7"></a></span>
+<span id="cb4-8"><a href="#cb4-8"></a>_FENCE_RE <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r"```</span>(?:<span class="vs">json</span>)<span class="op">?</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\s\S</span><span class="pp">]</span><span class="op">*?</span><span class="kw">)</span><span class="vs">```"</span>, re.IGNORECASE)</span>
+<span id="cb4-9"><a href="#cb4-9"></a>_THINK_RE <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r"&lt;think&gt;</span><span class="pp">[</span><span class="dv">\s\S</span><span class="pp">]</span><span class="op">*?</span><span class="vs">&lt;/think&gt;"</span>, re.IGNORECASE)</span>
+<span id="cb4-10"><a href="#cb4-10"></a></span>
+<span id="cb4-11"><a href="#cb4-11"></a><span class="kw">def</span> extract_json(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb4-12"><a href="#cb4-12"></a>    <span class="co">"""Strip reasoning tags and code fences. Return best-guess JSON substring."""</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a>    text <span class="op">=</span> _THINK_RE.sub(<span class="st">""</span>, text).strip()</span>
+<span id="cb4-14"><a href="#cb4-14"></a>    m <span class="op">=</span> _FENCE_RE.search(text)</span>
+<span id="cb4-15"><a href="#cb4-15"></a>    <span class="cf">if</span> m:</span>
+<span id="cb4-16"><a href="#cb4-16"></a>        <span class="cf">return</span> m.group(<span class="dv">1</span>).strip()</span>
+<span id="cb4-17"><a href="#cb4-17"></a>    <span class="co"># Fall back: first { ... last }</span></span>
+<span id="cb4-18"><a href="#cb4-18"></a>    start, end <span class="op">=</span> text.find(<span class="st">"{"</span>), text.rfind(<span class="st">"}"</span>)</span>
+<span id="cb4-19"><a href="#cb4-19"></a>    <span class="cf">if</span> start <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span> <span class="kw">and</span> end <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span>:</span>
+<span id="cb4-20"><a href="#cb4-20"></a>        <span class="cf">return</span> text[start : end <span class="op">+</span> <span class="dv">1</span>]</span>
+<span id="cb4-21"><a href="#cb4-21"></a>    <span class="cf">return</span> text</span>
+<span id="cb4-22"><a href="#cb4-22"></a></span>
+<span id="cb4-23"><a href="#cb4-23"></a><span class="kw">def</span> validate_structured(raw: <span class="bu">str</span>, schema: Type[T]) <span class="op">-&gt;</span> T:</span>
+<span id="cb4-24"><a href="#cb4-24"></a>    <span class="co">"""Parse + validate. Raises ValidationError on schema mismatch."""</span></span>
+<span id="cb4-25"><a href="#cb4-25"></a>    <span class="cf">try</span>:</span>
+<span id="cb4-26"><a href="#cb4-26"></a>        <span class="cf">return</span> schema.model_validate_json(extract_json(raw))</span>
+<span id="cb4-27"><a href="#cb4-27"></a>    <span class="cf">except</span> (ValidationError, json.JSONDecodeError) <span class="im">as</span> e:</span>
+<span id="cb4-28"><a href="#cb4-28"></a>        <span class="cf">raise</span> ProviderFailover(<span class="ss">f"schema mismatch: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>) <span class="im">from</span> e</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now the fallback function uses this on every provider:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="im">from</span> openai <span class="im">import</span> OpenAI</span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="kw">def</span> structured_generate(</span>
+<span id="cb5-4"><a href="#cb5-4"></a>    prompt: <span class="bu">str</span>,</span>
+<span id="cb5-5"><a href="#cb5-5"></a>    schema: Type[T],</span>
+<span id="cb5-6"><a href="#cb5-6"></a>    tier: Tier <span class="op">=</span> <span class="st">"workhorse"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7"></a>    system: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb5-8"><a href="#cb5-8"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[T, <span class="bu">str</span>]:</span>
+<span id="cb5-9"><a href="#cb5-9"></a>    <span class="co">"""Returns (validated_object, provider_name_that_succeeded)."""</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a>    system_msg <span class="op">=</span> system <span class="kw">or</span> (</span>
+<span id="cb5-11"><a href="#cb5-11"></a>        <span class="ss">f"Respond ONLY with valid JSON matching this schema:</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb5-12"><a href="#cb5-12"></a>        <span class="ss">f"</span><span class="sc">{</span>schema<span class="sc">.</span>model_json_schema()<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb5-13"><a href="#cb5-13"></a>        <span class="st">"No prose, no markdown fences, no explanations."</span></span>
+<span id="cb5-14"><a href="#cb5-14"></a>    )</span>
+<span id="cb5-15"><a href="#cb5-15"></a>    messages <span class="op">=</span> [</span>
+<span id="cb5-16"><a href="#cb5-16"></a>        {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: system_msg},</span>
+<span id="cb5-17"><a href="#cb5-17"></a>        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prompt},</span>
+<span id="cb5-18"><a href="#cb5-18"></a>    ]</span>
+<span id="cb5-19"><a href="#cb5-19"></a></span>
+<span id="cb5-20"><a href="#cb5-20"></a>    last_error: <span class="pp">Exception</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb5-21"><a href="#cb5-21"></a>    <span class="cf">for</span> p <span class="kw">in</span> providers_for_tier(tier):</span>
+<span id="cb5-22"><a href="#cb5-22"></a>        <span class="cf">try</span>:</span>
+<span id="cb5-23"><a href="#cb5-23"></a>            client <span class="op">=</span> OpenAI(base_url<span class="op">=</span>p[<span class="st">"base_url"</span>], api_key<span class="op">=</span>p[<span class="st">"api_key"</span>])</span>
+<span id="cb5-24"><a href="#cb5-24"></a></span>
+<span id="cb5-25"><a href="#cb5-25"></a>            <span class="kw">def</span> _call():</span>
+<span id="cb5-26"><a href="#cb5-26"></a>                <span class="cf">return</span> client.chat.completions.create(</span>
+<span id="cb5-27"><a href="#cb5-27"></a>                    model<span class="op">=</span>p[<span class="st">"model"</span>],</span>
+<span id="cb5-28"><a href="#cb5-28"></a>                    messages<span class="op">=</span>messages,</span>
+<span id="cb5-29"><a href="#cb5-29"></a>                    max_tokens<span class="op">=</span><span class="dv">2048</span>,</span>
+<span id="cb5-30"><a href="#cb5-30"></a>                    response_format<span class="op">=</span>(</span>
+<span id="cb5-31"><a href="#cb5-31"></a>                        {<span class="st">"type"</span>: <span class="st">"json_object"</span>} <span class="cf">if</span> p[<span class="st">"supports_json_mode"</span>] <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb5-32"><a href="#cb5-32"></a>                    ),</span>
+<span id="cb5-33"><a href="#cb5-33"></a>                    temperature<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb5-34"><a href="#cb5-34"></a>                )</span>
+<span id="cb5-35"><a href="#cb5-35"></a></span>
+<span id="cb5-36"><a href="#cb5-36"></a>            response <span class="op">=</span> call_with_retry(_call)</span>
+<span id="cb5-37"><a href="#cb5-37"></a>            raw <span class="op">=</span> response.choices[<span class="dv">0</span>].message.content</span>
+<span id="cb5-38"><a href="#cb5-38"></a>            validated <span class="op">=</span> validate_structured(raw, schema)</span>
+<span id="cb5-39"><a href="#cb5-39"></a>            <span class="cf">return</span> validated, p[<span class="st">"model"</span>]</span>
+<span id="cb5-40"><a href="#cb5-40"></a></span>
+<span id="cb5-41"><a href="#cb5-41"></a>        <span class="cf">except</span> ProviderFatal:</span>
+<span id="cb5-42"><a href="#cb5-42"></a>            <span class="cf">raise</span>  <span class="co"># prompt is broken; no point trying other providers</span></span>
+<span id="cb5-43"><a href="#cb5-43"></a>        <span class="cf">except</span> (ProviderFailover, ProviderRetryable, RetryError) <span class="im">as</span> e:</span>
+<span id="cb5-44"><a href="#cb5-44"></a>            last_error <span class="op">=</span> e</span>
+<span id="cb5-45"><a href="#cb5-45"></a>            logger.warning(<span class="st">"provider </span><span class="sc">%s</span><span class="st"> failed: </span><span class="sc">%s</span><span class="st">"</span>, p[<span class="st">"model"</span>], e)</span>
+<span id="cb5-46"><a href="#cb5-46"></a>            <span class="cf">continue</span></span>
+<span id="cb5-47"><a href="#cb5-47"></a></span>
+<span id="cb5-48"><a href="#cb5-48"></a>    <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="ss">f"all providers in tier '</span><span class="sc">{</span>tier<span class="sc">}</span><span class="ss">' exhausted: </span><span class="sc">{</span>last_error<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Usage:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">class</span> ExtractedInvoice(BaseModel):</span>
+<span id="cb6-2"><a href="#cb6-2"></a>    vendor: <span class="bu">str</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a>    total: <span class="bu">float</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a>    line_items: <span class="bu">list</span>[<span class="bu">str</span>]</span>
+<span id="cb6-5"><a href="#cb6-5"></a>    currency: <span class="bu">str</span></span>
+<span id="cb6-6"><a href="#cb6-6"></a></span>
+<span id="cb6-7"><a href="#cb6-7"></a>invoice, served_by <span class="op">=</span> structured_generate(</span>
+<span id="cb6-8"><a href="#cb6-8"></a>    prompt<span class="op">=</span><span class="st">"Extract from: Acme Corp, $1,250.00 USD for laptop, monitor, keyboard."</span>,</span>
+<span id="cb6-9"><a href="#cb6-9"></a>    schema<span class="op">=</span>ExtractedInvoice,</span>
+<span id="cb6-10"><a href="#cb6-10"></a>    tier<span class="op">=</span><span class="st">"workhorse"</span>,</span>
+<span id="cb6-11"><a href="#cb6-11"></a>)</span>
+<span id="cb6-12"><a href="#cb6-12"></a><span class="bu">print</span>(<span class="ss">f"served by: </span><span class="sc">{</span>served_by<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-13"><a href="#cb6-13"></a><span class="bu">print</span>(invoice.model_dump())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now every provider’s output is validated at the boundary. A provider that returns malformed JSON triggers a <em>failover</em>, not a silent downstream crash.</p>
+<hr>
+</section>
+<section id="streaming-with-mid-stream-failover" class="level2">
+<h2 class="anchored" data-anchor-id="streaming-with-mid-stream-failover">6. Streaming With Mid-Stream Failover</h2>
+<p>Real interactive apps stream tokens. The tricky case: a provider starts streaming, the connection drops at token 200, and you need to fail over without showing the user a broken UI.</p>
+<p>The pattern: buffer locally until first-token, then yield. If the stream dies mid-flight, retry the failed provider once (transient network), then fail over with the <em>partial output</em> as context to the next provider.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a><span class="im">from</span> typing <span class="im">import</span> Iterator</span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="kw">def</span> streaming_generate(</span>
+<span id="cb7-4"><a href="#cb7-4"></a>    prompt: <span class="bu">str</span>,</span>
+<span id="cb7-5"><a href="#cb7-5"></a>    tier: Tier <span class="op">=</span> <span class="st">"workhorse"</span>,</span>
+<span id="cb7-6"><a href="#cb7-6"></a>    system: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb7-7"><a href="#cb7-7"></a>) <span class="op">-&gt;</span> Iterator[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">str</span>]]:</span>
+<span id="cb7-8"><a href="#cb7-8"></a>    <span class="co">"""Yields (token, provider_name). Falls over mid-stream if needed."""</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a>    messages <span class="op">=</span> []</span>
+<span id="cb7-10"><a href="#cb7-10"></a>    <span class="cf">if</span> system:</span>
+<span id="cb7-11"><a href="#cb7-11"></a>        messages.append({<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: system})</span>
+<span id="cb7-12"><a href="#cb7-12"></a>    messages.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prompt})</span>
+<span id="cb7-13"><a href="#cb7-13"></a></span>
+<span id="cb7-14"><a href="#cb7-14"></a>    partial <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb7-15"><a href="#cb7-15"></a>    <span class="cf">for</span> p <span class="kw">in</span> providers_for_tier(tier):</span>
+<span id="cb7-16"><a href="#cb7-16"></a>        <span class="cf">try</span>:</span>
+<span id="cb7-17"><a href="#cb7-17"></a>            client <span class="op">=</span> OpenAI(base_url<span class="op">=</span>p[<span class="st">"base_url"</span>], api_key<span class="op">=</span>p[<span class="st">"api_key"</span>])</span>
+<span id="cb7-18"><a href="#cb7-18"></a>            stream <span class="op">=</span> client.chat.completions.create(</span>
+<span id="cb7-19"><a href="#cb7-19"></a>                model<span class="op">=</span>p[<span class="st">"model"</span>],</span>
+<span id="cb7-20"><a href="#cb7-20"></a>                messages<span class="op">=</span>messages,</span>
+<span id="cb7-21"><a href="#cb7-21"></a>                max_tokens<span class="op">=</span><span class="dv">2048</span>,</span>
+<span id="cb7-22"><a href="#cb7-22"></a>                stream<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb7-23"><a href="#cb7-23"></a>                temperature<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb7-24"><a href="#cb7-24"></a>            )</span>
+<span id="cb7-25"><a href="#cb7-25"></a>            <span class="cf">for</span> chunk <span class="kw">in</span> stream:</span>
+<span id="cb7-26"><a href="#cb7-26"></a>                delta <span class="op">=</span> chunk.choices[<span class="dv">0</span>].delta.content <span class="kw">or</span> <span class="st">""</span></span>
+<span id="cb7-27"><a href="#cb7-27"></a>                <span class="cf">if</span> delta:</span>
+<span id="cb7-28"><a href="#cb7-28"></a>                    partial <span class="op">+=</span> delta</span>
+<span id="cb7-29"><a href="#cb7-29"></a>                    <span class="cf">yield</span> delta, p[<span class="st">"model"</span>]</span>
+<span id="cb7-30"><a href="#cb7-30"></a>            <span class="cf">return</span>  <span class="co"># clean completion</span></span>
+<span id="cb7-31"><a href="#cb7-31"></a></span>
+<span id="cb7-32"><a href="#cb7-32"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb7-33"><a href="#cb7-33"></a>            logger.warning(<span class="st">"stream from </span><span class="sc">%s</span><span class="st"> dropped after </span><span class="sc">%d</span><span class="st"> chars: </span><span class="sc">%s</span><span class="st">"</span>,</span>
+<span id="cb7-34"><a href="#cb7-34"></a>                           p[<span class="st">"model"</span>], <span class="bu">len</span>(partial), e)</span>
+<span id="cb7-35"><a href="#cb7-35"></a>            <span class="co"># If we got meaningful output, append it as assistant context</span></span>
+<span id="cb7-36"><a href="#cb7-36"></a>            <span class="co"># so the next provider can continue rather than restart.</span></span>
+<span id="cb7-37"><a href="#cb7-37"></a>            <span class="cf">if</span> partial:</span>
+<span id="cb7-38"><a href="#cb7-38"></a>                messages.append({<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: partial})</span>
+<span id="cb7-39"><a href="#cb7-39"></a>                messages.append({</span>
+<span id="cb7-40"><a href="#cb7-40"></a>                    <span class="st">"role"</span>: <span class="st">"user"</span>,</span>
+<span id="cb7-41"><a href="#cb7-41"></a>                    <span class="st">"content"</span>: <span class="st">"Continue from where you left off. Do not repeat."</span>,</span>
+<span id="cb7-42"><a href="#cb7-42"></a>                })</span>
+<span id="cb7-43"><a href="#cb7-43"></a>                partial <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb7-44"><a href="#cb7-44"></a>            <span class="cf">continue</span></span>
+<span id="cb7-45"><a href="#cb7-45"></a></span>
+<span id="cb7-46"><a href="#cb7-46"></a>    <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="st">"all streaming providers failed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This is the pattern your interview-orchestrator-style apps actually need: the user sees uninterrupted streaming even when the backing provider changes mid-response.</p>
+<hr>
+</section>
+<section id="observability-know-which-provider-served-what" class="level2">
+<h2 class="anchored" data-anchor-id="observability-know-which-provider-served-what">7. Observability — Know Which Provider Served What</h2>
+<p>If you can’t measure it, you can’t trust it. A 10-line metrics block tells you per-provider success rate, latency, and quota consumption.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a><span class="im">from</span> prometheus_client <span class="im">import</span> Counter, Histogram</span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="im">import</span> time</span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="im">from</span> contextlib <span class="im">import</span> contextmanager</span>
+<span id="cb8-4"><a href="#cb8-4"></a></span>
+<span id="cb8-5"><a href="#cb8-5"></a>llm_requests_total <span class="op">=</span> Counter(</span>
+<span id="cb8-6"><a href="#cb8-6"></a>    <span class="st">"llm_requests_total"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7"></a>    <span class="st">"Total LLM requests by provider and outcome."</span>,</span>
+<span id="cb8-8"><a href="#cb8-8"></a>    [<span class="st">"provider"</span>, <span class="st">"tier"</span>, <span class="st">"outcome"</span>],</span>
+<span id="cb8-9"><a href="#cb8-9"></a>)</span>
+<span id="cb8-10"><a href="#cb8-10"></a>llm_request_duration <span class="op">=</span> Histogram(</span>
+<span id="cb8-11"><a href="#cb8-11"></a>    <span class="st">"llm_request_duration_seconds"</span>,</span>
+<span id="cb8-12"><a href="#cb8-12"></a>    <span class="st">"LLM request latency by provider."</span>,</span>
+<span id="cb8-13"><a href="#cb8-13"></a>    [<span class="st">"provider"</span>, <span class="st">"tier"</span>],</span>
+<span id="cb8-14"><a href="#cb8-14"></a>)</span>
+<span id="cb8-15"><a href="#cb8-15"></a></span>
+<span id="cb8-16"><a href="#cb8-16"></a><span class="at">@contextmanager</span></span>
+<span id="cb8-17"><a href="#cb8-17"></a><span class="kw">def</span> track(provider: <span class="bu">str</span>, tier: <span class="bu">str</span>):</span>
+<span id="cb8-18"><a href="#cb8-18"></a>    start <span class="op">=</span> time.perf_counter()</span>
+<span id="cb8-19"><a href="#cb8-19"></a>    outcome <span class="op">=</span> <span class="st">"success"</span></span>
+<span id="cb8-20"><a href="#cb8-20"></a>    <span class="cf">try</span>:</span>
+<span id="cb8-21"><a href="#cb8-21"></a>        <span class="cf">yield</span></span>
+<span id="cb8-22"><a href="#cb8-22"></a>    <span class="cf">except</span> ProviderRetryable:</span>
+<span id="cb8-23"><a href="#cb8-23"></a>        outcome <span class="op">=</span> <span class="st">"rate_limited"</span></span>
+<span id="cb8-24"><a href="#cb8-24"></a>        <span class="cf">raise</span></span>
+<span id="cb8-25"><a href="#cb8-25"></a>    <span class="cf">except</span> ProviderFailover:</span>
+<span id="cb8-26"><a href="#cb8-26"></a>        outcome <span class="op">=</span> <span class="st">"failover"</span></span>
+<span id="cb8-27"><a href="#cb8-27"></a>        <span class="cf">raise</span></span>
+<span id="cb8-28"><a href="#cb8-28"></a>    <span class="cf">except</span> ProviderFatal:</span>
+<span id="cb8-29"><a href="#cb8-29"></a>        outcome <span class="op">=</span> <span class="st">"fatal"</span></span>
+<span id="cb8-30"><a href="#cb8-30"></a>        <span class="cf">raise</span></span>
+<span id="cb8-31"><a href="#cb8-31"></a>    <span class="cf">except</span> <span class="pp">Exception</span>:</span>
+<span id="cb8-32"><a href="#cb8-32"></a>        outcome <span class="op">=</span> <span class="st">"error"</span></span>
+<span id="cb8-33"><a href="#cb8-33"></a>        <span class="cf">raise</span></span>
+<span id="cb8-34"><a href="#cb8-34"></a>    <span class="cf">finally</span>:</span>
+<span id="cb8-35"><a href="#cb8-35"></a>        elapsed <span class="op">=</span> time.perf_counter() <span class="op">-</span> start</span>
+<span id="cb8-36"><a href="#cb8-36"></a>        llm_requests_total.labels(provider, tier, outcome).inc()</span>
+<span id="cb8-37"><a href="#cb8-37"></a>        llm_request_duration.labels(provider, tier).observe(elapsed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Wrap the <code>_call()</code> closures in <code>structured_generate</code> and <code>streaming_generate</code> with <code>track(p["model"], p["tier"])</code> and you have proper per-provider visibility — exportable to Grafana, Datadog, or just printable via <code>prometheus_client.generate_latest()</code>.</p>
+<hr>
+</section>
+<section id="langchain-langgraph-integration-that-goes-beyond-toys" class="level2">
+<h2 class="anchored" data-anchor-id="langchain-langgraph-integration-that-goes-beyond-toys">8. LangChain &amp; LangGraph Integration That Goes Beyond Toys</h2>
+<p>The naive integration is <code>ChatOpenAI(base_url=...)</code> and call it a day. Here’s what actually composes:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1"></a><span class="im">from</span> langchain_openai <span class="im">import</span> ChatOpenAI</span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="im">from</span> langchain_core.runnables <span class="im">import</span> RunnableWithFallbacks</span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="im">from</span> langchain_core.runnables.retry <span class="im">import</span> RunnableRetry</span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="im">from</span> langchain_core.exceptions <span class="im">import</span> OutputParserException</span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="im">from</span> langchain_core.output_parsers <span class="im">import</span> PydanticOutputParser</span>
+<span id="cb9-6"><a href="#cb9-6"></a></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="kw">def</span> build_llm(provider_key: <span class="bu">str</span>, <span class="op">**</span>kwargs) <span class="op">-&gt;</span> ChatOpenAI:</span>
+<span id="cb9-8"><a href="#cb9-8"></a>    p <span class="op">=</span> PROVIDERS[provider_key]</span>
+<span id="cb9-9"><a href="#cb9-9"></a>    <span class="cf">return</span> ChatOpenAI(</span>
+<span id="cb9-10"><a href="#cb9-10"></a>        model<span class="op">=</span>p[<span class="st">"model"</span>],</span>
+<span id="cb9-11"><a href="#cb9-11"></a>        base_url<span class="op">=</span>p[<span class="st">"base_url"</span>],</span>
+<span id="cb9-12"><a href="#cb9-12"></a>        api_key<span class="op">=</span>p[<span class="st">"api_key"</span>],</span>
+<span id="cb9-13"><a href="#cb9-13"></a>        timeout<span class="op">=</span><span class="dv">30</span>,</span>
+<span id="cb9-14"><a href="#cb9-14"></a>        max_retries<span class="op">=</span><span class="dv">0</span>,  <span class="co"># we handle retry at the Runnable layer below</span></span>
+<span id="cb9-15"><a href="#cb9-15"></a>        <span class="op">**</span>kwargs,</span>
+<span id="cb9-16"><a href="#cb9-16"></a>    )</span>
+<span id="cb9-17"><a href="#cb9-17"></a></span>
+<span id="cb9-18"><a href="#cb9-18"></a><span class="co"># Compose: each provider gets internal rate-limit retry, then external failover</span></span>
+<span id="cb9-19"><a href="#cb9-19"></a>primary <span class="op">=</span> build_llm(<span class="st">"gemini-pro"</span>, temperature<span class="op">=</span><span class="dv">0</span>).with_retry(</span>
+<span id="cb9-20"><a href="#cb9-20"></a>    retry_if_exception_type<span class="op">=</span>(httpx.HTTPStatusError,),</span>
+<span id="cb9-21"><a href="#cb9-21"></a>    wait_exponential_jitter<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb9-22"><a href="#cb9-22"></a>    stop_after_attempt<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb9-23"><a href="#cb9-23"></a>)</span>
+<span id="cb9-24"><a href="#cb9-24"></a>secondary <span class="op">=</span> build_llm(<span class="st">"openrouter-deepseek"</span>, temperature<span class="op">=</span><span class="dv">0</span>).with_retry(</span>
+<span id="cb9-25"><a href="#cb9-25"></a>    stop_after_attempt<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb9-26"><a href="#cb9-26"></a>)</span>
+<span id="cb9-27"><a href="#cb9-27"></a>tertiary <span class="op">=</span> build_llm(<span class="st">"groq-gpt-oss"</span>, temperature<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb9-28"><a href="#cb9-28"></a></span>
+<span id="cb9-29"><a href="#cb9-29"></a>reasoning_chain <span class="op">=</span> primary.with_fallbacks(</span>
+<span id="cb9-30"><a href="#cb9-30"></a>    fallbacks<span class="op">=</span>[secondary, tertiary],</span>
+<span id="cb9-31"><a href="#cb9-31"></a>    exceptions_to_handle<span class="op">=</span>(httpx.HTTPStatusError, OutputParserException),</span>
+<span id="cb9-32"><a href="#cb9-32"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>For LangGraph, register <code>reasoning_chain</code> as a node’s LLM and the graph’s <code>checkpoint</code> memory persists across failovers — the next node sees the conversation state regardless of which provider produced each turn. That’s the property you need for agentic workflows.</p>
+<p>LangSmith traces will tag spans with the actual model that served the call, so you can debug after the fact which provider handled which step.</p>
+<hr>
+</section>
+<section id="embeddings-long-context-rag-on-free-tiers" class="level2">
+<h2 class="anchored" data-anchor-id="embeddings-long-context-rag-on-free-tiers">9. Embeddings &amp; Long-Context RAG on Free Tiers</h2>
+<p>A glaring gap in most “free LLM API” posts: they ignore RAG entirely. Here’s the free-tier embedding stack worth knowing:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Provider</th>
+<th>Model</th>
+<th>Free tier</th>
+<th>Strength</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Gemini</strong></td>
+<td><code>text-embedding-004</code></td>
+<td>1,500 RPD</td>
+<td>768-dim, multilingual, free with Gemini key</td>
+</tr>
+<tr class="even">
+<td><strong>Cohere</strong></td>
+<td><code>embed-v4.0</code></td>
+<td>1,000 calls/month</td>
+<td>Strong on retrieval, free with signup</td>
+</tr>
+<tr class="odd">
+<td><strong>Voyage</strong></td>
+<td><code>voyage-3-lite</code></td>
+<td>200M tokens free lifetime</td>
+<td>Best retrieval quality per dollar</td>
+</tr>
+<tr class="even">
+<td><strong>HuggingFace Inference</strong></td>
+<td><code>BAAI/bge-large-en-v1.5</code></td>
+<td>Rate-limited but free</td>
+<td>Open-weight; can self-host later</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1"></a><span class="im">from</span> openai <span class="im">import</span> OpenAI</span>
+<span id="cb10-2"><a href="#cb10-2"></a></span>
+<span id="cb10-3"><a href="#cb10-3"></a>embedder <span class="op">=</span> OpenAI(</span>
+<span id="cb10-4"><a href="#cb10-4"></a>    base_url<span class="op">=</span><span class="st">"https://generativelanguage.googleapis.com/v1beta/openai/"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5"></a>    api_key<span class="op">=</span>os.environ[<span class="st">"GEMINI_API_KEY"</span>],</span>
+<span id="cb10-6"><a href="#cb10-6"></a>)</span>
+<span id="cb10-7"><a href="#cb10-7"></a></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="kw">def</span> embed(texts: <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">list</span>[<span class="bu">float</span>]]:</span>
+<span id="cb10-9"><a href="#cb10-9"></a>    response <span class="op">=</span> embedder.embeddings.create(</span>
+<span id="cb10-10"><a href="#cb10-10"></a>        model<span class="op">=</span><span class="st">"text-embedding-004"</span>,</span>
+<span id="cb10-11"><a href="#cb10-11"></a>        <span class="bu">input</span><span class="op">=</span>texts,</span>
+<span id="cb10-12"><a href="#cb10-12"></a>    )</span>
+<span id="cb10-13"><a href="#cb10-13"></a>    <span class="cf">return</span> [d.embedding <span class="cf">for</span> d <span class="kw">in</span> response.data]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="long-context-why-geminis-1m-window-matters-in-practice" class="level3">
+<h3 class="anchored" data-anchor-id="long-context-why-geminis-1m-window-matters-in-practice">Long context — why Gemini’s 1M window matters in practice</h3>
+<p>For most apps with documents under ~200 pages, you can <strong>skip vector chunking entirely</strong> with Gemini’s 1M-token context. Drop the whole PDF in the prompt. No chunk boundaries, no semantic-search miss rate, no reranking step.</p>
+<p>Tradeoffs to know:</p>
+<ul>
+<li><strong>Cost (if you go paid):</strong> scales linearly. At free tier this is irrelevant; at paid tier 1M-token calls are expensive.</li>
+<li><strong>Latency:</strong> 1M-token prompts take 10–30s for first-token. Not for interactive use.</li>
+<li><strong>Lost-in-the-middle:</strong> even at 1M, models attend better to the start and end. Put critical context at boundaries.</li>
+</ul>
+<p>The pattern: long-context for one-shot heavy analysis, RAG for high-volume interactive queries.</p>
+<hr>
+</section>
+</section>
+<section id="the-full-stack-cost-quality-capacity" class="level2">
+<h2 class="anchored" data-anchor-id="the-full-stack-cost-quality-capacity">10. The Full Stack — Cost, Quality, Capacity</h2>
+<p>A senior reader wants the tradeoff matrix, not the marketing copy. Here it is:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Use case</th>
+<th>Recommended stack</th>
+<th>Daily capacity</th>
+<th>Quality tier</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Side project prototype</td>
+<td>Gemini Pro → Gemini Flash → Groq Llama</td>
+<td>~7K req/day</td>
+<td>Reasoning</td>
+</tr>
+<tr class="even">
+<td>Interactive chat (low latency)</td>
+<td>Groq GPT-OSS → Groq Llama → Cerebras Llama</td>
+<td>~7K req/day</td>
+<td>Reasoning→Workhorse</td>
+</tr>
+<tr class="odd">
+<td>Document extraction (batch)</td>
+<td>Gemini Flash → Cerebras Llama → OpenRouter</td>
+<td>~1.5K req/day</td>
+<td>Workhorse</td>
+</tr>
+<tr class="even">
+<td>RAG (high volume)</td>
+<td>Gemini Flash-Lite for queries; Gemini embeddings</td>
+<td>~1K req/day</td>
+<td>Routing</td>
+</tr>
+<tr class="odd">
+<td>Eval harness</td>
+<td>Gemini Pro for judge; DeepSeek R1 as second judge</td>
+<td>~100 evals/day</td>
+<td>Reasoning</td>
+</tr>
+</tbody>
+</table>
+<section id="when-free-stops-working" class="level3">
+<h3 class="anchored" data-anchor-id="when-free-stops-working">When free stops working</h3>
+<p>Honest list:</p>
+<ul>
+<li><strong>Paying customers with SLAs</strong> — free tiers don’t guarantee uptime. Move to paid.</li>
+<li><strong>Confidential data</strong> — Gemini free tier trains on prompts. Use Groq/Cerebras for sensitive prototyping, paid plans with DPA for client data.</li>
+<li><strong>High burst loads</strong> — RPM ceilings will hurt. Paid tiers raise them 10–100×.</li>
+<li><strong>Past ~10K req/day sustained</strong> — DeepSeek V4 paid at ~$0.30/M input tokens is cheaper than juggling four free quotas.</li>
+</ul>
+<p>For learning, prototyping, side projects, internal tools, RAG eval harnesses, and MVP demos — this stack is more than enough, and it composes into something you can credibly call infrastructure.</p>
+<hr>
+</section>
+</section>
+<section id="what-this-buys-you" class="level2">
+<h2 class="anchored" data-anchor-id="what-this-buys-you">What This Buys You</h2>
+<p>This is the difference between “I used a free LLM API” and “I built free-tier infrastructure.” The patterns above — tier-aware fallback, retry/failover distinction, structured-output validation at every boundary, streaming with mid-stream recovery, observability — are what reviewers look for when they’re trying to figure out whether you’ve shipped LLM systems in anger or just used them.</p>
+<p>Every block above is something I had to learn the hard way after a 2 AM page. Hopefully this saves you a few of those.</p>
+<hr>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
 <ol type="1">
-<li>Google docs: https://ai.google.dev/gemini-api/docs</li>
-<li>Rate limits: https://ai.google.dev/gemini-api/docs/rate-limits#free-tier</li>
+<li>Google AI Studio: <a href="https://aistudio.google.com/" class="uri">https://aistudio.google.com/</a></li>
+<li>Gemini rate limits: <a href="https://ai.google.dev/gemini-api/docs/rate-limits" class="uri">https://ai.google.dev/gemini-api/docs/rate-limits</a></li>
+<li>Gemini OpenAI compatibility: <a href="https://ai.google.dev/gemini-api/docs/openai" class="uri">https://ai.google.dev/gemini-api/docs/openai</a></li>
+<li>Groq Console: <a href="https://console.groq.com/" class="uri">https://console.groq.com/</a></li>
+<li>Cerebras Cloud: <a href="https://cloud.cerebras.ai/" class="uri">https://cloud.cerebras.ai/</a></li>
+<li>OpenRouter free models: <a href="https://openrouter.ai/models?max_price=0" class="uri">https://openrouter.ai/models?max_price=0</a></li>
+<li>LangChain fallbacks: <a href="https://python.langchain.com/docs/how_to/fallbacks/" class="uri">https://python.langchain.com/docs/how_to/fallbacks/</a></li>
+<li>Tenacity retry library: <a href="https://tenacity.readthedocs.io/" class="uri">https://tenacity.readthedocs.io/</a></li>
+<li>Pydantic v2 docs: <a href="https://docs.pydantic.dev/" class="uri">https://docs.pydantic.dev/</a></li>
+<li>Prometheus client (Python): <a href="https://prometheus.github.io/client_python/" class="uri">https://prometheus.github.io/client_python/</a></li>
 </ol>
+<hr>
+<p><em>Built this in production? Hit edge cases I missed? Reach me on <a href="https://linkedin.com/in/surajjaiswal007">LinkedIn</a> or check out my <a href="../index.html">other posts</a>.</em></p>
 
+
+<!-- -->
 
 </section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  const toggleBodyColorMode = (bsSheetEl) => {
-    const mode = bsSheetEl.getAttribute("data-mode");
-    const bodyEl = window.document.querySelector("body");
-    if (mode === "dark") {
-      bodyEl.classList.add("quarto-dark");
-      bodyEl.classList.remove("quarto-light");
-    } else {
-      bodyEl.classList.add("quarto-light");
-      bodyEl.classList.remove("quarto-dark");
-    }
-  }
-  const toggleBodyColorPrimary = () => {
-    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-    if (bsSheetEl) {
-      toggleBodyColorMode(bsSheetEl);
-    }
-  }
-  toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
-      }
-    }
-    return false;
-  }
-  const onCopySuccess = function(e) {
-    // button target
-    const button = e.trigger;
-    // don't keep focus
-    button.blur();
-    // flash "checked"
-    button.classList.add('code-copy-button-checked');
-    var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
-    setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
-      }
-      button.setAttribute("title", currentTitle);
-      button.classList.remove('code-copy-button-checked');
-    }, 1000);
-    // clear code selection
-    e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
-  });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
-    });
-    clipboardModal.on('success', onCopySuccess);
-  }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp("https:\/\/jaiswalsuraj487\.github\.io\/");
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-    }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
-      }
-    }
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-    const config = {
-      allowHTML: true,
-      maxWidth: 500,
-      delay: 100,
-      arrow: false,
-      appendTo: function(el) {
-          return el.parentElement;
-      },
-      interactive: true,
-      interactiveBorder: 10,
-      theme: 'quarto',
-      placement: 'bottom-start',
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
     };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
-    window.tippy(el, config); 
-  }
-  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-  for (var i=0; i<noterefs.length; i++) {
-    const ref = noterefs[i];
-    tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-      try { href = new URL(href).hash; } catch {}
-      const id = href.replace(/^#\/?/, "");
-      const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
         }
       }
+      return false;
     }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
-          } else {
-            container.appendChild(child.cloneNode(true));
-            break;
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
           }
         }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
         }
-        return container.innerHTML
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/jaiswalsuraj487\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
       } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      // TODO in 1.5, we should make sure this works without a callout special case
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
       }
     }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
           }
         } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
+            const note = htmlDoc.querySelector('main.content');
             if (note !== null) {
-              const html = processXRef(id, note);
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -622,185 +1210,759 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
-    });
-  }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            div.style.left = 0;
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
-        }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
-      }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
-  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-  for (var i=0; i<bibliorefs.length; i++) {
-    const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+      }, function(instance) {
       });
     }
-  }
-});
-</script>
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb11" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb11-1"><a href="#cb11-1"></a><span class="co">---</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="an">title:</span><span class="co"> "Production-Grade Multi-Provider LLM Fallback on Free Tiers (2026)"</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="an">author:</span><span class="co"> "Suraj Jaiswal"</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="an">date:</span><span class="co"> "2026-05-27"</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="an">date-modified:</span><span class="co"> "2026-05-27"</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="an">categories:</span><span class="co"> [Agentic AI, NLP, LLM, Infrastructure, RAG]</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="an">description:</span><span class="co"> "Structured outputs, retry/fallback semantics, mid-stream failover, and observability — building real LLM infrastructure on Gemini, Groq, Cerebras, and OpenRouter free tiers."</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a><span class="an">format:</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a><span class="co">  html:</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="co">    toc: true</span></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="co">    toc-depth: 3</span></span>
+<span id="cb11-12"><a href="#cb11-12"></a><span class="co">    code-fold: false</span></span>
+<span id="cb11-13"><a href="#cb11-13"></a><span class="co">    code-tools: true</span></span>
+<span id="cb11-14"><a href="#cb11-14"></a><span class="co">    code-line-numbers: true</span></span>
+<span id="cb11-15"><a href="#cb11-15"></a><span class="co">---</span></span>
+<span id="cb11-16"><a href="#cb11-16"></a></span>
+<span id="cb11-17"><a href="#cb11-17"></a><span class="at">&gt; 📌 **Rate limits and pricing verified:** 27 May 2026. Free-tier terms drift quarterly — re-verify before deploying.</span></span>
+<span id="cb11-18"><a href="#cb11-18"></a></span>
+<span id="cb11-19"><a href="#cb11-19"></a></span>
+<span id="cb11-20"><a href="#cb11-20"></a>We will cover six things the typical "free LLM API" post skips:</span>
+<span id="cb11-21"><a href="#cb11-21"></a></span>
+<span id="cb11-22"><a href="#cb11-22"></a><span class="ss">1. </span>**Quality tiers** — which free models are interchangeable, which aren't.</span>
+<span id="cb11-23"><a href="#cb11-23"></a><span class="ss">2. </span>**Structured outputs** that survive failover (the biggest silent-failure trap).</span>
+<span id="cb11-24"><a href="#cb11-24"></a><span class="ss">3. </span>**Retry vs. fallback** — they are not the same operation.</span>
+<span id="cb11-25"><a href="#cb11-25"></a><span class="ss">4. </span>**Streaming** with mid-stream failover.</span>
+<span id="cb11-26"><a href="#cb11-26"></a><span class="ss">5. </span>**Observability** — knowing which provider served what.</span>
+<span id="cb11-27"><a href="#cb11-27"></a><span class="ss">6. </span>**Embeddings &amp; long-context RAG** on free tiers.</span>
+<span id="cb11-28"><a href="#cb11-28"></a></span>
+<span id="cb11-29"><a href="#cb11-29"></a>By the end, you'll have ~400 lines of infrastructure code that handles a real workload without surprises.</span>
+<span id="cb11-30"><a href="#cb11-30"></a></span>
+<span id="cb11-31"><a href="#cb11-31"></a>---</span>
+<span id="cb11-32"><a href="#cb11-32"></a></span>
+<span id="cb11-33"><a href="#cb11-33"></a><span class="fu">## 1. Honest Capacity Math</span></span>
+<span id="cb11-34"><a href="#cb11-34"></a></span>
+<span id="cb11-35"><a href="#cb11-35"></a>Here's the actual arithmetic, per provider, assuming a typical 800-input / 600-output token prompt:</span>
+<span id="cb11-36"><a href="#cb11-36"></a></span>
+<span id="cb11-37"><a href="#cb11-37"></a><span class="pp">|</span> Provider <span class="pp">|</span> Free limit <span class="pp">|</span> Daily request capacity (800/600 tokens) <span class="pp">|</span> Notes <span class="pp">|</span></span>
+<span id="cb11-38"><a href="#cb11-38"></a><span class="pp">|---|---|---|---|</span></span>
+<span id="cb11-39"><a href="#cb11-39"></a><span class="pp">|</span> **Gemini 2.5 Pro** <span class="pp">|</span> 5 RPM, 100 RPD <span class="pp">|</span> 100 <span class="pp">|</span> Hard daily cap <span class="pp">|</span></span>
+<span id="cb11-40"><a href="#cb11-40"></a><span class="pp">|</span> **Gemini 2.5 Flash** <span class="pp">|</span> 10 RPM, 250 RPD <span class="pp">|</span> 250 <span class="pp">|</span> Hard daily cap <span class="pp">|</span></span>
+<span id="cb11-41"><a href="#cb11-41"></a><span class="pp">|</span> **Gemini 2.5 Flash-Lite** <span class="pp">|</span> 15 RPM, 1,000 RPD <span class="pp">|</span> 1,000 <span class="pp">|</span> Hard daily cap <span class="pp">|</span></span>
+<span id="cb11-42"><a href="#cb11-42"></a><span class="pp">|</span> **Groq Llama 3.3 70B** <span class="pp">|</span> 30 RPM, 14,400 RPD, 6K TPM <span class="pp">|</span> ~7,500 (TPM-bound) <span class="pp">|</span> TPM is the real ceiling <span class="pp">|</span></span>
+<span id="cb11-43"><a href="#cb11-43"></a><span class="pp">|</span> **Cerebras Llama 3.3 70B** <span class="pp">|</span> 30 RPM, 1M tokens/day <span class="pp">|</span> ~700 (token-bound) <span class="pp">|</span> Token cap, not request cap <span class="pp">|</span></span>
+<span id="cb11-44"><a href="#cb11-44"></a><span class="pp">|</span> **OpenRouter free models** <span class="pp">|</span> 20 RPM, 200 RPD per <span class="in">`:free`</span> model <span class="pp">|</span> ~200 per model <span class="pp">|</span> Multiple <span class="in">`:free`</span> models stack <span class="pp">|</span></span>
+<span id="cb11-45"><a href="#cb11-45"></a></span>
+<span id="cb11-46"><a href="#cb11-46"></a>**Realistic combined capacity for a mixed workload: ~8,000–10,000 requests/day**, not 20,000. Anyone telling you otherwise is adding RPDs without accounting for TPM and token caps.</span>
+<span id="cb11-47"><a href="#cb11-47"></a></span>
+<span id="cb11-48"><a href="#cb11-48"></a>That's still plenty for prototyping, soft-launches, internal tools, and RAG eval harnesses. Be honest about the ceiling.</span>
+<span id="cb11-49"><a href="#cb11-49"></a></span>
+<span id="cb11-50"><a href="#cb11-50"></a>---</span>
+<span id="cb11-51"><a href="#cb11-51"></a></span>
+<span id="cb11-52"><a href="#cb11-52"></a><span class="fu">## 2. Quality Tiers — Not All Free Models Are Equal</span></span>
+<span id="cb11-53"><a href="#cb11-53"></a></span>
+<span id="cb11-54"><a href="#cb11-54"></a>The biggest mistake in naive fallback patterns: treating models as interchangeable. They aren't. Failing over from Gemini 2.5 Pro to Gemma 3 27B will silently degrade reasoning quality even when the API call "succeeds."</span>
+<span id="cb11-55"><a href="#cb11-55"></a></span>
+<span id="cb11-56"><a href="#cb11-56"></a>**Reasoning tier** — comparable on hard multi-step problems:</span>
+<span id="cb11-57"><a href="#cb11-57"></a></span>
+<span id="cb11-58"><a href="#cb11-58"></a><span class="ss">- </span>Gemini 2.5 Pro</span>
+<span id="cb11-59"><a href="#cb11-59"></a><span class="ss">- </span>DeepSeek R1 (via OpenRouter)</span>
+<span id="cb11-60"><a href="#cb11-60"></a><span class="ss">- </span>GPT-OSS 120B (via Groq)</span>
+<span id="cb11-61"><a href="#cb11-61"></a><span class="ss">- </span>o3-mini (via GitHub Models)</span>
+<span id="cb11-62"><a href="#cb11-62"></a></span>
+<span id="cb11-63"><a href="#cb11-63"></a>**Workhorse tier** — strong general-purpose, weaker on multi-hop:</span>
+<span id="cb11-64"><a href="#cb11-64"></a></span>
+<span id="cb11-65"><a href="#cb11-65"></a><span class="ss">- </span>Gemini 2.5 Flash</span>
+<span id="cb11-66"><a href="#cb11-66"></a><span class="ss">- </span>Llama 3.3 70B (Groq, Cerebras)</span>
+<span id="cb11-67"><a href="#cb11-67"></a><span class="ss">- </span>Qwen3 32B (OpenRouter)</span>
+<span id="cb11-68"><a href="#cb11-68"></a><span class="ss">- </span>Mistral Large</span>
+<span id="cb11-69"><a href="#cb11-69"></a></span>
+<span id="cb11-70"><a href="#cb11-70"></a>**Routing/classification tier** — use for cheap calls, not for the actual work:</span>
+<span id="cb11-71"><a href="#cb11-71"></a></span>
+<span id="cb11-72"><a href="#cb11-72"></a><span class="ss">- </span>Gemini 2.5 Flash-Lite</span>
+<span id="cb11-73"><a href="#cb11-73"></a><span class="ss">- </span>Gemma 3 27B</span>
+<span id="cb11-74"><a href="#cb11-74"></a><span class="ss">- </span>Llama 3.1 8B</span>
+<span id="cb11-75"><a href="#cb11-75"></a></span>
+<span id="cb11-76"><a href="#cb11-76"></a>::: {.callout-important}</span>
+<span id="cb11-77"><a href="#cb11-77"></a>**Rule:** Only fall back *within the same tier*. If your prompt needs reasoning-tier quality, your fallback ladder should be Gemini 2.5 Pro → DeepSeek R1 → GPT-OSS 120B — not Gemini Pro → Gemma 3.</span>
+<span id="cb11-78"><a href="#cb11-78"></a>:::</span>
+<span id="cb11-79"><a href="#cb11-79"></a></span>
+<span id="cb11-80"><a href="#cb11-80"></a>---</span>
+<span id="cb11-81"><a href="#cb11-81"></a></span>
+<span id="cb11-82"><a href="#cb11-82"></a><span class="fu">## 3. The Setup</span></span>
+<span id="cb11-83"><a href="#cb11-83"></a></span>
+<span id="cb11-84"><a href="#cb11-84"></a><span class="in">```bash</span></span>
+<span id="cb11-85"><a href="#cb11-85"></a><span class="ex">pip</span> install <span class="at">-q</span> <span class="at">-U</span> openai pydantic tenacity httpx prometheus-client</span>
+<span id="cb11-86"><a href="#cb11-86"></a><span class="in">```</span></span>
+<span id="cb11-87"><a href="#cb11-87"></a></span>
+<span id="cb11-88"><a href="#cb11-88"></a><span class="in">```python</span></span>
+<span id="cb11-89"><a href="#cb11-89"></a><span class="im">import</span> os</span>
+<span id="cb11-90"><a href="#cb11-90"></a><span class="im">from</span> typing <span class="im">import</span> Literal</span>
+<span id="cb11-91"><a href="#cb11-91"></a></span>
+<span id="cb11-92"><a href="#cb11-92"></a><span class="co"># Tier-aware provider catalog</span></span>
+<span id="cb11-93"><a href="#cb11-93"></a>PROVIDERS: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">dict</span>] <span class="op">=</span> {</span>
+<span id="cb11-94"><a href="#cb11-94"></a>    <span class="co"># ---------- Reasoning tier ----------</span></span>
+<span id="cb11-95"><a href="#cb11-95"></a>    <span class="st">"gemini-pro"</span>: {</span>
+<span id="cb11-96"><a href="#cb11-96"></a>        <span class="st">"base_url"</span>: <span class="st">"https://generativelanguage.googleapis.com/v1beta/openai/"</span>,</span>
+<span id="cb11-97"><a href="#cb11-97"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"GEMINI_API_KEY"</span>],</span>
+<span id="cb11-98"><a href="#cb11-98"></a>        <span class="st">"model"</span>: <span class="st">"gemini-2.5-pro"</span>,</span>
+<span id="cb11-99"><a href="#cb11-99"></a>        <span class="st">"tier"</span>: <span class="st">"reasoning"</span>,</span>
+<span id="cb11-100"><a href="#cb11-100"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb11-101"><a href="#cb11-101"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb11-102"><a href="#cb11-102"></a>        <span class="st">"context_window"</span>: <span class="dv">1_048_576</span>,</span>
+<span id="cb11-103"><a href="#cb11-103"></a>    },</span>
+<span id="cb11-104"><a href="#cb11-104"></a>    <span class="st">"openrouter-deepseek"</span>: {</span>
+<span id="cb11-105"><a href="#cb11-105"></a>        <span class="st">"base_url"</span>: <span class="st">"https://openrouter.ai/api/v1"</span>,</span>
+<span id="cb11-106"><a href="#cb11-106"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"OPENROUTER_API_KEY"</span>],</span>
+<span id="cb11-107"><a href="#cb11-107"></a>        <span class="st">"model"</span>: <span class="st">"deepseek/deepseek-r1:free"</span>,</span>
+<span id="cb11-108"><a href="#cb11-108"></a>        <span class="st">"tier"</span>: <span class="st">"reasoning"</span>,</span>
+<span id="cb11-109"><a href="#cb11-109"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb11-110"><a href="#cb11-110"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb11-111"><a href="#cb11-111"></a>        <span class="st">"context_window"</span>: <span class="dv">163_840</span>,</span>
+<span id="cb11-112"><a href="#cb11-112"></a>    },</span>
+<span id="cb11-113"><a href="#cb11-113"></a>    <span class="st">"groq-gpt-oss"</span>: {</span>
+<span id="cb11-114"><a href="#cb11-114"></a>        <span class="st">"base_url"</span>: <span class="st">"https://api.groq.com/openai/v1"</span>,</span>
+<span id="cb11-115"><a href="#cb11-115"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"GROQ_API_KEY"</span>],</span>
+<span id="cb11-116"><a href="#cb11-116"></a>        <span class="st">"model"</span>: <span class="st">"openai/gpt-oss-120b"</span>,</span>
+<span id="cb11-117"><a href="#cb11-117"></a>        <span class="st">"tier"</span>: <span class="st">"reasoning"</span>,</span>
+<span id="cb11-118"><a href="#cb11-118"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb11-119"><a href="#cb11-119"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb11-120"><a href="#cb11-120"></a>        <span class="st">"context_window"</span>: <span class="dv">131_072</span>,</span>
+<span id="cb11-121"><a href="#cb11-121"></a>    },</span>
+<span id="cb11-122"><a href="#cb11-122"></a>    <span class="co"># ---------- Workhorse tier ----------</span></span>
+<span id="cb11-123"><a href="#cb11-123"></a>    <span class="st">"gemini-flash"</span>: {</span>
+<span id="cb11-124"><a href="#cb11-124"></a>        <span class="st">"base_url"</span>: <span class="st">"https://generativelanguage.googleapis.com/v1beta/openai/"</span>,</span>
+<span id="cb11-125"><a href="#cb11-125"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"GEMINI_API_KEY"</span>],</span>
+<span id="cb11-126"><a href="#cb11-126"></a>        <span class="st">"model"</span>: <span class="st">"gemini-2.5-flash"</span>,</span>
+<span id="cb11-127"><a href="#cb11-127"></a>        <span class="st">"tier"</span>: <span class="st">"workhorse"</span>,</span>
+<span id="cb11-128"><a href="#cb11-128"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb11-129"><a href="#cb11-129"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb11-130"><a href="#cb11-130"></a>        <span class="st">"context_window"</span>: <span class="dv">1_048_576</span>,</span>
+<span id="cb11-131"><a href="#cb11-131"></a>    },</span>
+<span id="cb11-132"><a href="#cb11-132"></a>    <span class="st">"groq-llama"</span>: {</span>
+<span id="cb11-133"><a href="#cb11-133"></a>        <span class="st">"base_url"</span>: <span class="st">"https://api.groq.com/openai/v1"</span>,</span>
+<span id="cb11-134"><a href="#cb11-134"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"GROQ_API_KEY"</span>],</span>
+<span id="cb11-135"><a href="#cb11-135"></a>        <span class="st">"model"</span>: <span class="st">"llama-3.3-70b-versatile"</span>,</span>
+<span id="cb11-136"><a href="#cb11-136"></a>        <span class="st">"tier"</span>: <span class="st">"workhorse"</span>,</span>
+<span id="cb11-137"><a href="#cb11-137"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb11-138"><a href="#cb11-138"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb11-139"><a href="#cb11-139"></a>        <span class="st">"context_window"</span>: <span class="dv">131_072</span>,</span>
+<span id="cb11-140"><a href="#cb11-140"></a>    },</span>
+<span id="cb11-141"><a href="#cb11-141"></a>    <span class="st">"cerebras-llama"</span>: {</span>
+<span id="cb11-142"><a href="#cb11-142"></a>        <span class="st">"base_url"</span>: <span class="st">"https://api.cerebras.ai/v1"</span>,</span>
+<span id="cb11-143"><a href="#cb11-143"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"CEREBRAS_API_KEY"</span>],</span>
+<span id="cb11-144"><a href="#cb11-144"></a>        <span class="st">"model"</span>: <span class="st">"llama-3.3-70b"</span>,</span>
+<span id="cb11-145"><a href="#cb11-145"></a>        <span class="st">"tier"</span>: <span class="st">"workhorse"</span>,</span>
+<span id="cb11-146"><a href="#cb11-146"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb11-147"><a href="#cb11-147"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb11-148"><a href="#cb11-148"></a>        <span class="st">"context_window"</span>: <span class="dv">128_000</span>,</span>
+<span id="cb11-149"><a href="#cb11-149"></a>    },</span>
+<span id="cb11-150"><a href="#cb11-150"></a>    <span class="co"># ---------- Routing tier ----------</span></span>
+<span id="cb11-151"><a href="#cb11-151"></a>    <span class="st">"gemini-flash-lite"</span>: {</span>
+<span id="cb11-152"><a href="#cb11-152"></a>        <span class="st">"base_url"</span>: <span class="st">"https://generativelanguage.googleapis.com/v1beta/openai/"</span>,</span>
+<span id="cb11-153"><a href="#cb11-153"></a>        <span class="st">"api_key"</span>: os.environ[<span class="st">"GEMINI_API_KEY"</span>],</span>
+<span id="cb11-154"><a href="#cb11-154"></a>        <span class="st">"model"</span>: <span class="st">"gemini-2.5-flash-lite"</span>,</span>
+<span id="cb11-155"><a href="#cb11-155"></a>        <span class="st">"tier"</span>: <span class="st">"routing"</span>,</span>
+<span id="cb11-156"><a href="#cb11-156"></a>        <span class="st">"supports_json_mode"</span>: <span class="va">True</span>,</span>
+<span id="cb11-157"><a href="#cb11-157"></a>        <span class="st">"supports_streaming"</span>: <span class="va">True</span>,</span>
+<span id="cb11-158"><a href="#cb11-158"></a>        <span class="st">"context_window"</span>: <span class="dv">1_048_576</span>,</span>
+<span id="cb11-159"><a href="#cb11-159"></a>    },</span>
+<span id="cb11-160"><a href="#cb11-160"></a>}</span>
+<span id="cb11-161"><a href="#cb11-161"></a></span>
+<span id="cb11-162"><a href="#cb11-162"></a>Tier <span class="op">=</span> Literal[<span class="st">"reasoning"</span>, <span class="st">"workhorse"</span>, <span class="st">"routing"</span>]</span>
+<span id="cb11-163"><a href="#cb11-163"></a></span>
+<span id="cb11-164"><a href="#cb11-164"></a><span class="kw">def</span> providers_for_tier(tier: Tier) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="cb11-165"><a href="#cb11-165"></a>    <span class="co">"""Return providers strictly within or above the requested tier."""</span></span>
+<span id="cb11-166"><a href="#cb11-166"></a>    rank <span class="op">=</span> {<span class="st">"routing"</span>: <span class="dv">0</span>, <span class="st">"workhorse"</span>: <span class="dv">1</span>, <span class="st">"reasoning"</span>: <span class="dv">2</span>}</span>
+<span id="cb11-167"><a href="#cb11-167"></a>    <span class="cf">return</span> [p <span class="cf">for</span> p <span class="kw">in</span> PROVIDERS.values() <span class="cf">if</span> rank[p[<span class="st">"tier"</span>]] <span class="op">&gt;=</span> rank[tier]]</span>
+<span id="cb11-168"><a href="#cb11-168"></a><span class="in">```</span></span>
+<span id="cb11-169"><a href="#cb11-169"></a></span>
+<span id="cb11-170"><a href="#cb11-170"></a>::: {.callout-note}</span>
+<span id="cb11-171"><a href="#cb11-171"></a>**GitHub Models intentionally omitted** from the unified client. It routes through Azure AI Inference and needs <span class="in">`api-key`</span> header semantics that differ from OpenAI's <span class="in">`Authorization: Bearer`</span>. Worth using — just not through this client. Use the <span class="in">`azure-ai-inference`</span> SDK separately.</span>
+<span id="cb11-172"><a href="#cb11-172"></a>:::</span>
+<span id="cb11-173"><a href="#cb11-173"></a></span>
+<span id="cb11-174"><a href="#cb11-174"></a>---</span>
+<span id="cb11-175"><a href="#cb11-175"></a></span>
+<span id="cb11-176"><a href="#cb11-176"></a><span class="fu">## 4. Retry vs. Fallback — They Are Not the Same</span></span>
+<span id="cb11-177"><a href="#cb11-177"></a></span>
+<span id="cb11-178"><a href="#cb11-178"></a>The single biggest mistake in naive fallback code: treating every exception identically.</span>
+<span id="cb11-179"><a href="#cb11-179"></a></span>
+<span id="cb11-180"><a href="#cb11-180"></a><span class="ss">- </span>**Rate limit (HTTP 429)** → retry the *same provider* with exponential backoff. Failing over immediately wastes quota you might recover in 60 seconds.</span>
+<span id="cb11-181"><a href="#cb11-181"></a><span class="ss">- </span>**Timeout / 5xx** → retry once with backoff, then fall over.</span>
+<span id="cb11-182"><a href="#cb11-182"></a><span class="ss">- </span>**Auth (401/403)** → fall over immediately. No amount of waiting fixes a bad key.</span>
+<span id="cb11-183"><a href="#cb11-183"></a><span class="ss">- </span>**Invalid request (400)** → do not fall over. The prompt itself is broken; the next provider will also reject it.</span>
+<span id="cb11-184"><a href="#cb11-184"></a><span class="ss">- </span>**Schema validation failure** → fall over with a stricter prompt.</span>
+<span id="cb11-185"><a href="#cb11-185"></a></span>
+<span id="cb11-186"><a href="#cb11-186"></a><span class="in">```python</span></span>
+<span id="cb11-187"><a href="#cb11-187"></a><span class="im">import</span> httpx</span>
+<span id="cb11-188"><a href="#cb11-188"></a><span class="im">import</span> logging</span>
+<span id="cb11-189"><a href="#cb11-189"></a><span class="im">from</span> tenacity <span class="im">import</span> (</span>
+<span id="cb11-190"><a href="#cb11-190"></a>    retry, retry_if_exception, stop_after_attempt,</span>
+<span id="cb11-191"><a href="#cb11-191"></a>    wait_exponential, RetryError,</span>
+<span id="cb11-192"><a href="#cb11-192"></a>)</span>
+<span id="cb11-193"><a href="#cb11-193"></a></span>
+<span id="cb11-194"><a href="#cb11-194"></a>logger <span class="op">=</span> logging.getLogger(<span class="va">__name__</span>)</span>
+<span id="cb11-195"><a href="#cb11-195"></a></span>
+<span id="cb11-196"><a href="#cb11-196"></a><span class="kw">class</span> ProviderRetryable(<span class="pp">Exception</span>):</span>
+<span id="cb11-197"><a href="#cb11-197"></a>    <span class="co">"""Should retry the same provider."""</span></span>
+<span id="cb11-198"><a href="#cb11-198"></a><span class="kw">class</span> ProviderFailover(<span class="pp">Exception</span>):</span>
+<span id="cb11-199"><a href="#cb11-199"></a>    <span class="co">"""Should fail over to the next provider."""</span></span>
+<span id="cb11-200"><a href="#cb11-200"></a><span class="kw">class</span> ProviderFatal(<span class="pp">Exception</span>):</span>
+<span id="cb11-201"><a href="#cb11-201"></a>    <span class="co">"""Do not retry or fail over — the prompt itself is broken."""</span></span>
+<span id="cb11-202"><a href="#cb11-202"></a></span>
+<span id="cb11-203"><a href="#cb11-203"></a><span class="kw">def</span> classify_error(exc: <span class="pp">Exception</span>) <span class="op">-&gt;</span> <span class="bu">type</span>[<span class="pp">Exception</span>]:</span>
+<span id="cb11-204"><a href="#cb11-204"></a>    <span class="co">"""Map a raw exception to one of our three categories."""</span></span>
+<span id="cb11-205"><a href="#cb11-205"></a>    <span class="cf">if</span> <span class="bu">isinstance</span>(exc, httpx.TimeoutException):</span>
+<span id="cb11-206"><a href="#cb11-206"></a>        <span class="cf">return</span> ProviderFailover</span>
+<span id="cb11-207"><a href="#cb11-207"></a>    status <span class="op">=</span> <span class="bu">getattr</span>(exc, <span class="st">"status_code"</span>, <span class="va">None</span>) <span class="kw">or</span> <span class="bu">getattr</span>(</span>
+<span id="cb11-208"><a href="#cb11-208"></a>        <span class="bu">getattr</span>(exc, <span class="st">"response"</span>, <span class="va">None</span>), <span class="st">"status_code"</span>, <span class="va">None</span></span>
+<span id="cb11-209"><a href="#cb11-209"></a>    )</span>
+<span id="cb11-210"><a href="#cb11-210"></a>    <span class="cf">if</span> status <span class="op">==</span> <span class="dv">429</span>:</span>
+<span id="cb11-211"><a href="#cb11-211"></a>        <span class="cf">return</span> ProviderRetryable</span>
+<span id="cb11-212"><a href="#cb11-212"></a>    <span class="cf">if</span> status <span class="kw">in</span> (<span class="dv">500</span>, <span class="dv">502</span>, <span class="dv">503</span>, <span class="dv">504</span>):</span>
+<span id="cb11-213"><a href="#cb11-213"></a>        <span class="cf">return</span> ProviderFailover</span>
+<span id="cb11-214"><a href="#cb11-214"></a>    <span class="cf">if</span> status <span class="kw">in</span> (<span class="dv">401</span>, <span class="dv">403</span>):</span>
+<span id="cb11-215"><a href="#cb11-215"></a>        <span class="cf">return</span> ProviderFailover</span>
+<span id="cb11-216"><a href="#cb11-216"></a>    <span class="cf">if</span> status <span class="op">==</span> <span class="dv">400</span>:</span>
+<span id="cb11-217"><a href="#cb11-217"></a>        <span class="cf">return</span> ProviderFatal</span>
+<span id="cb11-218"><a href="#cb11-218"></a>    <span class="cf">return</span> ProviderFailover  <span class="co"># default: try the next provider</span></span>
+<span id="cb11-219"><a href="#cb11-219"></a></span>
+<span id="cb11-220"><a href="#cb11-220"></a><span class="at">@retry</span>(</span>
+<span id="cb11-221"><a href="#cb11-221"></a>    retry<span class="op">=</span>retry_if_exception(<span class="kw">lambda</span> e: <span class="bu">isinstance</span>(e, ProviderRetryable)),</span>
+<span id="cb11-222"><a href="#cb11-222"></a>    stop<span class="op">=</span>stop_after_attempt(<span class="dv">3</span>),</span>
+<span id="cb11-223"><a href="#cb11-223"></a>    wait<span class="op">=</span>wait_exponential(multiplier<span class="op">=</span><span class="dv">2</span>, <span class="bu">min</span><span class="op">=</span><span class="dv">2</span>, <span class="bu">max</span><span class="op">=</span><span class="dv">30</span>),</span>
+<span id="cb11-224"><a href="#cb11-224"></a>    reraise<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb11-225"><a href="#cb11-225"></a>)</span>
+<span id="cb11-226"><a href="#cb11-226"></a><span class="kw">def</span> call_with_retry(client_call, <span class="op">*</span>args, <span class="op">**</span>kwargs):</span>
+<span id="cb11-227"><a href="#cb11-227"></a>    <span class="co">"""Run a provider call with rate-limit-aware retry, but no failover."""</span></span>
+<span id="cb11-228"><a href="#cb11-228"></a>    <span class="cf">try</span>:</span>
+<span id="cb11-229"><a href="#cb11-229"></a>        <span class="cf">return</span> client_call(<span class="op">*</span>args, <span class="op">**</span>kwargs)</span>
+<span id="cb11-230"><a href="#cb11-230"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb11-231"><a href="#cb11-231"></a>        category <span class="op">=</span> classify_error(e)</span>
+<span id="cb11-232"><a href="#cb11-232"></a>        <span class="cf">if</span> category <span class="kw">is</span> ProviderRetryable:</span>
+<span id="cb11-233"><a href="#cb11-233"></a>            logger.warning(<span class="st">"rate limited, backing off: </span><span class="sc">%s</span><span class="st">"</span>, e)</span>
+<span id="cb11-234"><a href="#cb11-234"></a>            <span class="cf">raise</span> ProviderRetryable(<span class="bu">str</span>(e)) <span class="im">from</span> e</span>
+<span id="cb11-235"><a href="#cb11-235"></a>        <span class="cf">if</span> category <span class="kw">is</span> ProviderFatal:</span>
+<span id="cb11-236"><a href="#cb11-236"></a>            <span class="cf">raise</span> ProviderFatal(<span class="bu">str</span>(e)) <span class="im">from</span> e</span>
+<span id="cb11-237"><a href="#cb11-237"></a>        <span class="cf">raise</span> ProviderFailover(<span class="bu">str</span>(e)) <span class="im">from</span> e</span>
+<span id="cb11-238"><a href="#cb11-238"></a><span class="in">```</span></span>
+<span id="cb11-239"><a href="#cb11-239"></a></span>
+<span id="cb11-240"><a href="#cb11-240"></a>That gives us correct semantics: retry where retry helps, fail over where it doesn't, and stop entirely on prompts that no provider can serve.</span>
+<span id="cb11-241"><a href="#cb11-241"></a></span>
+<span id="cb11-242"><a href="#cb11-242"></a>---</span>
+<span id="cb11-243"><a href="#cb11-243"></a></span>
+<span id="cb11-244"><a href="#cb11-244"></a><span class="fu">## 5. Structured Outputs That Survive Failover</span></span>
+<span id="cb11-245"><a href="#cb11-245"></a></span>
+<span id="cb11-246"><a href="#cb11-246"></a>This is the gap that breaks naive fallback patterns silently. Gemini might return clean JSON; Llama 3.3 might wrap it in markdown fences; DeepSeek R1 might prepend a <span class="in">`&lt;think&gt;`</span> block. Without validation at the boundary, your downstream parser receives garbage and you'll spend hours debugging.</span>
+<span id="cb11-247"><a href="#cb11-247"></a></span>
+<span id="cb11-248"><a href="#cb11-248"></a>Fix it with Pydantic + a tolerant JSON extractor + a validation step on every provider's output.</span>
+<span id="cb11-249"><a href="#cb11-249"></a></span>
+<span id="cb11-250"><a href="#cb11-250"></a><span class="in">```python</span></span>
+<span id="cb11-251"><a href="#cb11-251"></a><span class="im">import</span> json</span>
+<span id="cb11-252"><a href="#cb11-252"></a><span class="im">import</span> re</span>
+<span id="cb11-253"><a href="#cb11-253"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel, ValidationError</span>
+<span id="cb11-254"><a href="#cb11-254"></a><span class="im">from</span> typing <span class="im">import</span> Type, TypeVar</span>
+<span id="cb11-255"><a href="#cb11-255"></a></span>
+<span id="cb11-256"><a href="#cb11-256"></a>T <span class="op">=</span> TypeVar(<span class="st">"T"</span>, bound<span class="op">=</span>BaseModel)</span>
+<span id="cb11-257"><a href="#cb11-257"></a></span>
+<span id="cb11-258"><a href="#cb11-258"></a>_FENCE_RE <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r"```</span>(?:<span class="vs">json</span>)<span class="op">?</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\s\S</span><span class="pp">]</span><span class="op">*?</span><span class="kw">)</span><span class="vs">```"</span>, re.IGNORECASE)</span>
+<span id="cb11-259"><a href="#cb11-259"></a>_THINK_RE <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r"&lt;think&gt;</span><span class="pp">[</span><span class="dv">\s\S</span><span class="pp">]</span><span class="op">*?</span><span class="vs">&lt;/think&gt;"</span>, re.IGNORECASE)</span>
+<span id="cb11-260"><a href="#cb11-260"></a></span>
+<span id="cb11-261"><a href="#cb11-261"></a><span class="kw">def</span> extract_json(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb11-262"><a href="#cb11-262"></a>    <span class="co">"""Strip reasoning tags and code fences. Return best-guess JSON substring."""</span></span>
+<span id="cb11-263"><a href="#cb11-263"></a>    text <span class="op">=</span> _THINK_RE.sub(<span class="st">""</span>, text).strip()</span>
+<span id="cb11-264"><a href="#cb11-264"></a>    m <span class="op">=</span> _FENCE_RE.search(text)</span>
+<span id="cb11-265"><a href="#cb11-265"></a>    <span class="cf">if</span> m:</span>
+<span id="cb11-266"><a href="#cb11-266"></a>        <span class="cf">return</span> m.group(<span class="dv">1</span>).strip()</span>
+<span id="cb11-267"><a href="#cb11-267"></a>    <span class="co"># Fall back: first { ... last }</span></span>
+<span id="cb11-268"><a href="#cb11-268"></a>    start, end <span class="op">=</span> text.find(<span class="st">"{"</span>), text.rfind(<span class="st">"}"</span>)</span>
+<span id="cb11-269"><a href="#cb11-269"></a>    <span class="cf">if</span> start <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span> <span class="kw">and</span> end <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span>:</span>
+<span id="cb11-270"><a href="#cb11-270"></a>        <span class="cf">return</span> text[start : end <span class="op">+</span> <span class="dv">1</span>]</span>
+<span id="cb11-271"><a href="#cb11-271"></a>    <span class="cf">return</span> text</span>
+<span id="cb11-272"><a href="#cb11-272"></a></span>
+<span id="cb11-273"><a href="#cb11-273"></a><span class="kw">def</span> validate_structured(raw: <span class="bu">str</span>, schema: Type[T]) <span class="op">-&gt;</span> T:</span>
+<span id="cb11-274"><a href="#cb11-274"></a>    <span class="co">"""Parse + validate. Raises ValidationError on schema mismatch."""</span></span>
+<span id="cb11-275"><a href="#cb11-275"></a>    <span class="cf">try</span>:</span>
+<span id="cb11-276"><a href="#cb11-276"></a>        <span class="cf">return</span> schema.model_validate_json(extract_json(raw))</span>
+<span id="cb11-277"><a href="#cb11-277"></a>    <span class="cf">except</span> (ValidationError, json.JSONDecodeError) <span class="im">as</span> e:</span>
+<span id="cb11-278"><a href="#cb11-278"></a>        <span class="cf">raise</span> ProviderFailover(<span class="ss">f"schema mismatch: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>) <span class="im">from</span> e</span>
+<span id="cb11-279"><a href="#cb11-279"></a><span class="in">```</span></span>
+<span id="cb11-280"><a href="#cb11-280"></a></span>
+<span id="cb11-281"><a href="#cb11-281"></a>Now the fallback function uses this on every provider:</span>
+<span id="cb11-282"><a href="#cb11-282"></a></span>
+<span id="cb11-283"><a href="#cb11-283"></a><span class="in">```python</span></span>
+<span id="cb11-284"><a href="#cb11-284"></a><span class="im">from</span> openai <span class="im">import</span> OpenAI</span>
+<span id="cb11-285"><a href="#cb11-285"></a></span>
+<span id="cb11-286"><a href="#cb11-286"></a><span class="kw">def</span> structured_generate(</span>
+<span id="cb11-287"><a href="#cb11-287"></a>    prompt: <span class="bu">str</span>,</span>
+<span id="cb11-288"><a href="#cb11-288"></a>    schema: Type[T],</span>
+<span id="cb11-289"><a href="#cb11-289"></a>    tier: Tier <span class="op">=</span> <span class="st">"workhorse"</span>,</span>
+<span id="cb11-290"><a href="#cb11-290"></a>    system: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb11-291"><a href="#cb11-291"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[T, <span class="bu">str</span>]:</span>
+<span id="cb11-292"><a href="#cb11-292"></a>    <span class="co">"""Returns (validated_object, provider_name_that_succeeded)."""</span></span>
+<span id="cb11-293"><a href="#cb11-293"></a>    system_msg <span class="op">=</span> system <span class="kw">or</span> (</span>
+<span id="cb11-294"><a href="#cb11-294"></a>        <span class="ss">f"Respond ONLY with valid JSON matching this schema:</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb11-295"><a href="#cb11-295"></a>        <span class="ss">f"</span><span class="sc">{</span>schema<span class="sc">.</span>model_json_schema()<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb11-296"><a href="#cb11-296"></a>        <span class="st">"No prose, no markdown fences, no explanations."</span></span>
+<span id="cb11-297"><a href="#cb11-297"></a>    )</span>
+<span id="cb11-298"><a href="#cb11-298"></a>    messages <span class="op">=</span> [</span>
+<span id="cb11-299"><a href="#cb11-299"></a>        {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: system_msg},</span>
+<span id="cb11-300"><a href="#cb11-300"></a>        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prompt},</span>
+<span id="cb11-301"><a href="#cb11-301"></a>    ]</span>
+<span id="cb11-302"><a href="#cb11-302"></a></span>
+<span id="cb11-303"><a href="#cb11-303"></a>    last_error: <span class="pp">Exception</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb11-304"><a href="#cb11-304"></a>    <span class="cf">for</span> p <span class="kw">in</span> providers_for_tier(tier):</span>
+<span id="cb11-305"><a href="#cb11-305"></a>        <span class="cf">try</span>:</span>
+<span id="cb11-306"><a href="#cb11-306"></a>            client <span class="op">=</span> OpenAI(base_url<span class="op">=</span>p[<span class="st">"base_url"</span>], api_key<span class="op">=</span>p[<span class="st">"api_key"</span>])</span>
+<span id="cb11-307"><a href="#cb11-307"></a></span>
+<span id="cb11-308"><a href="#cb11-308"></a>            <span class="kw">def</span> _call():</span>
+<span id="cb11-309"><a href="#cb11-309"></a>                <span class="cf">return</span> client.chat.completions.create(</span>
+<span id="cb11-310"><a href="#cb11-310"></a>                    model<span class="op">=</span>p[<span class="st">"model"</span>],</span>
+<span id="cb11-311"><a href="#cb11-311"></a>                    messages<span class="op">=</span>messages,</span>
+<span id="cb11-312"><a href="#cb11-312"></a>                    max_tokens<span class="op">=</span><span class="dv">2048</span>,</span>
+<span id="cb11-313"><a href="#cb11-313"></a>                    response_format<span class="op">=</span>(</span>
+<span id="cb11-314"><a href="#cb11-314"></a>                        {<span class="st">"type"</span>: <span class="st">"json_object"</span>} <span class="cf">if</span> p[<span class="st">"supports_json_mode"</span>] <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb11-315"><a href="#cb11-315"></a>                    ),</span>
+<span id="cb11-316"><a href="#cb11-316"></a>                    temperature<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb11-317"><a href="#cb11-317"></a>                )</span>
+<span id="cb11-318"><a href="#cb11-318"></a></span>
+<span id="cb11-319"><a href="#cb11-319"></a>            response <span class="op">=</span> call_with_retry(_call)</span>
+<span id="cb11-320"><a href="#cb11-320"></a>            raw <span class="op">=</span> response.choices[<span class="dv">0</span>].message.content</span>
+<span id="cb11-321"><a href="#cb11-321"></a>            validated <span class="op">=</span> validate_structured(raw, schema)</span>
+<span id="cb11-322"><a href="#cb11-322"></a>            <span class="cf">return</span> validated, p[<span class="st">"model"</span>]</span>
+<span id="cb11-323"><a href="#cb11-323"></a></span>
+<span id="cb11-324"><a href="#cb11-324"></a>        <span class="cf">except</span> ProviderFatal:</span>
+<span id="cb11-325"><a href="#cb11-325"></a>            <span class="cf">raise</span>  <span class="co"># prompt is broken; no point trying other providers</span></span>
+<span id="cb11-326"><a href="#cb11-326"></a>        <span class="cf">except</span> (ProviderFailover, ProviderRetryable, RetryError) <span class="im">as</span> e:</span>
+<span id="cb11-327"><a href="#cb11-327"></a>            last_error <span class="op">=</span> e</span>
+<span id="cb11-328"><a href="#cb11-328"></a>            logger.warning(<span class="st">"provider </span><span class="sc">%s</span><span class="st"> failed: </span><span class="sc">%s</span><span class="st">"</span>, p[<span class="st">"model"</span>], e)</span>
+<span id="cb11-329"><a href="#cb11-329"></a>            <span class="cf">continue</span></span>
+<span id="cb11-330"><a href="#cb11-330"></a></span>
+<span id="cb11-331"><a href="#cb11-331"></a>    <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="ss">f"all providers in tier '</span><span class="sc">{</span>tier<span class="sc">}</span><span class="ss">' exhausted: </span><span class="sc">{</span>last_error<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-332"><a href="#cb11-332"></a><span class="in">```</span></span>
+<span id="cb11-333"><a href="#cb11-333"></a></span>
+<span id="cb11-334"><a href="#cb11-334"></a>Usage:</span>
+<span id="cb11-335"><a href="#cb11-335"></a></span>
+<span id="cb11-336"><a href="#cb11-336"></a><span class="in">```python</span></span>
+<span id="cb11-337"><a href="#cb11-337"></a><span class="kw">class</span> ExtractedInvoice(BaseModel):</span>
+<span id="cb11-338"><a href="#cb11-338"></a>    vendor: <span class="bu">str</span></span>
+<span id="cb11-339"><a href="#cb11-339"></a>    total: <span class="bu">float</span></span>
+<span id="cb11-340"><a href="#cb11-340"></a>    line_items: <span class="bu">list</span>[<span class="bu">str</span>]</span>
+<span id="cb11-341"><a href="#cb11-341"></a>    currency: <span class="bu">str</span></span>
+<span id="cb11-342"><a href="#cb11-342"></a></span>
+<span id="cb11-343"><a href="#cb11-343"></a>invoice, served_by <span class="op">=</span> structured_generate(</span>
+<span id="cb11-344"><a href="#cb11-344"></a>    prompt<span class="op">=</span><span class="st">"Extract from: Acme Corp, $1,250.00 USD for laptop, monitor, keyboard."</span>,</span>
+<span id="cb11-345"><a href="#cb11-345"></a>    schema<span class="op">=</span>ExtractedInvoice,</span>
+<span id="cb11-346"><a href="#cb11-346"></a>    tier<span class="op">=</span><span class="st">"workhorse"</span>,</span>
+<span id="cb11-347"><a href="#cb11-347"></a>)</span>
+<span id="cb11-348"><a href="#cb11-348"></a><span class="bu">print</span>(<span class="ss">f"served by: </span><span class="sc">{</span>served_by<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-349"><a href="#cb11-349"></a><span class="bu">print</span>(invoice.model_dump())</span>
+<span id="cb11-350"><a href="#cb11-350"></a><span class="in">```</span></span>
+<span id="cb11-351"><a href="#cb11-351"></a></span>
+<span id="cb11-352"><a href="#cb11-352"></a>Now every provider's output is validated at the boundary. A provider that returns malformed JSON triggers a *failover*, not a silent downstream crash.</span>
+<span id="cb11-353"><a href="#cb11-353"></a></span>
+<span id="cb11-354"><a href="#cb11-354"></a>---</span>
+<span id="cb11-355"><a href="#cb11-355"></a></span>
+<span id="cb11-356"><a href="#cb11-356"></a><span class="fu">## 6. Streaming With Mid-Stream Failover</span></span>
+<span id="cb11-357"><a href="#cb11-357"></a></span>
+<span id="cb11-358"><a href="#cb11-358"></a>Real interactive apps stream tokens. The tricky case: a provider starts streaming, the connection drops at token 200, and you need to fail over without showing the user a broken UI.</span>
+<span id="cb11-359"><a href="#cb11-359"></a></span>
+<span id="cb11-360"><a href="#cb11-360"></a>The pattern: buffer locally until first-token, then yield. If the stream dies mid-flight, retry the failed provider once (transient network), then fail over with the *partial output* as context to the next provider.</span>
+<span id="cb11-361"><a href="#cb11-361"></a></span>
+<span id="cb11-362"><a href="#cb11-362"></a><span class="in">```python</span></span>
+<span id="cb11-363"><a href="#cb11-363"></a><span class="im">from</span> typing <span class="im">import</span> Iterator</span>
+<span id="cb11-364"><a href="#cb11-364"></a></span>
+<span id="cb11-365"><a href="#cb11-365"></a><span class="kw">def</span> streaming_generate(</span>
+<span id="cb11-366"><a href="#cb11-366"></a>    prompt: <span class="bu">str</span>,</span>
+<span id="cb11-367"><a href="#cb11-367"></a>    tier: Tier <span class="op">=</span> <span class="st">"workhorse"</span>,</span>
+<span id="cb11-368"><a href="#cb11-368"></a>    system: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb11-369"><a href="#cb11-369"></a>) <span class="op">-&gt;</span> Iterator[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">str</span>]]:</span>
+<span id="cb11-370"><a href="#cb11-370"></a>    <span class="co">"""Yields (token, provider_name). Falls over mid-stream if needed."""</span></span>
+<span id="cb11-371"><a href="#cb11-371"></a>    messages <span class="op">=</span> []</span>
+<span id="cb11-372"><a href="#cb11-372"></a>    <span class="cf">if</span> system:</span>
+<span id="cb11-373"><a href="#cb11-373"></a>        messages.append({<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: system})</span>
+<span id="cb11-374"><a href="#cb11-374"></a>    messages.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prompt})</span>
+<span id="cb11-375"><a href="#cb11-375"></a></span>
+<span id="cb11-376"><a href="#cb11-376"></a>    partial <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb11-377"><a href="#cb11-377"></a>    <span class="cf">for</span> p <span class="kw">in</span> providers_for_tier(tier):</span>
+<span id="cb11-378"><a href="#cb11-378"></a>        <span class="cf">try</span>:</span>
+<span id="cb11-379"><a href="#cb11-379"></a>            client <span class="op">=</span> OpenAI(base_url<span class="op">=</span>p[<span class="st">"base_url"</span>], api_key<span class="op">=</span>p[<span class="st">"api_key"</span>])</span>
+<span id="cb11-380"><a href="#cb11-380"></a>            stream <span class="op">=</span> client.chat.completions.create(</span>
+<span id="cb11-381"><a href="#cb11-381"></a>                model<span class="op">=</span>p[<span class="st">"model"</span>],</span>
+<span id="cb11-382"><a href="#cb11-382"></a>                messages<span class="op">=</span>messages,</span>
+<span id="cb11-383"><a href="#cb11-383"></a>                max_tokens<span class="op">=</span><span class="dv">2048</span>,</span>
+<span id="cb11-384"><a href="#cb11-384"></a>                stream<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb11-385"><a href="#cb11-385"></a>                temperature<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb11-386"><a href="#cb11-386"></a>            )</span>
+<span id="cb11-387"><a href="#cb11-387"></a>            <span class="cf">for</span> chunk <span class="kw">in</span> stream:</span>
+<span id="cb11-388"><a href="#cb11-388"></a>                delta <span class="op">=</span> chunk.choices[<span class="dv">0</span>].delta.content <span class="kw">or</span> <span class="st">""</span></span>
+<span id="cb11-389"><a href="#cb11-389"></a>                <span class="cf">if</span> delta:</span>
+<span id="cb11-390"><a href="#cb11-390"></a>                    partial <span class="op">+=</span> delta</span>
+<span id="cb11-391"><a href="#cb11-391"></a>                    <span class="cf">yield</span> delta, p[<span class="st">"model"</span>]</span>
+<span id="cb11-392"><a href="#cb11-392"></a>            <span class="cf">return</span>  <span class="co"># clean completion</span></span>
+<span id="cb11-393"><a href="#cb11-393"></a></span>
+<span id="cb11-394"><a href="#cb11-394"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb11-395"><a href="#cb11-395"></a>            logger.warning(<span class="st">"stream from </span><span class="sc">%s</span><span class="st"> dropped after </span><span class="sc">%d</span><span class="st"> chars: </span><span class="sc">%s</span><span class="st">"</span>,</span>
+<span id="cb11-396"><a href="#cb11-396"></a>                           p[<span class="st">"model"</span>], <span class="bu">len</span>(partial), e)</span>
+<span id="cb11-397"><a href="#cb11-397"></a>            <span class="co"># If we got meaningful output, append it as assistant context</span></span>
+<span id="cb11-398"><a href="#cb11-398"></a>            <span class="co"># so the next provider can continue rather than restart.</span></span>
+<span id="cb11-399"><a href="#cb11-399"></a>            <span class="cf">if</span> partial:</span>
+<span id="cb11-400"><a href="#cb11-400"></a>                messages.append({<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: partial})</span>
+<span id="cb11-401"><a href="#cb11-401"></a>                messages.append({</span>
+<span id="cb11-402"><a href="#cb11-402"></a>                    <span class="st">"role"</span>: <span class="st">"user"</span>,</span>
+<span id="cb11-403"><a href="#cb11-403"></a>                    <span class="st">"content"</span>: <span class="st">"Continue from where you left off. Do not repeat."</span>,</span>
+<span id="cb11-404"><a href="#cb11-404"></a>                })</span>
+<span id="cb11-405"><a href="#cb11-405"></a>                partial <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb11-406"><a href="#cb11-406"></a>            <span class="cf">continue</span></span>
+<span id="cb11-407"><a href="#cb11-407"></a></span>
+<span id="cb11-408"><a href="#cb11-408"></a>    <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="st">"all streaming providers failed"</span>)</span>
+<span id="cb11-409"><a href="#cb11-409"></a><span class="in">```</span></span>
+<span id="cb11-410"><a href="#cb11-410"></a></span>
+<span id="cb11-411"><a href="#cb11-411"></a>This is the pattern your interview-orchestrator-style apps actually need: the user sees uninterrupted streaming even when the backing provider changes mid-response.</span>
+<span id="cb11-412"><a href="#cb11-412"></a></span>
+<span id="cb11-413"><a href="#cb11-413"></a>---</span>
+<span id="cb11-414"><a href="#cb11-414"></a></span>
+<span id="cb11-415"><a href="#cb11-415"></a><span class="fu">## 7. Observability — Know Which Provider Served What</span></span>
+<span id="cb11-416"><a href="#cb11-416"></a></span>
+<span id="cb11-417"><a href="#cb11-417"></a>If you can't measure it, you can't trust it. A 10-line metrics block tells you per-provider success rate, latency, and quota consumption.</span>
+<span id="cb11-418"><a href="#cb11-418"></a></span>
+<span id="cb11-419"><a href="#cb11-419"></a><span class="in">```python</span></span>
+<span id="cb11-420"><a href="#cb11-420"></a><span class="im">from</span> prometheus_client <span class="im">import</span> Counter, Histogram</span>
+<span id="cb11-421"><a href="#cb11-421"></a><span class="im">import</span> time</span>
+<span id="cb11-422"><a href="#cb11-422"></a><span class="im">from</span> contextlib <span class="im">import</span> contextmanager</span>
+<span id="cb11-423"><a href="#cb11-423"></a></span>
+<span id="cb11-424"><a href="#cb11-424"></a>llm_requests_total <span class="op">=</span> Counter(</span>
+<span id="cb11-425"><a href="#cb11-425"></a>    <span class="st">"llm_requests_total"</span>,</span>
+<span id="cb11-426"><a href="#cb11-426"></a>    <span class="st">"Total LLM requests by provider and outcome."</span>,</span>
+<span id="cb11-427"><a href="#cb11-427"></a>    [<span class="st">"provider"</span>, <span class="st">"tier"</span>, <span class="st">"outcome"</span>],</span>
+<span id="cb11-428"><a href="#cb11-428"></a>)</span>
+<span id="cb11-429"><a href="#cb11-429"></a>llm_request_duration <span class="op">=</span> Histogram(</span>
+<span id="cb11-430"><a href="#cb11-430"></a>    <span class="st">"llm_request_duration_seconds"</span>,</span>
+<span id="cb11-431"><a href="#cb11-431"></a>    <span class="st">"LLM request latency by provider."</span>,</span>
+<span id="cb11-432"><a href="#cb11-432"></a>    [<span class="st">"provider"</span>, <span class="st">"tier"</span>],</span>
+<span id="cb11-433"><a href="#cb11-433"></a>)</span>
+<span id="cb11-434"><a href="#cb11-434"></a></span>
+<span id="cb11-435"><a href="#cb11-435"></a><span class="at">@contextmanager</span></span>
+<span id="cb11-436"><a href="#cb11-436"></a><span class="kw">def</span> track(provider: <span class="bu">str</span>, tier: <span class="bu">str</span>):</span>
+<span id="cb11-437"><a href="#cb11-437"></a>    start <span class="op">=</span> time.perf_counter()</span>
+<span id="cb11-438"><a href="#cb11-438"></a>    outcome <span class="op">=</span> <span class="st">"success"</span></span>
+<span id="cb11-439"><a href="#cb11-439"></a>    <span class="cf">try</span>:</span>
+<span id="cb11-440"><a href="#cb11-440"></a>        <span class="cf">yield</span></span>
+<span id="cb11-441"><a href="#cb11-441"></a>    <span class="cf">except</span> ProviderRetryable:</span>
+<span id="cb11-442"><a href="#cb11-442"></a>        outcome <span class="op">=</span> <span class="st">"rate_limited"</span></span>
+<span id="cb11-443"><a href="#cb11-443"></a>        <span class="cf">raise</span></span>
+<span id="cb11-444"><a href="#cb11-444"></a>    <span class="cf">except</span> ProviderFailover:</span>
+<span id="cb11-445"><a href="#cb11-445"></a>        outcome <span class="op">=</span> <span class="st">"failover"</span></span>
+<span id="cb11-446"><a href="#cb11-446"></a>        <span class="cf">raise</span></span>
+<span id="cb11-447"><a href="#cb11-447"></a>    <span class="cf">except</span> ProviderFatal:</span>
+<span id="cb11-448"><a href="#cb11-448"></a>        outcome <span class="op">=</span> <span class="st">"fatal"</span></span>
+<span id="cb11-449"><a href="#cb11-449"></a>        <span class="cf">raise</span></span>
+<span id="cb11-450"><a href="#cb11-450"></a>    <span class="cf">except</span> <span class="pp">Exception</span>:</span>
+<span id="cb11-451"><a href="#cb11-451"></a>        outcome <span class="op">=</span> <span class="st">"error"</span></span>
+<span id="cb11-452"><a href="#cb11-452"></a>        <span class="cf">raise</span></span>
+<span id="cb11-453"><a href="#cb11-453"></a>    <span class="cf">finally</span>:</span>
+<span id="cb11-454"><a href="#cb11-454"></a>        elapsed <span class="op">=</span> time.perf_counter() <span class="op">-</span> start</span>
+<span id="cb11-455"><a href="#cb11-455"></a>        llm_requests_total.labels(provider, tier, outcome).inc()</span>
+<span id="cb11-456"><a href="#cb11-456"></a>        llm_request_duration.labels(provider, tier).observe(elapsed)</span>
+<span id="cb11-457"><a href="#cb11-457"></a><span class="in">```</span></span>
+<span id="cb11-458"><a href="#cb11-458"></a></span>
+<span id="cb11-459"><a href="#cb11-459"></a>Wrap the <span class="in">`_call()`</span> closures in <span class="in">`structured_generate`</span> and <span class="in">`streaming_generate`</span> with <span class="in">`track(p["model"], p["tier"])`</span> and you have proper per-provider visibility — exportable to Grafana, Datadog, or just printable via <span class="in">`prometheus_client.generate_latest()`</span>.</span>
+<span id="cb11-460"><a href="#cb11-460"></a></span>
+<span id="cb11-461"><a href="#cb11-461"></a>---</span>
+<span id="cb11-462"><a href="#cb11-462"></a></span>
+<span id="cb11-463"><a href="#cb11-463"></a><span class="fu">## 8. LangChain &amp; LangGraph Integration That Goes Beyond Toys</span></span>
+<span id="cb11-464"><a href="#cb11-464"></a></span>
+<span id="cb11-465"><a href="#cb11-465"></a>The naive integration is <span class="in">`ChatOpenAI(base_url=...)`</span> and call it a day. Here's what actually composes:</span>
+<span id="cb11-466"><a href="#cb11-466"></a></span>
+<span id="cb11-467"><a href="#cb11-467"></a><span class="in">```python</span></span>
+<span id="cb11-468"><a href="#cb11-468"></a><span class="im">from</span> langchain_openai <span class="im">import</span> ChatOpenAI</span>
+<span id="cb11-469"><a href="#cb11-469"></a><span class="im">from</span> langchain_core.runnables <span class="im">import</span> RunnableWithFallbacks</span>
+<span id="cb11-470"><a href="#cb11-470"></a><span class="im">from</span> langchain_core.runnables.retry <span class="im">import</span> RunnableRetry</span>
+<span id="cb11-471"><a href="#cb11-471"></a><span class="im">from</span> langchain_core.exceptions <span class="im">import</span> OutputParserException</span>
+<span id="cb11-472"><a href="#cb11-472"></a><span class="im">from</span> langchain_core.output_parsers <span class="im">import</span> PydanticOutputParser</span>
+<span id="cb11-473"><a href="#cb11-473"></a></span>
+<span id="cb11-474"><a href="#cb11-474"></a><span class="kw">def</span> build_llm(provider_key: <span class="bu">str</span>, <span class="op">**</span>kwargs) <span class="op">-&gt;</span> ChatOpenAI:</span>
+<span id="cb11-475"><a href="#cb11-475"></a>    p <span class="op">=</span> PROVIDERS[provider_key]</span>
+<span id="cb11-476"><a href="#cb11-476"></a>    <span class="cf">return</span> ChatOpenAI(</span>
+<span id="cb11-477"><a href="#cb11-477"></a>        model<span class="op">=</span>p[<span class="st">"model"</span>],</span>
+<span id="cb11-478"><a href="#cb11-478"></a>        base_url<span class="op">=</span>p[<span class="st">"base_url"</span>],</span>
+<span id="cb11-479"><a href="#cb11-479"></a>        api_key<span class="op">=</span>p[<span class="st">"api_key"</span>],</span>
+<span id="cb11-480"><a href="#cb11-480"></a>        timeout<span class="op">=</span><span class="dv">30</span>,</span>
+<span id="cb11-481"><a href="#cb11-481"></a>        max_retries<span class="op">=</span><span class="dv">0</span>,  <span class="co"># we handle retry at the Runnable layer below</span></span>
+<span id="cb11-482"><a href="#cb11-482"></a>        <span class="op">**</span>kwargs,</span>
+<span id="cb11-483"><a href="#cb11-483"></a>    )</span>
+<span id="cb11-484"><a href="#cb11-484"></a></span>
+<span id="cb11-485"><a href="#cb11-485"></a><span class="co"># Compose: each provider gets internal rate-limit retry, then external failover</span></span>
+<span id="cb11-486"><a href="#cb11-486"></a>primary <span class="op">=</span> build_llm(<span class="st">"gemini-pro"</span>, temperature<span class="op">=</span><span class="dv">0</span>).with_retry(</span>
+<span id="cb11-487"><a href="#cb11-487"></a>    retry_if_exception_type<span class="op">=</span>(httpx.HTTPStatusError,),</span>
+<span id="cb11-488"><a href="#cb11-488"></a>    wait_exponential_jitter<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb11-489"><a href="#cb11-489"></a>    stop_after_attempt<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb11-490"><a href="#cb11-490"></a>)</span>
+<span id="cb11-491"><a href="#cb11-491"></a>secondary <span class="op">=</span> build_llm(<span class="st">"openrouter-deepseek"</span>, temperature<span class="op">=</span><span class="dv">0</span>).with_retry(</span>
+<span id="cb11-492"><a href="#cb11-492"></a>    stop_after_attempt<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb11-493"><a href="#cb11-493"></a>)</span>
+<span id="cb11-494"><a href="#cb11-494"></a>tertiary <span class="op">=</span> build_llm(<span class="st">"groq-gpt-oss"</span>, temperature<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb11-495"><a href="#cb11-495"></a></span>
+<span id="cb11-496"><a href="#cb11-496"></a>reasoning_chain <span class="op">=</span> primary.with_fallbacks(</span>
+<span id="cb11-497"><a href="#cb11-497"></a>    fallbacks<span class="op">=</span>[secondary, tertiary],</span>
+<span id="cb11-498"><a href="#cb11-498"></a>    exceptions_to_handle<span class="op">=</span>(httpx.HTTPStatusError, OutputParserException),</span>
+<span id="cb11-499"><a href="#cb11-499"></a>)</span>
+<span id="cb11-500"><a href="#cb11-500"></a><span class="in">```</span></span>
+<span id="cb11-501"><a href="#cb11-501"></a></span>
+<span id="cb11-502"><a href="#cb11-502"></a>For LangGraph, register <span class="in">`reasoning_chain`</span> as a node's LLM and the graph's <span class="in">`checkpoint`</span> memory persists across failovers — the next node sees the conversation state regardless of which provider produced each turn. That's the property you need for agentic workflows.</span>
+<span id="cb11-503"><a href="#cb11-503"></a></span>
+<span id="cb11-504"><a href="#cb11-504"></a>LangSmith traces will tag spans with the actual model that served the call, so you can debug after the fact which provider handled which step.</span>
+<span id="cb11-505"><a href="#cb11-505"></a></span>
+<span id="cb11-506"><a href="#cb11-506"></a>---</span>
+<span id="cb11-507"><a href="#cb11-507"></a></span>
+<span id="cb11-508"><a href="#cb11-508"></a><span class="fu">## 9. Embeddings &amp; Long-Context RAG on Free Tiers</span></span>
+<span id="cb11-509"><a href="#cb11-509"></a></span>
+<span id="cb11-510"><a href="#cb11-510"></a>A glaring gap in most "free LLM API" posts: they ignore RAG entirely. Here's the free-tier embedding stack worth knowing:</span>
+<span id="cb11-511"><a href="#cb11-511"></a></span>
+<span id="cb11-512"><a href="#cb11-512"></a><span class="pp">|</span> Provider <span class="pp">|</span> Model <span class="pp">|</span> Free tier <span class="pp">|</span> Strength <span class="pp">|</span></span>
+<span id="cb11-513"><a href="#cb11-513"></a><span class="pp">|---|---|---|---|</span></span>
+<span id="cb11-514"><a href="#cb11-514"></a><span class="pp">|</span> **Gemini** <span class="pp">|</span> <span class="in">`text-embedding-004`</span> <span class="pp">|</span> 1,500 RPD <span class="pp">|</span> 768-dim, multilingual, free with Gemini key <span class="pp">|</span></span>
+<span id="cb11-515"><a href="#cb11-515"></a><span class="pp">|</span> **Cohere** <span class="pp">|</span> <span class="in">`embed-v4.0`</span> <span class="pp">|</span> 1,000 calls/month <span class="pp">|</span> Strong on retrieval, free with signup <span class="pp">|</span></span>
+<span id="cb11-516"><a href="#cb11-516"></a><span class="pp">|</span> **Voyage** <span class="pp">|</span> <span class="in">`voyage-3-lite`</span> <span class="pp">|</span> 200M tokens free lifetime <span class="pp">|</span> Best retrieval quality per dollar <span class="pp">|</span></span>
+<span id="cb11-517"><a href="#cb11-517"></a><span class="pp">|</span> **HuggingFace Inference** <span class="pp">|</span> <span class="in">`BAAI/bge-large-en-v1.5`</span> <span class="pp">|</span> Rate-limited but free <span class="pp">|</span> Open-weight; can self-host later <span class="pp">|</span></span>
+<span id="cb11-518"><a href="#cb11-518"></a></span>
+<span id="cb11-519"><a href="#cb11-519"></a><span class="in">```python</span></span>
+<span id="cb11-520"><a href="#cb11-520"></a><span class="im">from</span> openai <span class="im">import</span> OpenAI</span>
+<span id="cb11-521"><a href="#cb11-521"></a></span>
+<span id="cb11-522"><a href="#cb11-522"></a>embedder <span class="op">=</span> OpenAI(</span>
+<span id="cb11-523"><a href="#cb11-523"></a>    base_url<span class="op">=</span><span class="st">"https://generativelanguage.googleapis.com/v1beta/openai/"</span>,</span>
+<span id="cb11-524"><a href="#cb11-524"></a>    api_key<span class="op">=</span>os.environ[<span class="st">"GEMINI_API_KEY"</span>],</span>
+<span id="cb11-525"><a href="#cb11-525"></a>)</span>
+<span id="cb11-526"><a href="#cb11-526"></a></span>
+<span id="cb11-527"><a href="#cb11-527"></a><span class="kw">def</span> embed(texts: <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">list</span>[<span class="bu">float</span>]]:</span>
+<span id="cb11-528"><a href="#cb11-528"></a>    response <span class="op">=</span> embedder.embeddings.create(</span>
+<span id="cb11-529"><a href="#cb11-529"></a>        model<span class="op">=</span><span class="st">"text-embedding-004"</span>,</span>
+<span id="cb11-530"><a href="#cb11-530"></a>        <span class="bu">input</span><span class="op">=</span>texts,</span>
+<span id="cb11-531"><a href="#cb11-531"></a>    )</span>
+<span id="cb11-532"><a href="#cb11-532"></a>    <span class="cf">return</span> [d.embedding <span class="cf">for</span> d <span class="kw">in</span> response.data]</span>
+<span id="cb11-533"><a href="#cb11-533"></a><span class="in">```</span></span>
+<span id="cb11-534"><a href="#cb11-534"></a></span>
+<span id="cb11-535"><a href="#cb11-535"></a><span class="fu">### Long context — why Gemini's 1M window matters in practice</span></span>
+<span id="cb11-536"><a href="#cb11-536"></a></span>
+<span id="cb11-537"><a href="#cb11-537"></a>For most apps with documents under ~200 pages, you can **skip vector chunking entirely** with Gemini's 1M-token context. Drop the whole PDF in the prompt. No chunk boundaries, no semantic-search miss rate, no reranking step.</span>
+<span id="cb11-538"><a href="#cb11-538"></a></span>
+<span id="cb11-539"><a href="#cb11-539"></a>Tradeoffs to know:</span>
+<span id="cb11-540"><a href="#cb11-540"></a></span>
+<span id="cb11-541"><a href="#cb11-541"></a><span class="ss">- </span>**Cost (if you go paid):** scales linearly. At free tier this is irrelevant; at paid tier 1M-token calls are expensive.</span>
+<span id="cb11-542"><a href="#cb11-542"></a><span class="ss">- </span>**Latency:** 1M-token prompts take 10–30s for first-token. Not for interactive use.</span>
+<span id="cb11-543"><a href="#cb11-543"></a><span class="ss">- </span>**Lost-in-the-middle:** even at 1M, models attend better to the start and end. Put critical context at boundaries.</span>
+<span id="cb11-544"><a href="#cb11-544"></a></span>
+<span id="cb11-545"><a href="#cb11-545"></a>The pattern: long-context for one-shot heavy analysis, RAG for high-volume interactive queries.</span>
+<span id="cb11-546"><a href="#cb11-546"></a></span>
+<span id="cb11-547"><a href="#cb11-547"></a>---</span>
+<span id="cb11-548"><a href="#cb11-548"></a></span>
+<span id="cb11-549"><a href="#cb11-549"></a><span class="fu">## 10. The Full Stack — Cost, Quality, Capacity</span></span>
+<span id="cb11-550"><a href="#cb11-550"></a></span>
+<span id="cb11-551"><a href="#cb11-551"></a>A senior reader wants the tradeoff matrix, not the marketing copy. Here it is:</span>
+<span id="cb11-552"><a href="#cb11-552"></a></span>
+<span id="cb11-553"><a href="#cb11-553"></a><span class="pp">|</span> Use case <span class="pp">|</span> Recommended stack <span class="pp">|</span> Daily capacity <span class="pp">|</span> Quality tier <span class="pp">|</span></span>
+<span id="cb11-554"><a href="#cb11-554"></a><span class="pp">|---|---|---|---|</span></span>
+<span id="cb11-555"><a href="#cb11-555"></a><span class="pp">|</span> Side project prototype <span class="pp">|</span> Gemini Pro → Gemini Flash → Groq Llama <span class="pp">|</span> ~7K req/day <span class="pp">|</span> Reasoning <span class="pp">|</span></span>
+<span id="cb11-556"><a href="#cb11-556"></a><span class="pp">|</span> Interactive chat (low latency) <span class="pp">|</span> Groq GPT-OSS → Groq Llama → Cerebras Llama <span class="pp">|</span> ~7K req/day <span class="pp">|</span> Reasoning→Workhorse <span class="pp">|</span></span>
+<span id="cb11-557"><a href="#cb11-557"></a><span class="pp">|</span> Document extraction (batch) <span class="pp">|</span> Gemini Flash → Cerebras Llama → OpenRouter <span class="pp">|</span> ~1.5K req/day <span class="pp">|</span> Workhorse <span class="pp">|</span></span>
+<span id="cb11-558"><a href="#cb11-558"></a><span class="pp">|</span> RAG (high volume) <span class="pp">|</span> Gemini Flash-Lite for queries; Gemini embeddings <span class="pp">|</span> ~1K req/day <span class="pp">|</span> Routing <span class="pp">|</span></span>
+<span id="cb11-559"><a href="#cb11-559"></a><span class="pp">|</span> Eval harness <span class="pp">|</span> Gemini Pro for judge; DeepSeek R1 as second judge <span class="pp">|</span> ~100 evals/day <span class="pp">|</span> Reasoning <span class="pp">|</span></span>
+<span id="cb11-560"><a href="#cb11-560"></a></span>
+<span id="cb11-561"><a href="#cb11-561"></a><span class="fu">### When free stops working</span></span>
+<span id="cb11-562"><a href="#cb11-562"></a></span>
+<span id="cb11-563"><a href="#cb11-563"></a>Honest list:</span>
+<span id="cb11-564"><a href="#cb11-564"></a></span>
+<span id="cb11-565"><a href="#cb11-565"></a><span class="ss">- </span>**Paying customers with SLAs** — free tiers don't guarantee uptime. Move to paid.</span>
+<span id="cb11-566"><a href="#cb11-566"></a><span class="ss">- </span>**Confidential data** — Gemini free tier trains on prompts. Use Groq/Cerebras for sensitive prototyping, paid plans with DPA for client data.</span>
+<span id="cb11-567"><a href="#cb11-567"></a><span class="ss">- </span>**High burst loads** — RPM ceilings will hurt. Paid tiers raise them 10–100×.</span>
+<span id="cb11-568"><a href="#cb11-568"></a><span class="ss">- </span>**Past ~10K req/day sustained** — DeepSeek V4 paid at ~$0.30/M input tokens is cheaper than juggling four free quotas.</span>
+<span id="cb11-569"><a href="#cb11-569"></a></span>
+<span id="cb11-570"><a href="#cb11-570"></a>For learning, prototyping, side projects, internal tools, RAG eval harnesses, and MVP demos — this stack is more than enough, and it composes into something you can credibly call infrastructure.</span>
+<span id="cb11-571"><a href="#cb11-571"></a></span>
+<span id="cb11-572"><a href="#cb11-572"></a>---</span>
+<span id="cb11-573"><a href="#cb11-573"></a></span>
+<span id="cb11-574"><a href="#cb11-574"></a><span class="fu">## What This Buys You</span></span>
+<span id="cb11-575"><a href="#cb11-575"></a></span>
+<span id="cb11-576"><a href="#cb11-576"></a>This is the difference between "I used a free LLM API" and "I built free-tier infrastructure." The patterns above — tier-aware fallback, retry/failover distinction, structured-output validation at every boundary, streaming with mid-stream recovery, observability — are what reviewers look for when they're trying to figure out whether you've shipped LLM systems in anger or just used them.</span>
+<span id="cb11-577"><a href="#cb11-577"></a></span>
+<span id="cb11-578"><a href="#cb11-578"></a>Every block above is something I had to learn the hard way after a 2 AM page. Hopefully this saves you a few of those.</span>
+<span id="cb11-579"><a href="#cb11-579"></a></span>
+<span id="cb11-580"><a href="#cb11-580"></a>---</span>
+<span id="cb11-581"><a href="#cb11-581"></a></span>
+<span id="cb11-582"><a href="#cb11-582"></a><span class="fu">## References</span></span>
+<span id="cb11-583"><a href="#cb11-583"></a></span>
+<span id="cb11-584"><a href="#cb11-584"></a><span class="ss">1. </span>Google AI Studio: <span class="ot">&lt;https://aistudio.google.com/&gt;</span></span>
+<span id="cb11-585"><a href="#cb11-585"></a><span class="ss">2. </span>Gemini rate limits: <span class="ot">&lt;https://ai.google.dev/gemini-api/docs/rate-limits&gt;</span></span>
+<span id="cb11-586"><a href="#cb11-586"></a><span class="ss">3. </span>Gemini OpenAI compatibility: <span class="ot">&lt;https://ai.google.dev/gemini-api/docs/openai&gt;</span></span>
+<span id="cb11-587"><a href="#cb11-587"></a><span class="ss">4. </span>Groq Console: <span class="ot">&lt;https://console.groq.com/&gt;</span></span>
+<span id="cb11-588"><a href="#cb11-588"></a><span class="ss">5. </span>Cerebras Cloud: <span class="ot">&lt;https://cloud.cerebras.ai/&gt;</span></span>
+<span id="cb11-589"><a href="#cb11-589"></a><span class="ss">6. </span>OpenRouter free models: <span class="ot">&lt;https://openrouter.ai/models?max_price=0&gt;</span></span>
+<span id="cb11-590"><a href="#cb11-590"></a><span class="ss">7. </span>LangChain fallbacks: <span class="ot">&lt;https://python.langchain.com/docs/how_to/fallbacks/&gt;</span></span>
+<span id="cb11-591"><a href="#cb11-591"></a><span class="ss">8. </span>Tenacity retry library: <span class="ot">&lt;https://tenacity.readthedocs.io/&gt;</span></span>
+<span id="cb11-592"><a href="#cb11-592"></a><span class="ss">9. </span>Pydantic v2 docs: <span class="ot">&lt;https://docs.pydantic.dev/&gt;</span></span>
+<span id="cb11-593"><a href="#cb11-593"></a><span class="ss">10. </span>Prometheus client (Python): <span class="ot">&lt;https://prometheus.github.io/client_python/&gt;</span></span>
+<span id="cb11-594"><a href="#cb11-594"></a></span>
+<span id="cb11-595"><a href="#cb11-595"></a>---</span>
+<span id="cb11-596"><a href="#cb11-596"></a></span>
+<span id="cb11-597"><a href="#cb11-597"></a>*Built this in production? Hit edge cases I missed? Reach me on [LinkedIn](https://linkedin.com/in/surajjaiswal007) or check out my [other posts](../index.html).*</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
 </div> <!-- /content -->
 
 

@@ -1,0 +1,597 @@
+---
+title: "Production-Grade Multi-Provider LLM Fallback on Free Tiers (2026)"
+author: "Suraj Jaiswal"
+date: "2026-05-27"
+date-modified: "2026-05-27"
+categories: [Agentic AI, NLP, LLM, Infrastructure, RAG]
+description: "Structured outputs, retry/fallback semantics, mid-stream failover, and observability — building real LLM infrastructure on Gemini, Groq, Cerebras, and OpenRouter free tiers."
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: false
+    code-tools: true
+    code-line-numbers: true
+---
+
+> 📌 **Rate limits and pricing verified:** 27 May 2026. Free-tier terms drift quarterly — re-verify before deploying.
+
+
+We will cover six things the typical "free LLM API" post skips:
+
+1. **Quality tiers** — which free models are interchangeable, which aren't.
+2. **Structured outputs** that survive failover (the biggest silent-failure trap).
+3. **Retry vs. fallback** — they are not the same operation.
+4. **Streaming** with mid-stream failover.
+5. **Observability** — knowing which provider served what.
+6. **Embeddings & long-context RAG** on free tiers.
+
+By the end, you'll have ~400 lines of infrastructure code that handles a real workload without surprises.
+
+---
+
+## 1. Honest Capacity Math
+
+Here's the actual arithmetic, per provider, assuming a typical 800-input / 600-output token prompt:
+
+| Provider | Free limit | Daily request capacity (800/600 tokens) | Notes |
+|---|---|---|---|
+| **Gemini 2.5 Pro** | 5 RPM, 100 RPD | 100 | Hard daily cap |
+| **Gemini 2.5 Flash** | 10 RPM, 250 RPD | 250 | Hard daily cap |
+| **Gemini 2.5 Flash-Lite** | 15 RPM, 1,000 RPD | 1,000 | Hard daily cap |
+| **Groq Llama 3.3 70B** | 30 RPM, 14,400 RPD, 6K TPM | ~7,500 (TPM-bound) | TPM is the real ceiling |
+| **Cerebras Llama 3.3 70B** | 30 RPM, 1M tokens/day | ~700 (token-bound) | Token cap, not request cap |
+| **OpenRouter free models** | 20 RPM, 200 RPD per `:free` model | ~200 per model | Multiple `:free` models stack |
+
+**Realistic combined capacity for a mixed workload: ~8,000–10,000 requests/day**, not 20,000. Anyone telling you otherwise is adding RPDs without accounting for TPM and token caps.
+
+That's still plenty for prototyping, soft-launches, internal tools, and RAG eval harnesses. Be honest about the ceiling.
+
+---
+
+## 2. Quality Tiers — Not All Free Models Are Equal
+
+The biggest mistake in naive fallback patterns: treating models as interchangeable. They aren't. Failing over from Gemini 2.5 Pro to Gemma 3 27B will silently degrade reasoning quality even when the API call "succeeds."
+
+**Reasoning tier** — comparable on hard multi-step problems:
+
+- Gemini 2.5 Pro
+- DeepSeek R1 (via OpenRouter)
+- GPT-OSS 120B (via Groq)
+- o3-mini (via GitHub Models)
+
+**Workhorse tier** — strong general-purpose, weaker on multi-hop:
+
+- Gemini 2.5 Flash
+- Llama 3.3 70B (Groq, Cerebras)
+- Qwen3 32B (OpenRouter)
+- Mistral Large
+
+**Routing/classification tier** — use for cheap calls, not for the actual work:
+
+- Gemini 2.5 Flash-Lite
+- Gemma 3 27B
+- Llama 3.1 8B
+
+::: {.callout-important}
+**Rule:** Only fall back *within the same tier*. If your prompt needs reasoning-tier quality, your fallback ladder should be Gemini 2.5 Pro → DeepSeek R1 → GPT-OSS 120B — not Gemini Pro → Gemma 3.
+:::
+
+---
+
+## 3. The Setup
+
+```bash
+pip install -q -U openai pydantic tenacity httpx prometheus-client
+```
+
+```python
+import os
+from typing import Literal
+
+# Tier-aware provider catalog
+PROVIDERS: dict[str, dict] = {
+    # ---------- Reasoning tier ----------
+    "gemini-pro": {
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "api_key": os.environ["GEMINI_API_KEY"],
+        "model": "gemini-2.5-pro",
+        "tier": "reasoning",
+        "supports_json_mode": True,
+        "supports_streaming": True,
+        "context_window": 1_048_576,
+    },
+    "openrouter-deepseek": {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": os.environ["OPENROUTER_API_KEY"],
+        "model": "deepseek/deepseek-r1:free",
+        "tier": "reasoning",
+        "supports_json_mode": True,
+        "supports_streaming": True,
+        "context_window": 163_840,
+    },
+    "groq-gpt-oss": {
+        "base_url": "https://api.groq.com/openai/v1",
+        "api_key": os.environ["GROQ_API_KEY"],
+        "model": "openai/gpt-oss-120b",
+        "tier": "reasoning",
+        "supports_json_mode": True,
+        "supports_streaming": True,
+        "context_window": 131_072,
+    },
+    # ---------- Workhorse tier ----------
+    "gemini-flash": {
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "api_key": os.environ["GEMINI_API_KEY"],
+        "model": "gemini-2.5-flash",
+        "tier": "workhorse",
+        "supports_json_mode": True,
+        "supports_streaming": True,
+        "context_window": 1_048_576,
+    },
+    "groq-llama": {
+        "base_url": "https://api.groq.com/openai/v1",
+        "api_key": os.environ["GROQ_API_KEY"],
+        "model": "llama-3.3-70b-versatile",
+        "tier": "workhorse",
+        "supports_json_mode": True,
+        "supports_streaming": True,
+        "context_window": 131_072,
+    },
+    "cerebras-llama": {
+        "base_url": "https://api.cerebras.ai/v1",
+        "api_key": os.environ["CEREBRAS_API_KEY"],
+        "model": "llama-3.3-70b",
+        "tier": "workhorse",
+        "supports_json_mode": True,
+        "supports_streaming": True,
+        "context_window": 128_000,
+    },
+    # ---------- Routing tier ----------
+    "gemini-flash-lite": {
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "api_key": os.environ["GEMINI_API_KEY"],
+        "model": "gemini-2.5-flash-lite",
+        "tier": "routing",
+        "supports_json_mode": True,
+        "supports_streaming": True,
+        "context_window": 1_048_576,
+    },
+}
+
+Tier = Literal["reasoning", "workhorse", "routing"]
+
+def providers_for_tier(tier: Tier) -> list[dict]:
+    """Return providers strictly within or above the requested tier."""
+    rank = {"routing": 0, "workhorse": 1, "reasoning": 2}
+    return [p for p in PROVIDERS.values() if rank[p["tier"]] >= rank[tier]]
+```
+
+::: {.callout-note}
+**GitHub Models intentionally omitted** from the unified client. It routes through Azure AI Inference and needs `api-key` header semantics that differ from OpenAI's `Authorization: Bearer`. Worth using — just not through this client. Use the `azure-ai-inference` SDK separately.
+:::
+
+---
+
+## 4. Retry vs. Fallback — They Are Not the Same
+
+The single biggest mistake in naive fallback code: treating every exception identically.
+
+- **Rate limit (HTTP 429)** → retry the *same provider* with exponential backoff. Failing over immediately wastes quota you might recover in 60 seconds.
+- **Timeout / 5xx** → retry once with backoff, then fall over.
+- **Auth (401/403)** → fall over immediately. No amount of waiting fixes a bad key.
+- **Invalid request (400)** → do not fall over. The prompt itself is broken; the next provider will also reject it.
+- **Schema validation failure** → fall over with a stricter prompt.
+
+```python
+import httpx
+import logging
+from tenacity import (
+    retry, retry_if_exception, stop_after_attempt,
+    wait_exponential, RetryError,
+)
+
+logger = logging.getLogger(__name__)
+
+class ProviderRetryable(Exception):
+    """Should retry the same provider."""
+class ProviderFailover(Exception):
+    """Should fail over to the next provider."""
+class ProviderFatal(Exception):
+    """Do not retry or fail over — the prompt itself is broken."""
+
+def classify_error(exc: Exception) -> type[Exception]:
+    """Map a raw exception to one of our three categories."""
+    if isinstance(exc, httpx.TimeoutException):
+        return ProviderFailover
+    status = getattr(exc, "status_code", None) or getattr(
+        getattr(exc, "response", None), "status_code", None
+    )
+    if status == 429:
+        return ProviderRetryable
+    if status in (500, 502, 503, 504):
+        return ProviderFailover
+    if status in (401, 403):
+        return ProviderFailover
+    if status == 400:
+        return ProviderFatal
+    return ProviderFailover  # default: try the next provider
+
+@retry(
+    retry=retry_if_exception(lambda e: isinstance(e, ProviderRetryable)),
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=2, min=2, max=30),
+    reraise=True,
+)
+def call_with_retry(client_call, *args, **kwargs):
+    """Run a provider call with rate-limit-aware retry, but no failover."""
+    try:
+        return client_call(*args, **kwargs)
+    except Exception as e:
+        category = classify_error(e)
+        if category is ProviderRetryable:
+            logger.warning("rate limited, backing off: %s", e)
+            raise ProviderRetryable(str(e)) from e
+        if category is ProviderFatal:
+            raise ProviderFatal(str(e)) from e
+        raise ProviderFailover(str(e)) from e
+```
+
+That gives us correct semantics: retry where retry helps, fail over where it doesn't, and stop entirely on prompts that no provider can serve.
+
+---
+
+## 5. Structured Outputs That Survive Failover
+
+This is the gap that breaks naive fallback patterns silently. Gemini might return clean JSON; Llama 3.3 might wrap it in markdown fences; DeepSeek R1 might prepend a `<think>` block. Without validation at the boundary, your downstream parser receives garbage and you'll spend hours debugging.
+
+Fix it with Pydantic + a tolerant JSON extractor + a validation step on every provider's output.
+
+```python
+import json
+import re
+from pydantic import BaseModel, ValidationError
+from typing import Type, TypeVar
+
+T = TypeVar("T", bound=BaseModel)
+
+_FENCE_RE = re.compile(r"```(?:json)?\s*([\s\S]*?)```", re.IGNORECASE)
+_THINK_RE = re.compile(r"<think>[\s\S]*?</think>", re.IGNORECASE)
+
+def extract_json(text: str) -> str:
+    """Strip reasoning tags and code fences. Return best-guess JSON substring."""
+    text = _THINK_RE.sub("", text).strip()
+    m = _FENCE_RE.search(text)
+    if m:
+        return m.group(1).strip()
+    # Fall back: first { ... last }
+    start, end = text.find("{"), text.rfind("}")
+    if start != -1 and end != -1:
+        return text[start : end + 1]
+    return text
+
+def validate_structured(raw: str, schema: Type[T]) -> T:
+    """Parse + validate. Raises ValidationError on schema mismatch."""
+    try:
+        return schema.model_validate_json(extract_json(raw))
+    except (ValidationError, json.JSONDecodeError) as e:
+        raise ProviderFailover(f"schema mismatch: {e}") from e
+```
+
+Now the fallback function uses this on every provider:
+
+```python
+from openai import OpenAI
+
+def structured_generate(
+    prompt: str,
+    schema: Type[T],
+    tier: Tier = "workhorse",
+    system: str | None = None,
+) -> tuple[T, str]:
+    """Returns (validated_object, provider_name_that_succeeded)."""
+    system_msg = system or (
+        f"Respond ONLY with valid JSON matching this schema:\n"
+        f"{schema.model_json_schema()}\n"
+        "No prose, no markdown fences, no explanations."
+    )
+    messages = [
+        {"role": "system", "content": system_msg},
+        {"role": "user", "content": prompt},
+    ]
+
+    last_error: Exception | None = None
+    for p in providers_for_tier(tier):
+        try:
+            client = OpenAI(base_url=p["base_url"], api_key=p["api_key"])
+
+            def _call():
+                return client.chat.completions.create(
+                    model=p["model"],
+                    messages=messages,
+                    max_tokens=2048,
+                    response_format=(
+                        {"type": "json_object"} if p["supports_json_mode"] else None
+                    ),
+                    temperature=0.0,
+                )
+
+            response = call_with_retry(_call)
+            raw = response.choices[0].message.content
+            validated = validate_structured(raw, schema)
+            return validated, p["model"]
+
+        except ProviderFatal:
+            raise  # prompt is broken; no point trying other providers
+        except (ProviderFailover, ProviderRetryable, RetryError) as e:
+            last_error = e
+            logger.warning("provider %s failed: %s", p["model"], e)
+            continue
+
+    raise RuntimeError(f"all providers in tier '{tier}' exhausted: {last_error}")
+```
+
+Usage:
+
+```python
+class ExtractedInvoice(BaseModel):
+    vendor: str
+    total: float
+    line_items: list[str]
+    currency: str
+
+invoice, served_by = structured_generate(
+    prompt="Extract from: Acme Corp, $1,250.00 USD for laptop, monitor, keyboard.",
+    schema=ExtractedInvoice,
+    tier="workhorse",
+)
+print(f"served by: {served_by}")
+print(invoice.model_dump())
+```
+
+Now every provider's output is validated at the boundary. A provider that returns malformed JSON triggers a *failover*, not a silent downstream crash.
+
+---
+
+## 6. Streaming With Mid-Stream Failover
+
+Real interactive apps stream tokens. The tricky case: a provider starts streaming, the connection drops at token 200, and you need to fail over without showing the user a broken UI.
+
+The pattern: buffer locally until first-token, then yield. If the stream dies mid-flight, retry the failed provider once (transient network), then fail over with the *partial output* as context to the next provider.
+
+```python
+from typing import Iterator
+
+def streaming_generate(
+    prompt: str,
+    tier: Tier = "workhorse",
+    system: str | None = None,
+) -> Iterator[tuple[str, str]]:
+    """Yields (token, provider_name). Falls over mid-stream if needed."""
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
+
+    partial = ""
+    for p in providers_for_tier(tier):
+        try:
+            client = OpenAI(base_url=p["base_url"], api_key=p["api_key"])
+            stream = client.chat.completions.create(
+                model=p["model"],
+                messages=messages,
+                max_tokens=2048,
+                stream=True,
+                temperature=0.2,
+            )
+            for chunk in stream:
+                delta = chunk.choices[0].delta.content or ""
+                if delta:
+                    partial += delta
+                    yield delta, p["model"]
+            return  # clean completion
+
+        except Exception as e:
+            logger.warning("stream from %s dropped after %d chars: %s",
+                           p["model"], len(partial), e)
+            # If we got meaningful output, append it as assistant context
+            # so the next provider can continue rather than restart.
+            if partial:
+                messages.append({"role": "assistant", "content": partial})
+                messages.append({
+                    "role": "user",
+                    "content": "Continue from where you left off. Do not repeat.",
+                })
+                partial = ""
+            continue
+
+    raise RuntimeError("all streaming providers failed")
+```
+
+This is the pattern your interview-orchestrator-style apps actually need: the user sees uninterrupted streaming even when the backing provider changes mid-response.
+
+---
+
+## 7. Observability — Know Which Provider Served What
+
+If you can't measure it, you can't trust it. A 10-line metrics block tells you per-provider success rate, latency, and quota consumption.
+
+```python
+from prometheus_client import Counter, Histogram
+import time
+from contextlib import contextmanager
+
+llm_requests_total = Counter(
+    "llm_requests_total",
+    "Total LLM requests by provider and outcome.",
+    ["provider", "tier", "outcome"],
+)
+llm_request_duration = Histogram(
+    "llm_request_duration_seconds",
+    "LLM request latency by provider.",
+    ["provider", "tier"],
+)
+
+@contextmanager
+def track(provider: str, tier: str):
+    start = time.perf_counter()
+    outcome = "success"
+    try:
+        yield
+    except ProviderRetryable:
+        outcome = "rate_limited"
+        raise
+    except ProviderFailover:
+        outcome = "failover"
+        raise
+    except ProviderFatal:
+        outcome = "fatal"
+        raise
+    except Exception:
+        outcome = "error"
+        raise
+    finally:
+        elapsed = time.perf_counter() - start
+        llm_requests_total.labels(provider, tier, outcome).inc()
+        llm_request_duration.labels(provider, tier).observe(elapsed)
+```
+
+Wrap the `_call()` closures in `structured_generate` and `streaming_generate` with `track(p["model"], p["tier"])` and you have proper per-provider visibility — exportable to Grafana, Datadog, or just printable via `prometheus_client.generate_latest()`.
+
+---
+
+## 8. LangChain & LangGraph Integration That Goes Beyond Toys
+
+The naive integration is `ChatOpenAI(base_url=...)` and call it a day. Here's what actually composes:
+
+```python
+from langchain_openai import ChatOpenAI
+from langchain_core.runnables import RunnableWithFallbacks
+from langchain_core.runnables.retry import RunnableRetry
+from langchain_core.exceptions import OutputParserException
+from langchain_core.output_parsers import PydanticOutputParser
+
+def build_llm(provider_key: str, **kwargs) -> ChatOpenAI:
+    p = PROVIDERS[provider_key]
+    return ChatOpenAI(
+        model=p["model"],
+        base_url=p["base_url"],
+        api_key=p["api_key"],
+        timeout=30,
+        max_retries=0,  # we handle retry at the Runnable layer below
+        **kwargs,
+    )
+
+# Compose: each provider gets internal rate-limit retry, then external failover
+primary = build_llm("gemini-pro", temperature=0).with_retry(
+    retry_if_exception_type=(httpx.HTTPStatusError,),
+    wait_exponential_jitter=True,
+    stop_after_attempt=3,
+)
+secondary = build_llm("openrouter-deepseek", temperature=0).with_retry(
+    stop_after_attempt=2,
+)
+tertiary = build_llm("groq-gpt-oss", temperature=0)
+
+reasoning_chain = primary.with_fallbacks(
+    fallbacks=[secondary, tertiary],
+    exceptions_to_handle=(httpx.HTTPStatusError, OutputParserException),
+)
+```
+
+For LangGraph, register `reasoning_chain` as a node's LLM and the graph's `checkpoint` memory persists across failovers — the next node sees the conversation state regardless of which provider produced each turn. That's the property you need for agentic workflows.
+
+LangSmith traces will tag spans with the actual model that served the call, so you can debug after the fact which provider handled which step.
+
+---
+
+## 9. Embeddings & Long-Context RAG on Free Tiers
+
+A glaring gap in most "free LLM API" posts: they ignore RAG entirely. Here's the free-tier embedding stack worth knowing:
+
+| Provider | Model | Free tier | Strength |
+|---|---|---|---|
+| **Gemini** | `text-embedding-004` | 1,500 RPD | 768-dim, multilingual, free with Gemini key |
+| **Cohere** | `embed-v4.0` | 1,000 calls/month | Strong on retrieval, free with signup |
+| **Voyage** | `voyage-3-lite` | 200M tokens free lifetime | Best retrieval quality per dollar |
+| **HuggingFace Inference** | `BAAI/bge-large-en-v1.5` | Rate-limited but free | Open-weight; can self-host later |
+
+```python
+from openai import OpenAI
+
+embedder = OpenAI(
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+    api_key=os.environ["GEMINI_API_KEY"],
+)
+
+def embed(texts: list[str]) -> list[list[float]]:
+    response = embedder.embeddings.create(
+        model="text-embedding-004",
+        input=texts,
+    )
+    return [d.embedding for d in response.data]
+```
+
+### Long context — why Gemini's 1M window matters in practice
+
+For most apps with documents under ~200 pages, you can **skip vector chunking entirely** with Gemini's 1M-token context. Drop the whole PDF in the prompt. No chunk boundaries, no semantic-search miss rate, no reranking step.
+
+Tradeoffs to know:
+
+- **Cost (if you go paid):** scales linearly. At free tier this is irrelevant; at paid tier 1M-token calls are expensive.
+- **Latency:** 1M-token prompts take 10–30s for first-token. Not for interactive use.
+- **Lost-in-the-middle:** even at 1M, models attend better to the start and end. Put critical context at boundaries.
+
+The pattern: long-context for one-shot heavy analysis, RAG for high-volume interactive queries.
+
+---
+
+## 10. The Full Stack — Cost, Quality, Capacity
+
+A senior reader wants the tradeoff matrix, not the marketing copy. Here it is:
+
+| Use case | Recommended stack | Daily capacity | Quality tier |
+|---|---|---|---|
+| Side project prototype | Gemini Pro → Gemini Flash → Groq Llama | ~7K req/day | Reasoning |
+| Interactive chat (low latency) | Groq GPT-OSS → Groq Llama → Cerebras Llama | ~7K req/day | Reasoning→Workhorse |
+| Document extraction (batch) | Gemini Flash → Cerebras Llama → OpenRouter | ~1.5K req/day | Workhorse |
+| RAG (high volume) | Gemini Flash-Lite for queries; Gemini embeddings | ~1K req/day | Routing |
+| Eval harness | Gemini Pro for judge; DeepSeek R1 as second judge | ~100 evals/day | Reasoning |
+
+### When free stops working
+
+Honest list:
+
+- **Paying customers with SLAs** — free tiers don't guarantee uptime. Move to paid.
+- **Confidential data** — Gemini free tier trains on prompts. Use Groq/Cerebras for sensitive prototyping, paid plans with DPA for client data.
+- **High burst loads** — RPM ceilings will hurt. Paid tiers raise them 10–100×.
+- **Past ~10K req/day sustained** — DeepSeek V4 paid at ~$0.30/M input tokens is cheaper than juggling four free quotas.
+
+For learning, prototyping, side projects, internal tools, RAG eval harnesses, and MVP demos — this stack is more than enough, and it composes into something you can credibly call infrastructure.
+
+---
+
+## What This Buys You
+
+This is the difference between "I used a free LLM API" and "I built free-tier infrastructure." The patterns above — tier-aware fallback, retry/failover distinction, structured-output validation at every boundary, streaming with mid-stream recovery, observability — are what reviewers look for when they're trying to figure out whether you've shipped LLM systems in anger or just used them.
+
+Every block above is something I had to learn the hard way after a 2 AM page. Hopefully this saves you a few of those.
+
+---
+
+## References
+
+1. Google AI Studio: <https://aistudio.google.com/>
+2. Gemini rate limits: <https://ai.google.dev/gemini-api/docs/rate-limits>
+3. Gemini OpenAI compatibility: <https://ai.google.dev/gemini-api/docs/openai>
+4. Groq Console: <https://console.groq.com/>
+5. Cerebras Cloud: <https://cloud.cerebras.ai/>
+6. OpenRouter free models: <https://openrouter.ai/models?max_price=0>
+7. LangChain fallbacks: <https://python.langchain.com/docs/how_to/fallbacks/>
+8. Tenacity retry library: <https://tenacity.readthedocs.io/>
+9. Pydantic v2 docs: <https://docs.pydantic.dev/>
+10. Prometheus client (Python): <https://prometheus.github.io/client_python/>
+
+---
+
+*Built this in production? Hit edge cases I missed? Reach me on [LinkedIn](https://linkedin.com/in/surajjaiswal007) or check out my [other posts](../index.html).*

@@ -9,8 +9,8 @@
 <link>https://jaiswalsuraj487.github.io/projects/</link>
 <atom:link href="https://jaiswalsuraj487.github.io/projects/index.xml" rel="self" type="application/rss+xml"/>
 <description>Senior AI Engineer specializing in GenAI, NLP, and Computer Vision. Published at NeurIPS and ACM. Open to ML/AI Engineer roles.</description>
-<generator>quarto-1.6.33</generator>
-<lastBuildDate>Mon, 31 Mar 2025 18:30:00 GMT</lastBuildDate>
+<generator>quarto-1.7.33</generator>
+<lastBuildDate>Tue, 01 Apr 2025 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Real-Time Safety Monitoring Pipeline</title>
   <dc:creator>Suraj Jaiswal</dc:creator>
@@ -150,7 +150,7 @@
   <category>Computer Vision</category>
   <category>MLOps</category>
   <guid>https://jaiswalsuraj487.github.io/projects/data/safety_monitoring_pipeline.html</guid>
-  <pubDate>Mon, 31 Mar 2025 18:30:00 GMT</pubDate>
+  <pubDate>Tue, 01 Apr 2025 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>LLM-Based Code Evaluator</title>
@@ -184,7 +184,7 @@
   <category>GenAI</category>
   <category>NLP</category>
   <guid>https://jaiswalsuraj487.github.io/projects/data/llm_code_evaluator.html</guid>
-  <pubDate>Fri, 28 Feb 2025 18:30:00 GMT</pubDate>
+  <pubDate>Sat, 01 Mar 2025 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>GenAI Bill-of-Materials Automation Pipeline</title>
@@ -218,7 +218,7 @@
   <category>GenAI</category>
   <category>MLOps</category>
   <guid>https://jaiswalsuraj487.github.io/projects/data/genai_bom_pipeline.html</guid>
-  <pubDate>Fri, 31 Jan 2025 18:30:00 GMT</pubDate>
+  <pubDate>Sat, 01 Feb 2025 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Medical RAG System for Automated Billing Code Generation</title>
@@ -275,7 +275,7 @@
   <category>GenAI</category>
   <category>Healthcare</category>
   <guid>https://jaiswalsuraj487.github.io/projects/data/medical_rag_coding.html</guid>
-  <pubDate>Wed, 31 Jul 2024 18:30:00 GMT</pubDate>
+  <pubDate>Thu, 01 Aug 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
