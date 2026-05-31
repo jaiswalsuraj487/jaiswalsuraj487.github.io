@@ -2046,7 +2046,7 @@ Next command:                &lt;ONE specific actionable command&gt;</code></pre
 <hr>
 </section>
 <section id="scope-cheat-sheet-where-does-each-thing-live" class="level2">
-<h2 class="anchored" data-anchor-id="scope-cheat-sheet-where-does-each-thing-live">🧭 Scope cheat-sheet — where does each thing live?</h2>
+<h2 class="anchored" data-anchor-id="scope-cheat-sheet-where-does-each-thing-live">Scope cheat-sheet — where does each thing live?</h2>
 <p>Claude Code supports four scopes. Getting them right is the difference between a setup that survives the team and one that lives only on your laptop.</p>
 <table class="caption-top table">
 <colgroup>
@@ -2261,7 +2261,7 @@ font-style: inherit;">}}</span></span></code></pre></div></li>
 </section>
 </section>
 <section id="init-prompts-copy-paste" class="level2">
-<h2 class="anchored" data-anchor-id="init-prompts-copy-paste">🚀 Init prompts — copy-paste</h2>
+<h2 class="anchored" data-anchor-id="init-prompts-copy-paste">Init prompts — copy-paste</h2>
 <p><strong>Save this one line to your text expander as <code>;claudeinit</code>.</strong> It’s the only prompt you need. Claude reads the spec, detects project type, installs only what’s needed, and ends with a structured “ready to work” report.</p>
 <pre><code>Read https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md and execute it on this project.</code></pre>
 <p>That’s it. The spec at that URL contains everything Claude needs — scope rules, project-type detection, scaffold templates, permissions, hooks. No second prompt required.</p>
@@ -2274,7 +2274,7 @@ the scaffold files. Skip Phase 1a, 1b, 3, and 5.</code></pre>
 <hr>
 </section>
 <section id="bootstrap-for-claude" class="level2">
-<h2 class="anchored" data-anchor-id="bootstrap-for-claude">🤖 Bootstrap for Claude</h2>
+<h2 class="anchored" data-anchor-id="bootstrap-for-claude">Bootstrap for Claude</h2>
 <blockquote class="blockquote">
 <p><em>Claude — if a user pointed you at this URL, execute this section in order. <strong>Every step is idempotent</strong>: before installing an MCP server, run <code>claude mcp list</code> and skip if present. Before installing a plugin, run <code>/plugin list</code> and skip if present. Before creating a file, check if it exists and ask before overwriting. <strong>Scope matters</strong>: generic MCPs use <code>--scope user</code>; project-specific MCPs use <code>--scope project</code> (writes to <code>&lt;repo&gt;/.mcp.json</code>) so teammates inherit them.</em></p>
 </blockquote>

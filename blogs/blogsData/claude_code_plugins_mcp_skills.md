@@ -11,8 +11,8 @@ toc-depth: 3
 toc-expand: 2
 ---
 
-> **For humans:** Skim the TL;DR. Jump to whichever tier you need. If you just want to set up a new project, paste the [one-line init prompt](#-init-prompts-copy-paste) — it points to a separate minimal spec file (`claude-setup.md`) optimized purely for Claude to execute.
-> **For Claude Code (if a user pointed you at this URL):** Don't execute this post — execute the linked **setup spec** at `https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md` instead. This post is human rationale; the spec is the executable version. If for some reason you must use this post, read [§ Bootstrap for Claude](#-bootstrap-for-claude).
+> **For humans:** Skim the TL;DR. Jump to whichever tier you need. If you just want to set up a new project, paste the [one-line init prompt](#init-prompts-copy-paste) — it points to a separate minimal spec file (`claude-setup.md`) optimized purely for Claude to execute.
+> **For Claude Code (if a user pointed you at this URL):** Don't execute this post — execute the linked **setup spec** at `https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md` instead. This post is human rationale; the spec is the executable version. If for some reason you must use this post, read [§ Bootstrap for Claude](#bootstrap-for-claude).
 
 This post is the rationale behind a setup I run on every new AI/ML project. The actual executable spec lives at **[claude-setup.md](https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md)** — ~465 lines of pure Claude-first instructions. This post (~1,300 lines) is the *why*: the cost numbers, the verified package names, the testing patterns, the real anecdotes from my work at Tiger Analytics, NeuroReef Labs, and IIT Gandhinagar. Read the post if you want to understand the choices. Use the spec if you want to set up a project.
 
@@ -25,13 +25,13 @@ I've spent the last six months iterating across multi-agent orchestrators at Tig
 ## TL;DR
 
 - **Bootstrap is now 404-free, project-type-aware, and scope-correct.** All MCP install commands verified against npm/PyPI/GitHub on 27 May 2026. The bootstrap detects project type (LangGraph / RAG / CV / fine-tuning / plain backend) from the repo and installs only what's needed. **Generic MCPs go to user scope; project-specific ones (Postgres, AWS, Langfuse, Sentry, Playwright, project-scoped GitHub) go to project scope** (committed to `.mcp.json`) so teammates reproduce your setup. The earlier `@aws/mcp-server`, `@langfuse/mcp`, `@sentry/mcp` names were hallucinations — corrected to `awslabs.*` uvx packages, Langfuse's HTTP endpoint, and `@sentry/mcp-server`.
-- **Treat testing as Tier 0**, not Phase 2. LLM apps drift silently; agent loops desync; RAG retrieval degrades. Default stack: `pytest + pytest-asyncio + httpx.AsyncClient + Hypothesis + syrupy + schemathesis + pytest-recording` underneath, with ONE eval tool on top picked by the [decision tree below](#-which-eval-tool-pick-one-from-the-decision-tree).
-- **The biggest hidden cost is MCP context tax, not API tokens.** The official GitHub MCP injects ~42K–55K tokens of tool definitions before your first prompt; Playwright sessions balloon to ~114K. If `/context` shows >25% used at session start, [prune servers](#-context-hygiene-what-to-delete) before doing anything else. The `permissions.ask` / `permissions.deny` block in `.claude/settings.json` is your second line of defense — installed but unused MCPs can be denied without uninstalling.
+- **Treat testing as Tier 0**, not Phase 2. LLM apps drift silently; agent loops desync; RAG retrieval degrades. Default stack: `pytest + pytest-asyncio + httpx.AsyncClient + Hypothesis + syrupy + schemathesis + pytest-recording` underneath, with ONE eval tool on top picked by the [decision tree below](#which-eval-tool-pick-one-from-the-decision-tree).
+- **The biggest hidden cost is MCP context tax, not API tokens.** The official GitHub MCP injects ~42K–55K tokens of tool definitions before your first prompt; Playwright sessions balloon to ~114K. If `/context` shows >25% used at session start, [prune servers](#context-hygiene-what-to-delete) before doing anything else. The `permissions.ask` / `permissions.deny` block in `.claude/settings.json` is your second line of defense — installed but unused MCPs can be denied without uninstalling.
 - **A 200-trace × 4-metric × nightly Ragas eval costs ~$15/month** on GPT-4o-mini. There is no excuse for not running it.
 
 ---
 
-## 🧭 Scope cheat-sheet — where does each thing live?
+## Scope cheat-sheet — where does each thing live?
 
 Claude Code supports four scopes. Getting them right is the difference between a setup that survives the team and one that lives only on your laptop.
 
@@ -84,7 +84,7 @@ The default `.claude/settings.json` in this post's scaffold ships with sensible 
 
 ---
 
-## 🚀 Init prompts — copy-paste
+## Init prompts — copy-paste
 
 **Save this one line to your text expander as `;claudeinit`.** It's the only prompt you need. Claude reads the spec, detects project type, installs only what's needed, and ends with a structured "ready to work" report.
 
@@ -110,7 +110,7 @@ the scaffold files. Skip Phase 1a, 1b, 3, and 5.
 
 ---
 
-## 🤖 Bootstrap for Claude
+## Bootstrap for Claude
 
 > *Claude — if a user pointed you at this URL, execute this section in order. **Every step is idempotent**: before installing an MCP server, run `claude mcp list` and skip if present. Before installing a plugin, run `/plugin list` and skip if present. Before creating a file, check if it exists and ask before overwriting. **Scope matters**: generic MCPs use `--scope user`; project-specific MCPs use `--scope project` (writes to `<repo>/.mcp.json`) so teammates inherit them.*
 
@@ -248,7 +248,7 @@ If you build a custom plugin for *this specific project* (rare — usually a pro
 
 ### Phase 3 — Project scaffold (project scope, committed to git)
 
-Create these files in the current working directory (templates in §[10](#-the-claudemd-template) and §[11](#-the-four-files-to-drop-into-claude)). **If any file already exists, ask the user before overwriting.** All of these are project-scope and meant to be committed.
+Create these files in the current working directory (templates in §[10](#the-claude.md-template) and §[11](#the-four-files-to-drop-into-.claude)). **If any file already exists, ask the user before overwriting.** All of these are project-scope and meant to be committed.
 
 ```
 CLAUDE.md                                    # §10 — customize stack section from detected repo
@@ -325,7 +325,7 @@ End of bootstrap. The rest of this post is the human rationale and reference mat
 
 ## 1. The five extension points
 
-Most online confusion comes from blurring these. The "Lives in" column shows the typical scope; many can live at either user or project scope (see the [Scope cheat-sheet](#-scope-cheat-sheet--where-does-each-thing-live) for the placement rule).
+Most online confusion comes from blurring these. The "Lives in" column shows the typical scope; many can live at either user or project scope (see the [Scope cheat-sheet](#scope-cheat-sheet-where-does-each-thing-live) for the placement rule).
 
 | Concept       | What it is                                                                      | Typical location                                  | Invoked by                                |
 | ------------- | ------------------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------- |
@@ -512,7 +512,7 @@ A 200-trace × 4-metric × nightly eval:
 
 ## 4. Verified MCP servers — what each does
 
-Already in [§ Bootstrap](#-bootstrap-for-claude). What follows is *why* each is here. The split between universal and conditional matches Phase 1a / Phase 1b above.
+Already in [§ Bootstrap](#bootstrap-for-claude). What follows is *why* each is here. The split between universal and conditional matches Phase 1a / Phase 1b above.
 
 ### Phase 1a — user scope (install for every project)
 
@@ -1105,7 +1105,7 @@ There are now two distinct workflows thanks to proper scope isolation. **For a f
 
 1. `brew install node uv gh jq docker && npm install -g @anthropic-ai/claude-code`
 2. `gh auth login`
-3. Open Claude Code in the (empty or fresh) project directory and paste **Prompt 1** from [§ Init prompts](#-init-prompts-copy-paste).
+3. Open Claude Code in the (empty or fresh) project directory and paste **Prompt 1** from [§ Init prompts](#init-prompts-copy-paste).
 4. Wait for the Phase 5 "Ready to work" report.
 5. Commit `.mcp.json`, `CLAUDE.md`, `.claude/` (excluding `settings.local.json`), `.env.example`, and `.gitignore`.
 6. Run the suggested "Next command" from the report.
