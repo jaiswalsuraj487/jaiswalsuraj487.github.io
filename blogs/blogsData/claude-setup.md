@@ -12,7 +12,7 @@ toc-depth: 2
 
 # Claude Code Setup Spec
 
-> **Canonical URL:** `https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md`
+> **Canonical URL:** `https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html`
 
 > **Companion blog with rationale:** `https://jaiswalsuraj487.github.io/blogs/blogsData/claude_code_plugins_mcp_skills.html`
 > **Last verified:** 2026-05-31 against npm, PyPI, github/github-mcp-server official docs, and `anthropics/claude-plugins-official`.

@@ -23,7 +23,7 @@
 <section id="claude-code-setup-spec" class="level1">
 <h1>Claude Code Setup Spec</h1>
 <blockquote class="blockquote">
-<p><strong>Canonical URL:</strong> <code>https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md</code></p>
+<p><strong>Canonical URL:</strong> <code>https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html</code></p>
 </blockquote>
 <blockquote class="blockquote">
 <p><strong>Companion blog with rationale:</strong> <code>https://jaiswalsuraj487.github.io/blogs/blogsData/claude_code_plugins_mcp_skills.html</code> <strong>Last verified:</strong> 2026-05-31 against npm, PyPI, github/github-mcp-server official docs, and <code>anthropics/claude-plugins-official</code>.</p>
@@ -2029,9 +2029,9 @@ Next command:                &lt;ONE specific actionable command&gt;</code></pre
 
 
 <blockquote class="blockquote">
-<p><strong>For humans:</strong> Skim the TL;DR. Jump to whichever tier you need. If you just want to set up a new project, paste the one-line init prompt — it points to a separate minimal spec file (<code>claude-setup.md</code>) optimized purely for Claude to execute. <strong>For Claude Code (if a user pointed you at this URL):</strong> Don’t execute this post — execute the linked <strong>setup spec</strong> at <code>https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md</code> instead. This post is human rationale; the spec is the executable version. If for some reason you must use this post, read § Bootstrap for Claude.</p>
+<p><strong>For humans:</strong> Skim the TL;DR. Jump to whichever tier you need. If you just want to set up a new project, paste the one-line init prompt — it points to a separate minimal spec file (<code>claude-setup.md</code>) optimized purely for Claude to execute. <strong>For Claude Code (if a user pointed you at this URL):</strong> Don’t execute this post — execute the linked <strong>setup spec</strong> at <code>https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html</code> instead. This post is human rationale; the spec is the executable version. If for some reason you must use this post, read § Bootstrap for Claude.</p>
 </blockquote>
-<p>This post is the rationale behind a setup I run on every new AI/ML project. The actual executable spec lives at <strong><a href="https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md">claude-setup.md</a></strong> — ~465 lines of pure Claude-first instructions. This post (~1,300 lines) is the <em>why</em>: the cost numbers, the verified package names, the testing patterns, the real anecdotes from my work at Tiger Analytics, NeuroReef Labs, and IIT Gandhinagar. Read the post if you want to understand the choices. Use the spec if you want to set up a project.</p>
+<p>This post is the rationale behind a setup I run on every new AI/ML project. The actual executable spec lives at <strong><a href="https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html">claude-setup.md</a></strong> — ~465 lines of pure Claude-first instructions. This post (~1,300 lines) is the <em>why</em>: the cost numbers, the verified package names, the testing patterns, the real anecdotes from my work at Tiger Analytics, NeuroReef Labs, and IIT Gandhinagar. Read the post if you want to understand the choices. Use the spec if you want to set up a project.</p>
 <p>I’ve spent the last six months iterating across multi-agent orchestrators at Tiger Analytics, RAG pipelines for medical billing at NeuroReef Labs, and the satellite-imagery YOLO-OBB pipeline from my IIT Gandhinagar research. Every package name verified, every cost number sourced, every threshold cited.</p>
 <p><strong>Changes in v4:</strong> proper scope isolation — generic tools (Context7, Memory, Sequential Thinking, Filesystem) install at <strong>user scope</strong>; project-specific MCPs (Postgres, AWS, Langfuse, Sentry, Playwright, GitHub-with-project-token) install at <strong>project scope</strong> and are committed to <code>.mcp.json</code> so teammates inherit them; secrets and personal overrides go in gitignored <strong>local scope</strong>. Default <code>permissions.deny</code> and <code>permissions.ask</code> blocklists are now part of the project <code>.claude/settings.json</code> to neutralize MCPs you have installed but don’t want auto-called. Init prompts are unchanged at the surface but now route servers to the right scope.</p>
 <hr>
@@ -2263,13 +2263,13 @@ font-style: inherit;">}}</span></span></code></pre></div></li>
 <section id="init-prompts-copy-paste" class="level2">
 <h2 class="anchored" data-anchor-id="init-prompts-copy-paste">Init prompts — copy-paste</h2>
 <p><strong>Save this one line to your text expander as <code>;claudeinit</code>.</strong> It’s the only prompt you need. Claude reads the spec, detects project type, installs only what’s needed, and ends with a structured “ready to work” report.</p>
-<pre><code>Read https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md and execute it on this project.</code></pre>
+<pre><code>Read https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html and execute it on this project.</code></pre>
 <p>That’s it. The spec at that URL contains everything Claude needs — scope rules, project-type detection, scaffold templates, permissions, hooks. No second prompt required.</p>
 <p><strong>Override the detected project type</strong> if it gets it wrong:</p>
-<pre><code>Read https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md and execute it. Treat this
+<pre><code>Read https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html and execute it. Treat this
 project as: &lt;RAG | LangGraph agent | FastAPI backend | CV/YOLO | Fine-tuning&gt;.</code></pre>
 <p><strong>Scaffold files only</strong> (skip MCPs and plugins, useful when joining an existing project):</p>
-<pre><code>Read Phase 4 of https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md and create just
+<pre><code>Read Phase 4 of https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html and create just
 the scaffold files. Skip Phase 1a, 1b, 3, and 5.</code></pre>
 <hr>
 </section>

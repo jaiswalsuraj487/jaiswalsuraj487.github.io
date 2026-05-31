@@ -12,9 +12,9 @@ toc-expand: 2
 ---
 
 > **For humans:** Skim the TL;DR. Jump to whichever tier you need. If you just want to set up a new project, paste the [one-line init prompt](#init-prompts-copy-paste) — it points to a separate minimal spec file (`claude-setup.md`) optimized purely for Claude to execute.
-> **For Claude Code (if a user pointed you at this URL):** Don't execute this post — execute the linked **setup spec** at `https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md` instead. This post is human rationale; the spec is the executable version. If for some reason you must use this post, read [§ Bootstrap for Claude](#bootstrap-for-claude).
+> **For Claude Code (if a user pointed you at this URL):** Don't execute this post — execute the linked **setup spec** at `https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html` instead. This post is human rationale; the spec is the executable version. If for some reason you must use this post, read [§ Bootstrap for Claude](#bootstrap-for-claude).
 
-This post is the rationale behind a setup I run on every new AI/ML project. The actual executable spec lives at **[claude-setup.md](https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md)** — ~465 lines of pure Claude-first instructions. This post (~1,300 lines) is the *why*: the cost numbers, the verified package names, the testing patterns, the real anecdotes from my work at Tiger Analytics, NeuroReef Labs, and IIT Gandhinagar. Read the post if you want to understand the choices. Use the spec if you want to set up a project.
+This post is the rationale behind a setup I run on every new AI/ML project. The actual executable spec lives at **[claude-setup.md](https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html)** — ~465 lines of pure Claude-first instructions. This post (~1,300 lines) is the *why*: the cost numbers, the verified package names, the testing patterns, the real anecdotes from my work at Tiger Analytics, NeuroReef Labs, and IIT Gandhinagar. Read the post if you want to understand the choices. Use the spec if you want to set up a project.
 
 I've spent the last six months iterating across multi-agent orchestrators at Tiger Analytics, RAG pipelines for medical billing at NeuroReef Labs, and the satellite-imagery YOLO-OBB pipeline from my IIT Gandhinagar research. Every package name verified, every cost number sourced, every threshold cited.
 
@@ -89,7 +89,7 @@ The default `.claude/settings.json` in this post's scaffold ships with sensible 
 **Save this one line to your text expander as `;claudeinit`.** It's the only prompt you need. Claude reads the spec, detects project type, installs only what's needed, and ends with a structured "ready to work" report.
 
 ```
-Read https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md and execute it on this project.
+Read https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html and execute it on this project.
 ```
 
 That's it. The spec at that URL contains everything Claude needs — scope rules, project-type detection, scaffold templates, permissions, hooks. No second prompt required.
@@ -97,14 +97,14 @@ That's it. The spec at that URL contains everything Claude needs — scope rules
 **Override the detected project type** if it gets it wrong:
 
 ```
-Read https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md and execute it. Treat this
+Read https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html and execute it. Treat this
 project as: <RAG | LangGraph agent | FastAPI backend | CV/YOLO | Fine-tuning>.
 ```
 
 **Scaffold files only** (skip MCPs and plugins, useful when joining an existing project):
 
 ```
-Read Phase 4 of https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md and create just
+Read Phase 4 of https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html and create just
 the scaffold files. Skip Phase 1a, 1b, 3, and 5.
 ```
 
