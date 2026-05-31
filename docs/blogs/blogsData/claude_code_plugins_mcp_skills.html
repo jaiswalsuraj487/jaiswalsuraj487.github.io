@@ -314,9 +314,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <blockquote class="blockquote">
 <p><strong>For humans:</strong> Skim the TL;DR. Jump to whichever tier you need. If you just want to set up a new project, paste the <a href="#init-prompts-copy-paste">one-line init prompt</a> — it points to a separate minimal spec file (<code>claude-setup.md</code>) optimized purely for Claude to execute. <strong>For Claude Code (if a user pointed you at this URL):</strong> Don’t execute this post — execute the linked <strong>setup spec</strong> at <code>https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html</code> instead. This post is human rationale; the spec is the executable version. If for some reason you must use this post, read <a href="#bootstrap-for-claude">§ Bootstrap for Claude</a>.</p>
 </blockquote>
-<p>This post is the rationale behind a setup I run on every new AI/ML project. The actual executable spec lives at <strong><a href="https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html">claude-setup.md</a></strong> — ~465 lines of pure Claude-first instructions. This post (~1,300 lines) is the <em>why</em>: the cost numbers, the verified package names, the testing patterns, the real anecdotes from my work at Tiger Analytics, NeuroReef Labs, and IIT Gandhinagar. Read the post if you want to understand the choices. Use the spec if you want to set up a project.</p>
-<p>I’ve spent the last six months iterating across multi-agent orchestrators at Tiger Analytics, RAG pipelines for medical billing at NeuroReef Labs, and the satellite-imagery YOLO-OBB pipeline from my IIT Gandhinagar research. Every package name verified, every cost number sourced, every threshold cited.</p>
-<p><strong>Changes in v4:</strong> proper scope isolation — generic tools (Context7, Memory, Sequential Thinking, Filesystem) install at <strong>user scope</strong>; project-specific MCPs (Postgres, AWS, Langfuse, Sentry, Playwright, GitHub-with-project-token) install at <strong>project scope</strong> and are committed to <code>.mcp.json</code> so teammates inherit them; secrets and personal overrides go in gitignored <strong>local scope</strong>. Default <code>permissions.deny</code> and <code>permissions.ask</code> blocklists are now part of the project <code>.claude/settings.json</code> to neutralize MCPs you have installed but don’t want auto-called. Init prompts are unchanged at the surface but now route servers to the right scope.</p>
+<p>This post is the rationale behind a setup I run on every new AI/ML project. The actual executable spec lives at <strong><a href="https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html">claude-setup.md</a></strong> — ~465 lines of pure Claude-first instructions. This post (~1,300 lines) is the <em>why</em>: the cost numbers, the verified package names, the testing patterns, the real anecdotes from my work. Read the post if you want to understand the choices. Use the spec if you want to set up a project.</p>
 <hr>
 <section id="tldr" class="level2">
 <h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
@@ -635,7 +633,12 @@ the scaffold files. Skip Phase 1a, 1b, 3, and 5.</code></pre>
 <section id="phase-2-plugins-user-scope-run-inside-claude-code" class="level3">
 <h3 class="anchored" data-anchor-id="phase-2-plugins-user-scope-run-inside-claude-code">Phase 2 — Plugins (user scope, run inside Claude Code)</h3>
 <p>Plugins are workflow-style tools — they help you code regardless of stack. <strong>All install at user scope</strong> (they’re available everywhere). Skip any already in <code>/plugin list</code>. All of these are verified in the official <code>claude-plugins-official</code> marketplace.</p>
-<pre class="text"><code># Core workflow plugins — recommended for every project
+<p><strong>Failure rule: if any command in this phase fails, do NOT guess alternative URLs or names. Print the exact error, mark Phase 2 as ⚠️ FAILED in the Phase 5 report, and continue to Phase 3.</strong></p>
+<pre class="text"><code># Register the Anthropic marketplace first (owner/repo shorthand — no full URL).
+# Only needed once per machine; safe to re-run (no-op if already registered).
+claude plugin marketplace add anthropics/claude-plugins-official
+
+# Core workflow plugins — recommended for every project
 /plugin install ralph-loop@claude-plugins-official
 /plugin install feature-dev@claude-plugins-official
 /plugin install code-simplifier@claude-plugins-official
@@ -716,7 +719,11 @@ Status:
   pytest:                    PASS / FAIL / NOT RUN (N tests)
 
 Next command:                &lt;ONE specific command — e.g., "@test-writer write tests for src/app/main.py"
-                                                            or "edit CLAUDE.md and fill the &lt;NAME&gt; placeholder"&gt;</code></pre>
+                                                            or "edit CLAUDE.md and fill the &lt;NAME&gt; placeholder"&gt;
+
+Failures (if any):
+  Phase X:                   &lt;what failed and exact error&gt;
+  Recovery:                  &lt;what user should try next&gt;</code></pre>
 <p>End of bootstrap. The rest of this post is the human rationale and reference material.</p>
 <hr>
 </section>

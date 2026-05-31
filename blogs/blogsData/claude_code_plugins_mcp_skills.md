@@ -14,11 +14,7 @@ toc-expand: 2
 > **For humans:** Skim the TL;DR. Jump to whichever tier you need. If you just want to set up a new project, paste the [one-line init prompt](#init-prompts-copy-paste) — it points to a separate minimal spec file (`claude-setup.md`) optimized purely for Claude to execute.
 > **For Claude Code (if a user pointed you at this URL):** Don't execute this post — execute the linked **setup spec** at `https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html` instead. This post is human rationale; the spec is the executable version. If for some reason you must use this post, read [§ Bootstrap for Claude](#bootstrap-for-claude).
 
-This post is the rationale behind a setup I run on every new AI/ML project. The actual executable spec lives at **[claude-setup.md](https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html)** — ~465 lines of pure Claude-first instructions. This post (~1,300 lines) is the *why*: the cost numbers, the verified package names, the testing patterns, the real anecdotes from my work at Tiger Analytics, NeuroReef Labs, and IIT Gandhinagar. Read the post if you want to understand the choices. Use the spec if you want to set up a project.
-
-I've spent the last six months iterating across multi-agent orchestrators at Tiger Analytics, RAG pipelines for medical billing at NeuroReef Labs, and the satellite-imagery YOLO-OBB pipeline from my IIT Gandhinagar research. Every package name verified, every cost number sourced, every threshold cited.
-
-**Changes in v4:** proper scope isolation — generic tools (Context7, Memory, Sequential Thinking, Filesystem) install at **user scope**; project-specific MCPs (Postgres, AWS, Langfuse, Sentry, Playwright, GitHub-with-project-token) install at **project scope** and are committed to `.mcp.json` so teammates inherit them; secrets and personal overrides go in gitignored **local scope**. Default `permissions.deny` and `permissions.ask` blocklists are now part of the project `.claude/settings.json` to neutralize MCPs you have installed but don't want auto-called. Init prompts are unchanged at the surface but now route servers to the right scope.
+This post is the rationale behind a setup I run on every new AI/ML project. The actual executable spec lives at **[claude-setup.md](https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.html)** — ~465 lines of pure Claude-first instructions. This post (~1,300 lines) is the *why*: the cost numbers, the verified package names, the testing patterns, the real anecdotes from my work. Read the post if you want to understand the choices. Use the spec if you want to set up a project.
 
 ---
 
@@ -218,7 +214,13 @@ Verify with `claude mcp list --scope project`. The `.mcp.json` file should now b
 
 Plugins are workflow-style tools — they help you code regardless of stack. **All install at user scope** (they're available everywhere). Skip any already in `/plugin list`. All of these are verified in the official `claude-plugins-official` marketplace.
 
+**Failure rule: if any command in this phase fails, do NOT guess alternative URLs or names. Print the exact error, mark Phase 2 as ⚠️ FAILED in the Phase 5 report, and continue to Phase 3.**
+
 ```text
+# Register the Anthropic marketplace first (owner/repo shorthand — no full URL).
+# Only needed once per machine; safe to re-run (no-op if already registered).
+claude plugin marketplace add anthropics/claude-plugins-official
+
 # Core workflow plugins — recommended for every project
 /plugin install ralph-loop@claude-plugins-official
 /plugin install feature-dev@claude-plugins-official
@@ -317,6 +319,10 @@ Status:
 
 Next command:                <ONE specific command — e.g., "@test-writer write tests for src/app/main.py"
                                                             or "edit CLAUDE.md and fill the <NAME> placeholder">
+
+Failures (if any):
+  Phase X:                   <what failed and exact error>
+  Recovery:                  <what user should try next>
 ```
 
 End of bootstrap. The rest of this post is the human rationale and reference material.

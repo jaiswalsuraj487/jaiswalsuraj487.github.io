@@ -133,9 +133,15 @@ claude mcp add --scope project --transport http sentry https://mcp.sentry.dev/mc
 
 ## Phase 3 — Plugins (user scope, inside Claude Code)
 
+**Failure rule: if any command in this phase fails, do NOT guess alternative URLs or names. Print the exact error, mark Phase 3 as ⚠️ FAILED in the Phase 6 report, and continue to Phase 4.**
+
 Skip any in `/plugin list`. All verified in the `claude-plugins-official` marketplace.
 
 ```text
+# Step 3a — Register the Anthropic marketplace (owner/repo shorthand, no full URL).
+# Only needed once per machine; safe to re-run (no-op if already registered).
+claude plugin marketplace add anthropics/claude-plugins-official
+
 # Core workflow plugins — recommended for every project
 /plugin install ralph-loop@claude-plugins-official
 /plugin install feature-dev@claude-plugins-official
@@ -509,6 +515,10 @@ Status:
   pytest:                    PASS / FAIL / NOT RUN (N tests)
 
 Next command:                <ONE specific actionable command>
+
+Failures (if any):
+  Phase X:                   <what failed and exact error>
+  Recovery:                  <what user should try next>
 ```
 
 End of spec. Do not output anything after the report.

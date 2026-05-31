@@ -397,8 +397,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="phase-3-plugins-user-scope-inside-claude-code" class="level2">
 <h2 class="anchored" data-anchor-id="phase-3-plugins-user-scope-inside-claude-code">Phase 3 — Plugins (user scope, inside Claude Code)</h2>
+<p><strong>Failure rule: if any command in this phase fails, do NOT guess alternative URLs or names. Print the exact error, mark Phase 3 as ⚠️ FAILED in the Phase 6 report, and continue to Phase 4.</strong></p>
 <p>Skip any in <code>/plugin list</code>. All verified in the <code>claude-plugins-official</code> marketplace.</p>
-<pre class="text"><code># Core workflow plugins — recommended for every project
+<pre class="text"><code># Step 3a — Register the Anthropic marketplace (owner/repo shorthand, no full URL).
+# Only needed once per machine; safe to re-run (no-op if already registered).
+claude plugin marketplace add anthropics/claude-plugins-official
+
+# Core workflow plugins — recommended for every project
 /plugin install ralph-loop@claude-plugins-official
 /plugin install feature-dev@claude-plugins-official
 /plugin install code-simplifier@claude-plugins-official
@@ -729,7 +734,11 @@ Status:
   /context used:             NN%
   pytest:                    PASS / FAIL / NOT RUN (N tests)
 
-Next command:                &lt;ONE specific actionable command&gt;</code></pre>
+Next command:                &lt;ONE specific actionable command&gt;
+
+Failures (if any):
+  Phase X:                   &lt;what failed and exact error&gt;
+  Recovery:                  &lt;what user should try next&gt;</code></pre>
 <p>End of spec. Do not output anything after the report.</p>
 
 
