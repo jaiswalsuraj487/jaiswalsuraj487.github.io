@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.33">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Suraj Jaiswal">
+<meta name="dcterms.date" content="2026-05-31">
+<meta name="description" content="Executable setup spec for Claude Code: scope-correct MCP installs (user vs project), plugin installs, project-type detection, scaffold templates, and dependency setup. Companion spec to The Ultimate Claude Code Setup — run this, not the blog post.">
+
+<title>Claude Code Project Init Spec – Suraj Jaiswal</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-6ec84bd1cbca259591e26654c72239a2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Suraj Jaiswal | Senior AI Engineer | GenAI &amp; NLP">
+<meta property="og:description" content="Senior AI Engineer specializing in GenAI, NLP, and Computer Vision. Published at NeurIPS and ACM. Open to ML/AI Engineer roles.">
+<meta property="og:image" content="https://jaiswalsuraj487.github.io/blogs/blogsData/images/claude_logo_img.png">
+<meta property="og:site_name" content="Suraj Jaiswal">
+<meta property="og:image:height" content="1504">
+<meta property="og:image:width" content="2848">
+<meta name="twitter:title" content="Suraj Jaiswal | Senior AI Engineer | GenAI &amp; NLP">
+<meta name="twitter:description" content="Senior AI Engineer specializing in GenAI, NLP, and Computer Vision. Published at NeurIPS and ACM. Open to ML/AI Engineer roles.">
+<meta name="twitter:image" content="https://jaiswalsuraj487.github.io/blogs/blogsData/images/claude_logo_img.png">
+<meta name="twitter:image-height" content="1504">
+<meta name="twitter:image-width" content="2848">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Suraj Jaiswal</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blogs/index.html"> 
+<span class="menu-text">Blogs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects/index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications_and_projects/index.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../resume/Suraj_Jaiswal_Resume.pdf"> 
+<span class="menu-text">Resume</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#claude-code-setup-spec" id="toc-claude-code-setup-spec" class="nav-link active" data-scroll-target="#claude-code-setup-spec">Claude Code Setup Spec</a>
+  <ul class="collapse">
+  <li><a href="#phase-0-sanity-checks" id="toc-phase-0-sanity-checks" class="nav-link" data-scroll-target="#phase-0-sanity-checks">Phase 0 — Sanity checks</a></li>
+  <li><a href="#phase-1a-user-scope-mcp-servers-universal" id="toc-phase-1a-user-scope-mcp-servers-universal" class="nav-link" data-scroll-target="#phase-1a-user-scope-mcp-servers-universal">Phase 1a — User-scope MCP servers (universal)</a></li>
+  <li><a href="#phase-2-project-type-detection" id="toc-phase-2-project-type-detection" class="nav-link" data-scroll-target="#phase-2-project-type-detection">Phase 2 — Project-type detection</a></li>
+  <li><a href="#phase-1b-project-scope-mcp-servers-only-what-the-detected-type-needs" id="toc-phase-1b-project-scope-mcp-servers-only-what-the-detected-type-needs" class="nav-link" data-scroll-target="#phase-1b-project-scope-mcp-servers-only-what-the-detected-type-needs">Phase 1b — Project-scope MCP servers (only what the detected type needs)</a></li>
+  <li><a href="#phase-3-plugins-user-scope-inside-claude-code" id="toc-phase-3-plugins-user-scope-inside-claude-code" class="nav-link" data-scroll-target="#phase-3-plugins-user-scope-inside-claude-code">Phase 3 — Plugins (user scope, inside Claude Code)</a></li>
+  <li><a href="#phase-4-scaffold-files" id="toc-phase-4-scaffold-files" class="nav-link" data-scroll-target="#phase-4-scaffold-files">Phase 4 — Scaffold files</a></li>
+  <li><a href="#phase-5-project-dependencies-uv" id="toc-phase-5-project-dependencies-uv" class="nav-link" data-scroll-target="#phase-5-project-dependencies-uv">Phase 5 — Project dependencies (uv)</a></li>
+  <li><a href="#phase-6-ready-to-work-report-required-format" id="toc-phase-6-ready-to-work-report-required-format" class="nav-link" data-scroll-target="#phase-6-ready-to-work-report-required-format">Phase 6 — Ready-to-work report (REQUIRED FORMAT)</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Claude Code Project Init Spec</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Agentic AI</div>
+    <div class="quarto-category">Claude Code</div>
+    <div class="quarto-category">MCP</div>
+    <div class="quarto-category">LLM</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Executable setup spec for Claude Code: scope-correct MCP installs (user vs project), plugin installs, project-type detection, scaffold templates, and dependency setup. Companion spec to The Ultimate Claude Code Setup — run this, not the blog post.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Suraj Jaiswal </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 31, 2026</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">May 31, 2026</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="claude-code-setup-spec" class="level1">
+<h1>Claude Code Setup Spec</h1>
+<blockquote class="blockquote">
+<p><strong>Canonical URL:</strong> <code>https://jaiswalsuraj487.github.io/blogs/blogsData/claude-setup.md</code></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>Companion blog with rationale:</strong> <code>https://jaiswalsuraj487.github.io/blogs/blogsData/claude_code_plugins_mcp_skills.html</code> <strong>Last verified:</strong> 2026-05-31 against npm, PyPI, github/github-mcp-server official docs, and <code>anthropics/claude-plugins-official</code>.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>Claude — read this entire document, then execute it on the current project. This is not a blog post. Every section is mandatory. Print a one-line checkpoint after each phase (e.g.&nbsp;<code>✓ Phase 1a complete (5 added, 0 skipped)</code>). End with the Phase 5 report in the exact format specified.</strong></p>
+<p><strong>Idempotency:</strong> every step is safe to re-run. Before any install or file creation, check existence and skip or ask before overwriting.</p>
+<p><strong>Scope rule:</strong> generic tools → <code>--scope user</code>. Project-specific tools → <code>--scope project</code> (writes to <code>&lt;repo&gt;/.mcp.json</code>, gets committed). Personal overrides → <code>.claude/settings.local.json</code> (gitignored).</p>
+</blockquote>
+<hr>
+<section id="phase-0-sanity-checks" class="level2">
+<h2 class="anchored" data-anchor-id="phase-0-sanity-checks">Phase 0 — Sanity checks</h2>
+<p>Run these. If any fail, stop and tell the user to install:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--version</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> <span class="at">--version</span>          <span class="co"># need &gt;= 20</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> <span class="at">--version</span>            <span class="co"># `pipx install uv` if missing</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> <span class="at">--version</span>        <span class="co"># GitHub MCP runs via docker</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">jq</span> <span class="at">--version</span>            <span class="co"># used by the pytest hook</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>✓ Phase 0 complete</code> checkpoint.</p>
+<hr>
+</section>
+<section id="phase-1a-user-scope-mcp-servers-universal" class="level2">
+<h2 class="anchored" data-anchor-id="phase-1a-user-scope-mcp-servers-universal">Phase 1a — User-scope MCP servers (universal)</h2>
+<p>Skip any already in <code>claude mcp list --scope user</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Context7 — anonymous mode works fine for personal use. If you hit rate limits,</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># get a free API key at context7.com and append: -- npx -y @upstash/context7-mcp --api-key YOUR_KEY</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--scope</span> user context7 <span class="at">--</span> npx <span class="at">-y</span> @upstash/context7-mcp</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># GitHub — official binary (ghcr.io). The npm @modelcontextprotocol/server-github</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># is </span><span class="al">DEPRECATED</span><span class="co"> and shows "no longer supported".</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># The -e flag passes the env var through to docker. Requires $GITHUB_PAT in your shell.</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--scope</span> user github <span class="at">-e</span> GITHUB_PERSONAL_ACCESS_TOKEN=<span class="va">$GITHUB_PAT</span> <span class="at">--</span> <span class="dt">\</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  docker run <span class="at">-i</span> <span class="at">--rm</span> <span class="at">-e</span> GITHUB_PERSONAL_ACCESS_TOKEN <span class="dt">\</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  ghcr.io/github/github-mcp-server</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Alternative if Docker isn't available — use the remote HTTP transport:</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># claude mcp add --transport http github https://api.githubcopilot.com/mcp \</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#   -H "Authorization: Bearer $GITHUB_PAT"</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--scope</span> user fs <span class="at">--</span> npx <span class="at">-y</span> @modelcontextprotocol/server-filesystem <span class="st">"</span><span class="va">$HOME</span><span class="st">/code"</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--scope</span> user memory <span class="at">--</span> npx <span class="at">-y</span> @modelcontextprotocol/server-memory</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--scope</span> user seq <span class="at">--</span> npx <span class="at">-y</span> @modelcontextprotocol/server-sequential-thinking</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>✓ Phase 1a complete (X added, Y skipped)</code> checkpoint.</p>
+<hr>
+</section>
+<section id="phase-2-project-type-detection" class="level2">
+<h2 class="anchored" data-anchor-id="phase-2-project-type-detection">Phase 2 — Project-type detection</h2>
+<p>Inspect the repo and match against this table. Pick the dominant signal. If nothing matches, <strong>ask the user</strong> with project-type options as buttons. Print the detected type and your reasoning before continuing.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Signals</th>
+<th>Project type</th>
+<th>Phase 1b servers</th>
+<th>Phase 4 eval framework</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>langgraph</code> / <code>langchain</code> in deps, <code>agents/</code> or <code>graph.py</code></td>
+<td><strong>LangGraph agent</strong></td>
+<td>langfuse (opt), sentry (opt)</td>
+<td><code>langsmith agentevals</code></td>
+</tr>
+<tr class="even">
+<td><code>chromadb</code> / <code>pgvector</code> / <code>qdrant</code> / <code>weaviate</code>; <code>rag/</code> or <code>retriever.py</code></td>
+<td><strong>RAG</strong></td>
+<td>postgres, langfuse (opt), sentry (opt)</td>
+<td><code>ragas</code></td>
+</tr>
+<tr class="odd">
+<td><code>ultralytics</code> / <code>torch</code> + <code>opencv</code> / image dirs</td>
+<td><strong>CV / YOLO</strong></td>
+<td>aws-api+docs (if S3), sentry (opt)</td>
+<td><code>pycocotools imagehash supervision</code></td>
+</tr>
+<tr class="even">
+<td><code>transformers</code> + training script (<code>train.py</code>, HF Trainer)</td>
+<td><strong>Fine-tuning</strong></td>
+<td>aws-api+docs (if S3)</td>
+<td><code>lm-eval</code></td>
+</tr>
+<tr class="odd">
+<td><code>fastapi</code> / <code>uvicorn</code>, no LLM deps</td>
+<td><strong>Plain backend</strong></td>
+<td>postgres (if DB), sentry (opt)</td>
+<td><em>(skip)</em></td>
+</tr>
+<tr class="even">
+<td>Any project that scrapes / tests / drives a browser</td>
+<td><strong>+ browser automation</strong></td>
+<td>playwright OR agent-browser (pick one — see Phase 1b)</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Empty repo or none of the above</td>
+<td><strong>Ask the user</strong></td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><code>✓ Phase 2 complete (detected: &lt;type&gt;, reason: &lt;signal&gt;)</code> checkpoint.</p>
+<hr>
+</section>
+<section id="phase-1b-project-scope-mcp-servers-only-what-the-detected-type-needs" class="level2">
+<h2 class="anchored" data-anchor-id="phase-1b-project-scope-mcp-servers-only-what-the-detected-type-needs">Phase 1b — Project-scope MCP servers (only what the detected type needs)</h2>
+<p>Install with <code>--scope project</code> so they write to <code>&lt;repo&gt;/.mcp.json</code> and teammates inherit them. Skip any already in <code>claude mcp list --scope project</code>. Reference env vars — never bake real secrets.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Postgres — RAG and DB-backed plain-backend projects.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># DO NOT use @modelcontextprotocol/server-postgres (archived after SQLi CVE).</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Defaults to read-only; add --access-mode=unrestricted only if you genuinely need writes:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--scope</span> project postgres <span class="at">--</span> uvx postgres-mcp <span class="st">"</span><span class="va">$DATABASE_URL</span><span class="st">"</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Or for read+write:</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># claude mcp add --scope project postgres -- uvx postgres-mcp --access-mode=unrestricted "$DATABASE_URL"</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Browser automation — pick ONE of these, not both. They overlap.</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Option A: Playwright MCP (Microsoft, most mature, ~114K tokens of context tax in full sessions)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--scope</span> project playwright <span class="at">--</span> npx <span class="at">-y</span> @playwright/mcp@latest</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Option B: agent-browser (Vercel Labs, Rust CLI, claims 93% smaller context footprint).</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Younger project (Jan 2026), 23K+ stars, 109K weekly npm downloads. Installed as a SKILL, not an MCP.</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co"># npm install -g agent-browser</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># agent-browser install     # downloads Chrome for Testing</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -y    # project scope</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co"># npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -y -g # global scope</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># AWS — CV / fine-tuning / AWS-deploy projects. Use awslabs.* (no @aws/mcp-server).</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--scope</span> project aws-api <span class="at">--</span> uvx awslabs.aws-api-mcp-server@latest</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--scope</span> project aws-docs <span class="at">--</span> uvx awslabs.aws-documentation-mcp-server@latest</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Langfuse — LLM observability. HTTP transport (no npm package).</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--scope</span> project <span class="at">--transport</span> http langfuse <span class="dt">\</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  https://cloud.langfuse.com/api/public/mcp <span class="dt">\</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">--header</span> <span class="st">"Authorization: Basic </span><span class="va">$(</span><span class="bu">printf</span> <span class="st">'%s:%s'</span> <span class="st">"</span><span class="va">$LF_PUBLIC_KEY</span><span class="st">"</span> <span class="st">"</span><span class="va">$LF_SECRET_KEY</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">base64</span><span class="va">)</span><span class="st">"</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Sentry — production error tracking.</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--scope</span> project <span class="at">--transport</span> http sentry https://mcp.sentry.dev/mcp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>✓ Phase 1b complete (X added, Y skipped)</code> checkpoint.</p>
+<hr>
+</section>
+<section id="phase-3-plugins-user-scope-inside-claude-code" class="level2">
+<h2 class="anchored" data-anchor-id="phase-3-plugins-user-scope-inside-claude-code">Phase 3 — Plugins (user scope, inside Claude Code)</h2>
+<p>Skip any in <code>/plugin list</code>. All verified in the <code>claude-plugins-official</code> marketplace.</p>
+<pre class="text"><code># Core workflow plugins — recommended for every project
+/plugin install ralph-loop@claude-plugins-official
+/plugin install feature-dev@claude-plugins-official
+/plugin install code-simplifier@claude-plugins-official
+/plugin install code-review@claude-plugins-official
+/plugin install pr-review-toolkit@claude-plugins-official
+/plugin install claude-md-management@claude-plugins-official
+/plugin install pyright-lsp@claude-plugins-official
+/plugin install coderabbit@claude-plugins-official
+
+# Optional — install per project need:
+# /plugin install codspeed@claude-plugins-official              # performance benchmarking + MCP
+# /plugin install 42crunch-api-security-testing@claude-plugins-official  # OpenAPI security audits
+
+# superpowers is in a separate marketplace (Jesse Vincent's, not Anthropic's).
+# Adds workflow slash commands like /brainstorming, /tdd, /systematic-debugging.
+/plugin marketplace add obra/superpowers
+/plugin install superpowers@obra-superpowers
+
+/reload-plugins</code></pre>
+<p><strong>Notes:</strong> - If <code>ralph-loop</code> install fails, try <code>ralph-wiggum@claude-plugins-official</code> — some sources document the plugin under that name. - Adding any third-party marketplace (<code>obra/superpowers</code> above) is a trust decision — plugins can register hooks that intercept tool calls. Inspect the source before installing if you don’t already trust the author. - <code>pyright-lsp</code> has a known config-propagation bug on Windows (anthropics/claude-code#16219). If LSP features don’t appear, hand-configure or use <code>ruff</code> + manual <code>mypy</code> instead.</p>
+<p><code>✓ Phase 3 complete (X added, Y skipped)</code> checkpoint.</p>
+<hr>
+</section>
+<section id="phase-4-scaffold-files" class="level2">
+<h2 class="anchored" data-anchor-id="phase-4-scaffold-files">Phase 4 — Scaffold files</h2>
+<p>Create these in the project root. <strong>Ask before overwriting any that exist.</strong> Templates are inline below.</p>
+<pre><code>CLAUDE.md
+.claude/settings.json
+.claude/hooks/pytest-changed.sh    # chmod +x after creating
+.claude/agents/test-writer.md
+.claude/agents/eval-runner.md
+.claude/skills/tdd-loop/SKILL.md
+.env.example                       # only if Phase 1b installed servers using env vars</code></pre>
+<p>Append to <code>.gitignore</code> (create if missing):</p>
+<pre><code>.claude/settings.local.json
+.env</code></pre>
+<section id="claude.md" class="level3">
+<h3 class="anchored" data-anchor-id="claude.md">4.1 <code>CLAUDE.md</code></h3>
+<p>Fill in placeholders from the detected project. Don’t leave <code>&lt;NAME&gt;</code> etc. unfilled.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Project: &lt;NAME&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## What this is</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">one</span><span class="ot"> paragraph </span><span class="er">—</span><span class="ot"> what it does</span><span class="er">,</span><span class="ot"> who uses it</span><span class="er">,</span><span class="ot"> what stack</span><span class="dt">&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">## Stack</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Python 3.12, uv for env management</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="dt">&lt;</span><span class="kw">FastAPI</span><span class="ot"> </span><span class="er">|</span><span class="ot"> LangGraph </span><span class="er">|</span><span class="ot"> RAG </span><span class="er">|</span><span class="ot"> YOLO </span><span class="er">|</span><span class="ot"> </span><span class="er">...</span><span class="dt">&gt;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="dt">&lt;</span><span class="kw">Postgres</span><span class="ot"> </span><span class="er">+</span><span class="ot"> pgvector </span><span class="er">|</span><span class="ot"> etc.</span><span class="dt">&gt;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">## Commands</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Install: <span class="in">`uv sync`</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Run: <span class="in">`uvicorn app.main:app --reload`</span>   # or project-appropriate</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Test (fast): <span class="in">`uv run pytest -x --no-cov`</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Test (full): <span class="in">`uv run pytest --cov=app --cov-report=term-missing`</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Lint: <span class="in">`uv run ruff check . &amp;&amp; uv run ruff format --check .`</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Type-check: <span class="in">`uv run mypy src/`</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Eval: <span class="in">`@eval-runner`</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="fu">## Repo layout</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`src/`</span> — application code</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`tests/`</span> — pytest suite</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`evals/`</span> — eval datasets and harness; do not modify without explicit ask</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`.claude/`</span> — subagents, skills, hooks (committed)</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="fu">## Testing rules (apply to production code in src/app/core, agents, rag, api)</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>TDD via the <span class="in">`tdd-loop`</span> skill for any feature in production paths.</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>No live external API in CI. Wrap LLM/HTTP calls with <span class="in">`@pytest.mark.vcr()`</span>.</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Async tests use <span class="in">`httpx.AsyncClient`</span> + <span class="in">`ASGITransport`</span>.</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>LLM outputs: assert structure (Pydantic), properties, or syrupy snapshots — never literal strings.</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Coverage: 80% line, 100% on <span class="in">`app/core/`</span> and <span class="in">`app/agents/`</span>.</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Property-based (Hypothesis) for every pure utility.</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>Contract tests (Schemathesis) on every PR.</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Prompt/RAG/agent changes require passing <span class="in">`@eval-runner`</span> against <span class="in">`evals/thresholds.yaml`</span>.</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conventions</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`uv add &lt;pkg&gt;`</span>, not <span class="in">`pip install`</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`uv run &lt;cmd&gt;`</span>, not bare <span class="in">`python`</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Avoid <span class="in">`print`</span> — use <span class="in">`loguru`</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Pydantic v2 syntax</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>All public functions get type hints</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="fu">## Don't</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Don't commit unless I explicitly say "commit".</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Don't run <span class="in">`terraform apply`</span> — only <span class="in">`plan`</span>.</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Don't touch <span class="in">`evals/datasets/`</span>.</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Don't add top-level dependencies without asking.</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Don't bypass <span class="in">`@pytest.mark.vcr()`</span> in LLM-touching tests.</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Don't suggest the deprecated <span class="in">`@modelcontextprotocol/server-postgres`</span> — use Postgres MCP Pro.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="claudesettings.json" class="level3">
+<h3 class="anchored" data-anchor-id="claudesettings.json">4.2 <code>.claude/settings.json</code></h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"hooks"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"PreToolUse"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"matcher"</span><span class="fu">:</span> <span class="st">"Bash"</span><span class="fu">,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"hooks"</span><span class="fu">:</span> <span class="ot">[</span><span class="fu">{</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>          <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"command"</span><span class="fu">,</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>          <span class="dt">"command"</span><span class="fu">:</span> <span class="st">"bash -c 'echo </span><span class="ch">\"</span><span class="st">$CLAUDE_TOOL_INPUT</span><span class="ch">\"</span><span class="st"> | grep -E </span><span class="ch">\"</span><span class="st">(rm -rf /|sudo rm|:(){ :|:&amp;)</span><span class="ch">\"</span><span class="st"> &amp;&amp; echo BLOCKED &amp;&amp; exit 2 || exit 0'"</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">]</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"matcher"</span><span class="fu">:</span> <span class="st">"Write|Edit"</span><span class="fu">,</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"hooks"</span><span class="fu">:</span> <span class="ot">[</span><span class="fu">{</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>          <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"command"</span><span class="fu">,</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>          <span class="dt">"command"</span><span class="fu">:</span> <span class="st">"bash -c 'echo </span><span class="ch">\"</span><span class="st">$CLAUDE_TOOL_INPUT</span><span class="ch">\"</span><span class="st"> | grep -E </span><span class="ch">\"</span><span class="st">(AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{36})</span><span class="ch">\"</span><span class="st"> &amp;&amp; echo SECRET &amp;&amp; exit 2 || exit 0'"</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">]</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"PostToolUse"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"matcher"</span><span class="fu">:</span> <span class="st">"Write|Edit|MultiEdit"</span><span class="fu">,</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"hooks"</span><span class="fu">:</span> <span class="ot">[</span><span class="fu">{</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>          <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"command"</span><span class="fu">,</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>          <span class="dt">"command"</span><span class="fu">:</span> <span class="st">"bash </span><span class="ch">\"</span><span class="st">$CLAUDE_PROJECT_DIR</span><span class="ch">\"</span><span class="st">/.claude/hooks/pytest-changed.sh"</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span><span class="ot">]</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"Stop"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"hooks"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>          <span class="fu">{</span> <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"command"</span><span class="fu">,</span> <span class="dt">"command"</span><span class="fu">:</span> <span class="st">"uv run ruff format . &amp;&amp; uv run ruff check --fix . 2&gt;&amp;1 | tail -5"</span> <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>          <span class="fu">{</span> <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"command"</span><span class="fu">,</span> <span class="dt">"command"</span><span class="fu">:</span> <span class="st">"uv run pytest -q 2&gt;&amp;1 | tail -10"</span> <span class="fu">}</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        <span class="ot">]</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"permissions"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"allow"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(uv run pytest *)"</span><span class="ot">,</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(uv run ruff *)"</span><span class="ot">,</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(uv run mypy *)"</span><span class="ot">,</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(uv add *)"</span><span class="ot">,</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(uv sync *)"</span><span class="ot">,</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(gh *)"</span><span class="ot">,</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Edit(*)"</span><span class="ot">,</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Write(*)"</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"ask"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(git push *)"</span><span class="ot">,</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(docker run *)"</span><span class="ot">,</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(terraform plan *)"</span><span class="ot">,</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(aws *)"</span><span class="ot">,</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mcp__playwright__*"</span><span class="ot">,</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mcp__postgres__execute_sql"</span><span class="ot">,</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mcp__github__create_*"</span><span class="ot">,</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mcp__github__merge_*"</span><span class="ot">,</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mcp__aws-api__*"</span></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"deny"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(rm -rf *)"</span><span class="ot">,</span></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(git push --force *)"</span><span class="ot">,</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(git reset --hard *)"</span><span class="ot">,</span></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(terraform apply *)"</span><span class="ot">,</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(terraform destroy *)"</span><span class="ot">,</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Bash(kubectl delete *)"</span><span class="ot">,</span></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mcp__github__delete_*"</span><span class="ot">,</span></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mcp__postgres__drop_*"</span><span class="ot">,</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mcp__postgres__truncate_*"</span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="claudehookspytest-changed.sh" class="level3">
+<h3 class="anchored" data-anchor-id="claudehookspytest-changed.sh">4.3 <code>.claude/hooks/pytest-changed.sh</code></h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># PostToolUse hook: runs pytest on the matching test file when source changes.</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Handles src/, app/, and flat layouts. Never blocks the session.</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-u</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="va">INPUT</span><span class="op">=</span><span class="va">$(</span><span class="fu">cat</span><span class="va">)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="va">FILE</span><span class="op">=</span><span class="va">$(</span><span class="bu">echo</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="kw">|</span> <span class="ex">jq</span> <span class="at">-r</span> <span class="st">'.tool_input.file_path // empty'</span><span class="va">)</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span> <span class="ot">-z</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span> <span class="kw">||</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span> <span class="ot">!=</span> <span class="pp">*</span>.py <span class="kw">]]</span> <span class="kw">&amp;&amp;</span> <span class="bu">exit</span> 0</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="va">ROOT</span><span class="op">=</span><span class="st">"</span><span class="va">$(</span><span class="fu">git</span> <span class="at">-C</span> <span class="st">"</span><span class="va">$(</span><span class="fu">dirname</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span><span class="va">)</span><span class="st">"</span> rev-parse <span class="at">--show-toplevel</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null<span class="va">)</span><span class="st">"</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span> <span class="ot">-z</span> <span class="st">"</span><span class="va">$ROOT</span><span class="st">"</span> <span class="kw">]]</span> <span class="kw">&amp;&amp;</span> <span class="bu">exit</span> 0</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="va">REL</span><span class="op">=</span><span class="st">"</span><span class="va">${FILE</span><span class="op">#</span><span class="va">$ROOT</span>/<span class="va">}</span><span class="st">"</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="va">BASENAME</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$REL</span><span class="st">"</span> .py<span class="va">)</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="va">DIRNAME</span><span class="op">=</span><span class="va">$(</span><span class="fu">dirname</span> <span class="st">"</span><span class="va">$REL</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="st">"</span><span class="va">$BASENAME</span><span class="st">"</span> <span class="ot">==</span> test_<span class="pp">*</span> <span class="kw">||</span> <span class="st">"</span><span class="va">$BASENAME</span><span class="st">"</span> <span class="ot">==</span> <span class="pp">*</span>_test <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="va">TARGET</span><span class="op">=</span><span class="st">"</span><span class="va">$REL</span><span class="st">"</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="va">STRIPPED</span><span class="op">=</span><span class="st">"</span><span class="va">${DIRNAME</span><span class="op">#</span>src/<span class="va">}</span><span class="st">"</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="va">STRIPPED</span><span class="op">=</span><span class="st">"</span><span class="va">${STRIPPED</span><span class="op">#</span>app/<span class="va">}</span><span class="st">"</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="va">CANDIDATES</span><span class="op">=</span><span class="va">(</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tests/</span><span class="va">${STRIPPED}</span><span class="st">/test_</span><span class="va">${BASENAME}</span><span class="st">.py"</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tests/test_</span><span class="va">${BASENAME}</span><span class="st">.py"</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span><span class="va">${DIRNAME}</span><span class="st">/test_</span><span class="va">${BASENAME}</span><span class="st">.py"</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  <span class="va">)</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  <span class="va">TARGET</span><span class="op">=</span><span class="st">""</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> c <span class="kw">in</span> <span class="st">"</span><span class="va">${CANDIDATES</span><span class="op">[@]</span><span class="va">}</span><span class="st">"</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">[[</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$ROOT</span><span class="st">/</span><span class="va">$c</span><span class="st">"</span> <span class="kw">]]</span> <span class="kw">&amp;&amp;</span> <span class="kw">{</span> <span class="va">TARGET</span><span class="op">=</span><span class="st">"</span><span class="va">$c</span><span class="st">"</span><span class="kw">;</span> <span class="cf">break</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">done</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span> <span class="ot">-z</span> <span class="st">"</span><span class="va">$TARGET</span><span class="st">"</span> <span class="kw">]]</span> <span class="kw">&amp;&amp;</span> <span class="bu">exit</span> 0</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="st">"</span><span class="va">$ROOT</span><span class="st">"</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="fu">timeout</span> 30 uv run pytest <span class="st">"</span><span class="va">$TARGET</span><span class="st">"</span> <span class="at">-x</span> <span class="at">--tb</span><span class="op">=</span>short <span class="at">--no-header</span> <span class="at">-q</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-20</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="bu">exit</span> 0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then: <code>chmod +x .claude/hooks/pytest-changed.sh</code></p>
+</section>
+<section id="claudeagentstest-writer.md" class="level3">
+<h3 class="anchored" data-anchor-id="claudeagentstest-writer.md">4.4 <code>.claude/agents/test-writer.md</code></h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="an">name:</span><span class="co"> test-writer</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> Writes pytest unit, integration, and property-based tests for the file or function the user names. Generates fixtures, mocks external services with respx/responses, uses Hypothesis for pure functions. Use when the user says "write tests for", "add tests for", or "test this function/file/module".</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="an">tools:</span><span class="co"> Read, Grep, Glob, Edit, Write, Bash</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="an">model:</span><span class="co"> sonnet</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>You are a senior Python test engineer. When invoked:</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Read the target file and inspect any sibling <span class="in">`tests/`</span> patterns.</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Detect the framework: FastAPI → <span class="in">`httpx.AsyncClient`</span> + <span class="in">`ASGITransport`</span>; LangGraph → <span class="in">`agentevals`</span> + <span class="in">`InMemorySaver`</span>; RAG → <span class="in">`ragas.evaluate`</span>; plain Python → pytest + Hypothesis.</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Generate in order: happy path, edge cases, error paths, Hypothesis properties for pure functions, syrupy snapshots for stable serialized outputs.</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Mock externals: HTTP via <span class="in">`respx`</span>/<span class="in">`responses`</span>, time via <span class="in">`freezegun`</span>, LLM/HTTP via <span class="in">`@pytest.mark.vcr()`</span>, DB via fixtures with rollback.</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Write the file. Run <span class="in">`uv run pytest -x`</span> on it. Fix if it fails.</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Output a one-paragraph coverage summary listing paths NOT covered.</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>Hard rules:</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Never hit live external APIs without VCR cassettes.</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Never assert on literal LLM output strings — use syrupy, properties, or LLM-as-judge.</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Never use <span class="in">`time.sleep()`</span> — freezegun or asyncio mock-time.</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Test files in <span class="in">`tests/`</span> mirroring source layout.</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Use parametrize for variations, not copy-paste.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="claudeagentseval-runner.md" class="level3">
+<h3 class="anchored" data-anchor-id="claudeagentseval-runner.md">4.5 <code>.claude/agents/eval-runner.md</code></h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="an">name:</span><span class="co"> eval-runner</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> Runs the project's eval suite (DeepEval / Ragas / agentevals / lm-eval) and produces a structured pass/fail report with per-metric scores, deltas vs the last run, and a list of failing examples. Use after any prompt change, retrieval change, model swap, or anything that touches app/prompts, app/agents, or app/rag.</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="an">tools:</span><span class="co"> Read, Grep, Bash, Edit</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="an">model:</span><span class="co"> sonnet</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>You are the project's evaluation operator.</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Detect framework from <span class="in">`pyproject.toml`</span> / <span class="in">`requirements*.txt`</span>:</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span><span class="in">`ragas`</span>               → <span class="in">`uv run python -m evals.ragas_run`</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span><span class="in">`deepeval`</span>            → <span class="in">`uv run deepeval test run evals/`</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span><span class="in">`agentevals`</span>/<span class="in">`langsmith`</span> → <span class="in">`uv run pytest evals/ -m langsmith`</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span><span class="in">`lm-eval`</span>             → <span class="in">`uv run lm_eval --tasks &lt;project_tasks&gt; ...`</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Capture JSON to <span class="in">`evals/runs/&lt;ISO-timestamp&gt;.json`</span>.</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Diff vs <span class="in">`evals/runs/baseline.json`</span>. Flag metrics regressed &gt; threshold in <span class="in">`evals/thresholds.yaml`</span> (default 2% absolute).</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Print markdown table: metric | baseline | current | Δ | verdict.</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Exit non-zero if any blocker metric regressed (read blockers from <span class="in">`evals/thresholds.yaml`</span>).</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>For each failing example: ID, input, expected, got, metric score.</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>Hard rules:</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Never run live LLM evals on every CI step — use cassettes.</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Schedule expensive judge-LLM evals nightly, not per-PR.</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>If <span class="in">`baseline.json`</span> missing, treat current as new baseline and notice the user.</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>If suite &gt; 10 minutes, run subset (<span class="in">`--sample 50`</span>) and say so.</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Never modify <span class="in">`evals/datasets/`</span> — frozen for regression comparison.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="claudeskillstdd-loopskill.md" class="level3">
+<h3 class="anchored" data-anchor-id="claudeskillstdd-loopskill.md">4.6 <code>.claude/skills/tdd-loop/SKILL.md</code></h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="an">name:</span><span class="co"> tdd-loop</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> Disciplined red-green-refactor loop for production code. Use when the user asks to add a feature, build, implement an endpoint, fix a bug, or refactor a function in production code paths (src/app/core, src/app/agents, src/app/rag, src/app/api). Forces writing a failing test first, then minimal code to pass, then refactor. Triggers on "add", "build", "implement", "fix bug", "refactor" combined with a production code path.</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>Use ONLY for production-code work in <span class="in">`src/app/core/`</span>, <span class="in">`src/app/agents/`</span>, <span class="in">`src/app/rag/`</span>, <span class="in">`src/app/api/`</span>. Skip for prompt tweaks (use <span class="in">`@eval-runner`</span> instead), notebooks, docs, CI/infra YAML.</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## Procedure</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Red.** Smallest failing test in <span class="in">`tests/`</span>. Match type to code: pure → Hypothesis; FastAPI → <span class="in">`httpx.AsyncClient`</span>+<span class="in">`ASGITransport`</span>; LangGraph → <span class="in">`agentevals`</span>+<span class="in">`InMemorySaver`</span>; RAG step → Q-A from <span class="in">`evals/datasets/`</span>. Run <span class="in">`uv run pytest -x -k &lt;new&gt;`</span> and SHOW the failure.</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Green.** Minimum implementation. No extras. Run test. Show it passes.</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Refactor.** Clean only. Run full suite. Show it still passes.</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Commit.** <span class="in">`feat(&lt;area&gt;): &lt;one-line&gt; + test`</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## Gotchas</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Don't stub functions just to make tests pass — fake green.</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>LLM outputs: assert structure/property, never literal strings.</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>If test needs &gt;50 lines of fixtures, design is wrong — stop and ask.</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Record external API calls with <span class="in">`@pytest.mark.vcr()`</span> from first run.</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>One test, one behavior. Test names with "and"/"or" split into two.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>✓ Phase 4 complete (X created, Y skipped)</code> checkpoint.</p>
+<hr>
+</section>
+</section>
+<section id="phase-5-project-dependencies-uv" class="level2">
+<h2 class="anchored" data-anchor-id="phase-5-project-dependencies-uv">Phase 5 — Project dependencies (uv)</h2>
+<p>Install the universal testing stack, then ONLY the eval framework for the detected project type.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Universal — install for every project</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add <span class="at">--dev</span> pytest pytest-asyncio pytest-cov pytest-recording httpx <span class="dt">\</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>            hypothesis schemathesis syrupy freezegun pytest-mock respx <span class="dt">\</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>            ruff mypy</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then pick ONE based on Phase 2 detection:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># LangGraph agent</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add <span class="at">--dev</span> langsmith agentevals</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># RAG</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add <span class="at">--dev</span> ragas</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># CV / YOLO</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add <span class="at">--dev</span> pycocotools imagehash supervision</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Fine-tuning</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add <span class="at">--dev</span> lm-eval</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Plain backend — skip eval framework</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>✓ Phase 5 complete (deps installed)</code> checkpoint.</p>
+<hr>
+</section>
+<section id="phase-6-ready-to-work-report-required-format" class="level2">
+<h2 class="anchored" data-anchor-id="phase-6-ready-to-work-report-required-format">Phase 6 — Ready-to-work report (REQUIRED FORMAT)</h2>
+<p>Print EXACTLY this format. Do not improvise. If a section is empty, write <code>(none)</code>. Do not skip the box characters.</p>
+<pre><code>✅ Ready to work.
+
+Project type detected: &lt;one of: LangGraph agent | RAG | CV/YOLO | Fine-tuning | Plain backend&gt;
+                       &lt;reason: e.g., "found langgraph in pyproject.toml and src/app/agents/"&gt;
+
+MCPs:
+  Phase 1a (user scope):     added: &lt;list&gt; | skipped: &lt;list&gt;
+  Phase 1b (project scope):  added: &lt;list&gt; | skipped: &lt;list&gt;
+                             writes to .mcp.json — commit this file
+
+Plugins (user scope):        added: &lt;list&gt; | skipped: &lt;list&gt;
+
+Files:
+  Created:                   &lt;list&gt;
+  Skipped (existed):         &lt;list&gt;
+  Gitignored:                .claude/settings.local.json, .env
+
+Dependencies installed:      &lt;list of packages added in this phase&gt;
+
+Status:
+  /context used:             NN%
+  pytest:                    PASS / FAIL / NOT RUN (N tests)
+
+Next command:                &lt;ONE specific actionable command&gt;</code></pre>
+<p>End of spec. Do not output anything after the report.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/jaiswalsuraj487\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
